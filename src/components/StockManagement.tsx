@@ -13,11 +13,20 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3, Trash2, MoreVertical } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-
-export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { clients, buildings, stockItems, addStockItem, updateStockItem, deleteStockItem } = useStore();
+export const StockManagement = ({
+  onSwitchApp
+}: {
+  onSwitchApp?: () => void;
+}) => {
+  const {
+    clients,
+    buildings,
+    stockItems,
+    addStockItem,
+    updateStockItem,
+    deleteStockItem
+  } = useStore();
   const navigate = useNavigate();
-  
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('tous');
   const [filterStatus, setFilterStatus] = useState<string>('tous');
@@ -39,59 +48,66 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     batimentId: '',
     quantite: 1
   });
-
   const getEquipmentIcon = (type: string) => {
     switch (type) {
-      case 'cle': return <Key className="h-4 w-4" />;
-      case 'badge': return <CreditCard className="h-4 w-4" />;
-      case 'telecommande': return <Radio className="h-4 w-4" />;
-      default: return <Package className="h-4 w-4" />;
+      case 'cle':
+        return <Key className="h-4 w-4" />;
+      case 'badge':
+        return <CreditCard className="h-4 w-4" />;
+      case 'telecommande':
+        return <Radio className="h-4 w-4" />;
+      default:
+        return <Package className="h-4 w-4" />;
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'disponible': return 'bg-success text-success-foreground';
-      case 'attribue': return 'bg-primary text-primary-foreground';
-      default: return 'bg-muted text-muted-foreground';
+      case 'disponible':
+        return 'bg-success text-success-foreground';
+      case 'attribue':
+        return 'bg-primary text-primary-foreground';
+      case 'perdu':
+        return 'bg-destructive text-destructive-foreground';
+      default:
+        return 'bg-muted text-muted-foreground';
     }
   };
-
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'disponible': return 'Disponible';
-      case 'attribue': return 'Attribué';
-      default: return status;
+      case 'disponible':
+        return 'Disponible';
+      case 'attribue':
+        return 'Attribué';
+      case 'perdu':
+        return 'Perdu';
+      default:
+        return status;
     }
   };
-
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'cle': return 'Clé';
-      case 'badge': return 'Badge';
-      case 'telecommande': return 'Télécommande';
-      default: return type;
+      case 'cle':
+        return 'Clé';
+      case 'badge':
+        return 'Badge';
+      case 'telecommande':
+        return 'Télécommande';
+      default:
+        return type;
     }
   };
 
   // Fonction pour calculer les quantités réelles basées sur les distributions aux clients
   const getUpdatedStockItem = (stockItem: StockItem) => {
-    const distributedCount = clients
-      .flatMap(client => client.equipements)
-      .filter(eq => 
-        eq.type === stockItem.type && 
-        eq.numero === stockItem.numero &&
-        eq.statut === 'remis'
-      ).length;
-    
-    
-    const quantiteDisponible = Math.max(0, stockItem.quantite - distributedCount);
-    
+    const distributedCount = clients.flatMap(client => client.equipements).filter(eq => eq.type === stockItem.type && eq.numero === stockItem.numero && eq.statut === 'remis').length;
+    const lostCount = clients.flatMap(client => client.equipements).filter(eq => eq.type === stockItem.type && eq.numero === stockItem.numero && eq.statut === 'perdu').length;
+    const quantiteDisponible = Math.max(0, stockItem.quantite - distributedCount - lostCount);
     let statut: StockItem['statut'] = 'disponible';
-    if (quantiteDisponible === 0 && distributedCount > 0) {
+    if (lostCount > 0) {
+      statut = 'perdu';
+    } else if (quantiteDisponible === 0 && distributedCount > 0) {
       statut = 'attribue';
     }
-
     return {
       ...stockItem,
       quantiteDisponible,
@@ -101,27 +117,25 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
 
   // Mettre à jour tous les items du stock avec les données réelles
   const updatedStockItems = stockItems.map(item => getUpdatedStockItem(item));
-
   const filteredItems = updatedStockItems.filter(item => {
-    const matchesSearch = item.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.clientActuel?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = item.numero.toLowerCase().includes(searchTerm.toLowerCase()) || item.description?.toLowerCase().includes(searchTerm.toLowerCase()) || item.clientActuel?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'tous' || item.type === filterType;
     const matchesStatus = filterStatus === 'tous' || item.statut === filterStatus;
-    
     return matchesSearch && matchesType && matchesStatus;
   });
-
   const getStats = () => {
     const total = updatedStockItems.reduce((sum, item) => sum + item.quantite, 0);
     const disponible = updatedStockItems.reduce((sum, item) => sum + item.quantiteDisponible, 0);
     const attribue = updatedStockItems.reduce((sum, item) => sum + (item.quantite - item.quantiteDisponible), 0);
-    
-    return { total, disponible, attribue };
+    const perdu = updatedStockItems.filter(item => item.statut === 'perdu').reduce((sum, item) => sum + item.quantite, 0);
+    return {
+      total,
+      disponible,
+      attribue,
+      perdu
+    };
   };
-
   const stats = getStats();
-
   const handleEditClick = (item: StockItem) => {
     setEditingItem(item);
     setEditForm({
@@ -132,10 +146,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       batimentId: item.batimentId
     });
   };
-
   const handleSaveEdit = () => {
     if (!editingItem) return;
-    
     updateStockItem(editingItem.id, {
       numero: editForm.numero,
       description: editForm.description,
@@ -143,11 +155,9 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       clientActuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined,
       batimentId: editForm.batimentId
     });
-    
     setEditingItem(null);
     toast.success('Équipement modifié avec succès');
   };
-
   const handleAddEquipment = () => {
     if (!addForm.numero.trim() || !addForm.batimentId) {
       toast.error('La référence et le bâtiment sont obligatoires');
@@ -156,10 +166,7 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
 
     // Vérifier l'unicité seulement pour les télécommandes et badges
     if (addForm.type === 'telecommande' || addForm.type === 'badge') {
-      if (stockItems.some(item => 
-        item.type === addForm.type && 
-        item.numero.toLowerCase() === addForm.numero.toLowerCase()
-      )) {
+      if (stockItems.some(item => item.type === addForm.type && item.numero.toLowerCase() === addForm.numero.toLowerCase())) {
         const typeLabel = addForm.type === 'telecommande' ? 'télécommande' : 'badge';
         toast.error(`Cette référence de ${typeLabel} existe déjà. Les ${typeLabel}s doivent être uniques.`);
         return;
@@ -176,7 +183,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       quantite: addForm.quantite,
       quantiteDisponible: addForm.quantite
     });
-
     setAddForm({
       type: 'cle',
       numero: '',
@@ -188,7 +194,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     setIsAddDialogOpen(false);
     toast.success('Équipement ajouté avec succès');
   };
-
   const handleDeleteEquipment = (itemId: string) => {
     deleteStockItem(itemId);
     setItemToDelete(null);
@@ -197,19 +202,9 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
 
   // Fonction pour récupérer les clients qui ont reçu un équipement spécifique
   const getClientsForEquipment = (stockItem: StockItem) => {
-    return clients
-      .filter(client => 
-        client.equipements.some(eq => 
-          eq.type === stockItem.type && 
-          eq.numero === stockItem.numero &&
-          eq.statut === 'remis'
-        )
-      )
-      .map(client => `${client.prenom} ${client.nom}`);
+    return clients.filter(client => client.equipements.some(eq => eq.type === stockItem.type && eq.numero === stockItem.numero && eq.statut === 'remis')).map(client => `${client.prenom} ${client.nom}`);
   };
-
-  return (
-    <div className="p-4 space-y-6">
+  return <div className="p-4 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
@@ -219,11 +214,9 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
           <h1 className="text-xl font-bold">Gestion du stock</h1>
           <p className="text-sm text-muted-foreground">Inventaire des équipements</p>
         </div>
-        {onSwitchApp && (
-          <Button variant="outline" size="sm" onClick={onSwitchApp}>
+        {onSwitchApp && <Button variant="outline" size="sm" onClick={onSwitchApp}>
             État des lieux
-          </Button>
-        )}
+          </Button>}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
@@ -238,9 +231,10 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
             <div className="space-y-4">
               <div>
                 <Label htmlFor="type">Type d'équipement</Label>
-                <Select value={addForm.type} onValueChange={(value: StockItem['type']) => 
-                  setAddForm(prev => ({ ...prev, type: value }))
-                }>
+                <Select value={addForm.type} onValueChange={(value: StockItem['type']) => setAddForm(prev => ({
+                ...prev,
+                type: value
+              }))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -254,49 +248,41 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
               
               <div>
                 <Label htmlFor="add-numero">Référence *</Label>
-                <Input
-                  id="add-numero"
-                  value={addForm.numero}
-                  onChange={(e) => setAddForm(prev => ({ ...prev, numero: e.target.value }))}
-                  placeholder="ex: K001, B001, T001"
-                />
+                <Input id="add-numero" value={addForm.numero} onChange={e => setAddForm(prev => ({
+                ...prev,
+                numero: e.target.value
+              }))} placeholder="ex: K001, B001, T001" />
               </div>
               
               <div>
                 <Label htmlFor="add-description">Description</Label>
-                <Textarea
-                  id="add-description"
-                  value={addForm.description}
-                  onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Description de l'équipement"
-                />
+                <Textarea id="add-description" value={addForm.description} onChange={e => setAddForm(prev => ({
+                ...prev,
+                description: e.target.value
+              }))} placeholder="Description de l'équipement" />
               </div>
               
               <div>
                 <Label htmlFor="add-quantite">Quantité *</Label>
-                <Input
-                  id="add-quantite"
-                  type="number"
-                  min="1"
-                  value={addForm.quantite}
-                  onChange={(e) => setAddForm(prev => ({ ...prev, quantite: parseInt(e.target.value) || 1 }))}
-                />
+                <Input id="add-quantite" type="number" min="1" value={addForm.quantite} onChange={e => setAddForm(prev => ({
+                ...prev,
+                quantite: parseInt(e.target.value) || 1
+              }))} />
               </div>
               
               <div>
                 <Label htmlFor="add-batiment">Bâtiment *</Label>
-                <Select value={addForm.batimentId} onValueChange={(value) => 
-                  setAddForm(prev => ({ ...prev, batimentId: value }))
-                }>
+                <Select value={addForm.batimentId} onValueChange={value => setAddForm(prev => ({
+                ...prev,
+                batimentId: value
+              }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner un bâtiment" />
                   </SelectTrigger>
                   <SelectContent>
-                    {buildings.map((building) => (
-                      <SelectItem key={building.id} value={building.id}>
+                    {buildings.map(building => <SelectItem key={building.id} value={building.id}>
                         {building.code} - {building.nom}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -344,12 +330,19 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       {/* Detailed Stats */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Répartition</CardTitle>
+          <CardTitle className="text-base">Répartition par statut</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
-            <span className="text-sm font-medium">Attribués</span>
-            <Badge className="bg-primary text-primary-foreground">{stats.attribue}</Badge>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
+              <span className="text-sm font-medium">Attribués</span>
+              <Badge className="bg-primary text-primary-foreground">{stats.attribue}</Badge>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg">
+              <span className="text-sm font-medium">Perdus</span>
+              <Badge variant="destructive">{stats.perdu}</Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -360,12 +353,7 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher par référence, description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-12"
-            />
+            <Input placeholder="Rechercher par référence, description..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 h-12" />
           </div>
           
           {/* Filter dropdowns */}
@@ -381,21 +369,29 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                 <SelectItem value="telecommande">Télécommandes</SelectItem>
               </SelectContent>
             </Select>
+            
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tous">Tous les statuts</SelectItem>
+                <SelectItem value="disponible">Disponible</SelectItem>
+                <SelectItem value="attribue">Attribué</SelectItem>
+                <SelectItem value="perdu">Perdu</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
       {/* Equipment List */}
       <div className="space-y-3">
-        {filteredItems.length === 0 ? (
-          <Card>
+        {filteredItems.length === 0 ? <Card>
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">Aucun équipement trouvé</p>
             </CardContent>
-          </Card>
-        ) : (
-          filteredItems.map((item) => (
-            <Card key={item.id}>
+          </Card> : filteredItems.map(item => <Card key={item.id}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
@@ -413,34 +409,26 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                         </Badge>
                       </div>
                       
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground mb-2">
+                      {item.description && <p className="text-sm text-muted-foreground mb-2">
                           {item.description}
-                        </p>
-                      )}
+                        </p>}
                       
-                      {item.clientActuel && (
-                        <p className="text-xs text-muted-foreground">
+                      {item.clientActuel && <p className="text-xs text-muted-foreground">
                           Attribué à: <span className="font-medium">{item.clientActuel}</span>
-                        </p>
-                      )}
+                        </p>}
                       
                       {/* Affichage des clients qui ont reçu cet équipement */}
                       {(() => {
-                        const clientsWithEquipment = getClientsForEquipment(item);
-                        return clientsWithEquipment.length > 0 && (
-                          <div className="mt-2">
+                  const clientsWithEquipment = getClientsForEquipment(item);
+                  return clientsWithEquipment.length > 0 && <div className="mt-2">
                             <p className="text-xs text-muted-foreground mb-1">Remis à :</p>
                             <div className="flex flex-wrap gap-1">
-                              {clientsWithEquipment.map((clientName, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
+                              {clientsWithEquipment.map((clientName, index) => <Badge key={index} variant="outline" className="text-xs">
                                   {clientName}
-                                </Badge>
-                              ))}
+                                </Badge>)}
                             </div>
-                          </div>
-                        );
-                      })()}
+                          </div>;
+                })()}
                       
                       <p className="text-xs text-muted-foreground mt-2">
                         Bâtiment: <span className="font-medium">{buildings.find(b => b.id === item.batimentId)?.code || 'N/A'}</span>
@@ -449,9 +437,7 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                   </div>
                   
                   <div className="flex flex-col items-end gap-2">
-                    <Badge className={getStatusColor(item.statut)}>
-                      {getStatusLabel(item.statut)}
-                    </Badge>
+                    
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
@@ -461,12 +447,10 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                       <DropdownMenuContent>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <DropdownMenuItem 
-                              onSelect={(e) => {
-                                e.preventDefault();
-                                handleEditClick(item);
-                              }}
-                            >
+                            <DropdownMenuItem onSelect={e => {
+                        e.preventDefault();
+                        handleEditClick(item);
+                      }}>
                               <Edit3 className="h-4 w-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
@@ -478,63 +462,58 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                             <div className="space-y-4">
                               <div>
                                 <Label htmlFor="numero">Référence</Label>
-                                <Input
-                                  id="numero"
-                                  value={editForm.numero}
-                                  onChange={(e) => setEditForm(prev => ({ ...prev, numero: e.target.value }))}
-                                />
+                                <Input id="numero" value={editForm.numero} onChange={e => setEditForm(prev => ({
+                            ...prev,
+                            numero: e.target.value
+                          }))} />
                               </div>
                               
                               <div>
                                 <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                  id="description"
-                                  value={editForm.description}
-                                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                                />
+                                <Textarea id="description" value={editForm.description} onChange={e => setEditForm(prev => ({
+                            ...prev,
+                            description: e.target.value
+                          }))} />
                               </div>
                               
                               <div>
                                 <Label htmlFor="statut">Statut</Label>
-                                <Select value={editForm.statut} onValueChange={(value: StockItem['statut']) => 
-                                  setEditForm(prev => ({ ...prev, statut: value }))
-                                }>
+                                <Select value={editForm.statut} onValueChange={(value: StockItem['statut']) => setEditForm(prev => ({
+                            ...prev,
+                            statut: value
+                          }))}>
                                   <SelectTrigger>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="disponible">Disponible</SelectItem>
                                     <SelectItem value="attribue">Attribué</SelectItem>
+                                    <SelectItem value="perdu">Perdu</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
                               
-                              {editForm.statut === 'attribue' && (
-                                <div>
+                              {editForm.statut === 'attribue' && <div>
                                   <Label htmlFor="clientActuel">Client actuel</Label>
-                                  <Input
-                                    id="clientActuel"
-                                    value={editForm.clientActuel}
-                                    onChange={(e) => setEditForm(prev => ({ ...prev, clientActuel: e.target.value }))}
-                                    placeholder="Nom du client"
-                                  />
-                                </div>
-                              )}
+                                  <Input id="clientActuel" value={editForm.clientActuel} onChange={e => setEditForm(prev => ({
+                            ...prev,
+                            clientActuel: e.target.value
+                          }))} placeholder="Nom du client" />
+                                </div>}
                               
                               <div>
                                 <Label htmlFor="edit-batiment">Bâtiment</Label>
-                                <Select value={editForm.batimentId} onValueChange={(value) => 
-                                  setEditForm(prev => ({ ...prev, batimentId: value }))
-                                }>
+                                <Select value={editForm.batimentId} onValueChange={value => setEditForm(prev => ({
+                            ...prev,
+                            batimentId: value
+                          }))}>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Sélectionner un bâtiment" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {buildings.map((building) => (
-                                      <SelectItem key={building.id} value={building.id}>
+                                    {buildings.map(building => <SelectItem key={building.id} value={building.id}>
                                         {building.code} - {building.nom}
-                                      </SelectItem>
-                                    ))}
+                                      </SelectItem>)}
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -556,9 +535,7 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          ))
-        )}
+            </Card>)}
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -572,15 +549,11 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => itemToDelete && handleDeleteEquipment(itemToDelete)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={() => itemToDelete && handleDeleteEquipment(itemToDelete)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
