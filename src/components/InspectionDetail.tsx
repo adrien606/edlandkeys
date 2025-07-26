@@ -123,6 +123,18 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             .signature { margin-top: 30px; text-align: center; margin-bottom: 40px; }
             .signature img { max-width: 300px; border: 1px solid #ddd; }
             .photo { width: 150px; height: 150px; object-fit: cover; margin: 5px; border: 1px solid #ddd; }
+            .signatures { 
+              margin-top: 30px; 
+              display: flex; 
+              flex-wrap: wrap; 
+              gap: 30px; 
+              justify-content: space-around;
+            }
+            .signatures .signature { 
+              flex: 1; 
+              min-width: 250px; 
+              margin-top: 0; 
+            }
             .footer { 
               margin-top: 40px; 
               border-top: 2px solid #333; 
@@ -195,12 +207,27 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
         </div>`;
     });
     
-    if (inspection.signature) {
-      html += `
-        <div class="signature">
-          <h3>Signature du client</h3>
-          <img src="${inspection.signature}" alt="Signature du client">
-        </div>`;
+    // Signatures section
+    if (inspection.signature || inspection.siteManagerSignature) {
+      html += `<div class="signatures">`;
+      
+      if (inspection.signature) {
+        html += `
+          <div class="signature">
+            <h3>Signature du client</h3>
+            <img src="${inspection.signature}" alt="Signature du client">
+          </div>`;
+      }
+      
+      if (inspection.siteManagerSignature) {
+        html += `
+          <div class="signature">
+            <h3>Responsable de site${inspection.siteManagerName ? ' - ' + inspection.siteManagerName : ''}</h3>
+            <img src="${inspection.siteManagerSignature}" alt="Signature du responsable de site">
+          </div>`;
+      }
+      
+      html += `</div>`;
     }
     
     // Ajouter le pied de page avec nom du client, adresse du bâtiment et "lu et approuvé"
@@ -499,19 +526,43 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
         </Card>
 
         {/* Signature */}
-        {inspection.signature && (
+        {/* Signatures Section */}
+        {(inspection.signature || inspection.siteManagerSignature) && (
           <Card>
             <CardHeader>
-              <CardTitle>Signature du client</CardTitle>
+              <CardTitle>Signatures</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="border rounded p-4 bg-white">
-                <img 
-                  src={inspection.signature} 
-                  alt="Signature du client"
-                  className="max-w-full h-auto"
-                />
-              </div>
+            <CardContent className="space-y-6">
+              {inspection.signature && (
+                <div>
+                  <h4 className="font-medium mb-3">Signature du client</h4>
+                  <div className="border rounded p-4 bg-white">
+                    <img 
+                      src={inspection.signature} 
+                      alt="Signature du client"
+                      className="max-w-full h-auto"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {inspection.siteManagerSignature && (
+                <div>
+                  <h4 className="font-medium mb-3">
+                    Responsable de site
+                    {inspection.siteManagerName && (
+                      <span className="text-muted-foreground font-normal"> - {inspection.siteManagerName}</span>
+                    )}
+                  </h4>
+                  <div className="border rounded p-4 bg-white">
+                    <img 
+                      src={inspection.siteManagerSignature} 
+                      alt="Signature du responsable de site"
+                      className="max-w-full h-auto"
+                    />
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
