@@ -12,7 +12,7 @@ import { ArrowLeft, Package, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { clients, addEquipment, buildings } = useStore();
+  const { clients, addEquipment, buildings, stockItems } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -23,19 +23,41 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
     batimentId: '',
   });
   
-  // Simuler l'accès au stock (dans une vraie app, ceci viendrait du store)
+  // Fonction pour calculer les quantités réelles basées sur les distributions aux clients
+  const getUpdatedStockItem = (stockItem: any) => {
+    const distributedCount = clients
+      .flatMap(client => client.equipements)
+      .filter(eq => 
+        eq.type === stockItem.type && 
+        eq.numero === stockItem.numero &&
+        eq.statut === 'remis'
+      ).length;
+    
+    const lostCount = clients
+      .flatMap(client => client.equipements)
+      .filter(eq => 
+        eq.type === stockItem.type && 
+        eq.numero === stockItem.numero &&
+        eq.statut === 'perdu'
+      ).length;
+
+    const quantiteDisponible = Math.max(0, stockItem.quantite - distributedCount - lostCount);
+    
+    return {
+      ...stockItem,
+      quantiteDisponible
+    };
+  };
+  
+  // Récupérer les éléments disponibles du stock
   const getAvailableStockItems = () => {
-    // Mock des données de stock
-    return [
-      { id: '1', type: 'cle', numero: 'K001', description: 'Clé bureau A1', batimentId: buildings[0]?.id || '', quantiteDisponible: 2 },
-      { id: '2', type: 'cle', numero: 'K002', description: 'Clé bureau A2', batimentId: buildings[0]?.id || '', quantiteDisponible: 1 },
-      { id: '3', type: 'badge', numero: 'B001', description: 'Badge accès principal', batimentId: buildings[1]?.id || '', quantiteDisponible: 1 },
-      { id: '5', type: 'telecommande', numero: 'T001', description: 'Télécommande portail', batimentId: buildings[2]?.id || '', quantiteDisponible: 1 },
-    ].filter(item => 
-      item.quantiteDisponible > 0 && 
-      (!formData.equipmentType || item.type === formData.equipmentType) &&
-      (!formData.batimentId || item.batimentId === formData.batimentId)
-    );
+    return stockItems
+      .map(item => getUpdatedStockItem(item))
+      .filter(item => 
+        item.quantiteDisponible > 0 && 
+        (!formData.equipmentType || item.type === formData.equipmentType) &&
+        (!formData.batimentId || item.batimentId === formData.batimentId)
+      );
   };
   
   const availableItems = getAvailableStockItems();
