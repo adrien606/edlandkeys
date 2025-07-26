@@ -4,18 +4,27 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useStore } from '@/store/useStore';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Key, CreditCard, Radio, User, Mail, Phone, Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, Edit3 } from 'lucide-react';
+import { ArrowLeft, Key, CreditCard, Radio, User, Mail, Phone, Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, Edit3, Trash2, MoreVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { EditClientDialog, DeleteClientDialog } from '@/components/EditClientDialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 export const ClientDetail = () => {
   const { clientId } = useParams();
-  const { getClientById, updateEquipmentStatus } = useStore();
+  const { getClientById, updateEquipmentStatus, deleteClient, deleteEquipment, buildings } = useStore();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: useToastHook } = useToast();
+  
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [equipmentToDelete, setEquipmentToDelete] = useState<string | null>(null);
   
   const client = clientId ? getClientById(clientId) : null;
+  const building = client ? buildings.find(b => b.id === client.batimentId) : null;
 
   const handleStatusChange = (equipmentId: string, newStatus: string) => {
     if (!clientId) return;
@@ -27,10 +36,26 @@ export const ClientDetail = () => {
       newStatus === 'restitue' ? new Date().toISOString() : undefined
     );
     
-    toast({
+    useToastHook({
       title: "Statut mis à jour",
       description: `L'équipement a été marqué comme ${getStatusLabel(newStatus)}`,
     });
+  };
+
+  const handleDeleteClient = () => {
+    if (!clientId) return;
+    
+    deleteClient(clientId);
+    toast.success('Client supprimé avec succès');
+    navigate('/clients');
+  };
+
+  const handleDeleteEquipment = (equipmentId: string) => {
+    if (!clientId) return;
+    
+    deleteEquipment(clientId, equipmentId);
+    toast.success('Équipement supprimé avec succès');
+    setEquipmentToDelete(null);
   };
 
   const getEquipmentIcon = (type: string) => {
@@ -107,9 +132,16 @@ export const ClientDetail = () => {
           <h1 className="text-xl font-bold">{client.prenom} {client.nom}</h1>
           <p className="text-sm text-muted-foreground">Détails du client</p>
         </div>
-        <Button variant="outline" size="sm">
-          <Edit3 className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
+            <Edit3 className="h-4 w-4 mr-2" />
+            Modifier
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setIsDeleteDialogOpen(true)}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Supprimer
+          </Button>
+        </div>
       </div>
 
       {/* Client Info */}
@@ -138,6 +170,7 @@ export const ClientDetail = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">
                 Inscrit le {new Date(client.dateInscription).toLocaleDateString('fr-FR')}
+                {building && ` - ${building.code}`}
               </span>
             </div>
           </div>
@@ -189,10 +222,25 @@ export const ClientDetail = () => {
                             )}
                           </div>
                         </div>
-                        <Badge className={getStatusColor(equipment.statut)}>
-                          {getStatusIcon(equipment.statut)}
-                          <span className="ml-1">{getStatusLabel(equipment.statut)}</span>
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(equipment.statut)}>
+                            {getStatusIcon(equipment.statut)}
+                            <span className="ml-1">{getStatusLabel(equipment.statut)}</span>
+                          </Badge>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem onClick={() => setEquipmentToDelete(equipment.id)}>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
 
                       {/* Equipment Details */}
@@ -278,6 +326,42 @@ export const ClientDetail = () => {
           Attribuer un nouvel équipement
         </Button>
       </div>
+
+      {/* Edit Client Dialog */}
+      <EditClientDialog 
+        isOpen={isEditDialogOpen} 
+        onClose={() => setIsEditDialogOpen(false)} 
+        client={client} 
+      />
+
+      {/* Delete Client Dialog */}
+      <DeleteClientDialog 
+        isOpen={isDeleteDialogOpen} 
+        onClose={() => setIsDeleteDialogOpen(false)} 
+        client={client}
+        onDelete={handleDeleteClient}
+      />
+
+      {/* Delete Equipment Dialog */}
+      <AlertDialog open={!!equipmentToDelete} onOpenChange={() => setEquipmentToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer l'équipement</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer cet équipement ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => equipmentToDelete && handleDeleteEquipment(equipmentToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

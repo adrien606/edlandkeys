@@ -22,6 +22,7 @@ interface Store {
   
   addEquipment: (data: EquipmentFormData) => void;
   updateEquipmentStatus: (clientId: string, equipmentId: string, status: Equipment['statut'], dateRestitution?: string) => void;
+  deleteEquipment: (clientId: string, equipmentId: string) => void;
   validateEquipment: (clientId: string, equipmentId: string, nomClient: string, signature?: string) => void;
   
   setSearchTerm: (term: string) => void;
@@ -152,6 +153,19 @@ export const useStore = create<Store>()(
                         }
                       : eq
                   ),
+                }
+              : client
+          ),
+        }));
+      },
+      
+      deleteEquipment: (clientId, equipmentId) => {
+        set((state) => ({
+          clients: state.clients.map((client) =>
+            client.id === clientId
+              ? {
+                  ...client,
+                  equipements: client.equipements.filter((eq) => eq.id !== equipmentId),
                 }
               : client
           ),
