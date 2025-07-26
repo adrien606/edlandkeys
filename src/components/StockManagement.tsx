@@ -8,37 +8,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useStore } from '@/store/useStore';
+import { useStore, StockItem } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3, Trash2, MoreVertical } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
-interface StockItem {
-  id: string;
-  type: 'cle' | 'badge' | 'telecommande';
-  numero: string;
-  description?: string;
-  statut: 'disponible' | 'attribue' | 'perdu';
-  clientActuel?: string;
-  batimentId: string;
-  quantite: number; // Quantité totale
-  quantiteDisponible: number; // Quantité disponible
-}
-
 export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { clients, buildings } = useStore();
+  const { clients, buildings, stockItems, addStockItem, updateStockItem, deleteStockItem } = useStore();
   const navigate = useNavigate();
-  
-  // Stock fictif pour démonstration - dans une vraie app, ceci serait dans le store
-  const [stockItems, setStockItems] = useState<StockItem[]>([
-    { id: '1', type: 'cle', numero: 'K001', description: 'Clé bureau A1', statut: 'disponible', batimentId: buildings[0]?.id || '', quantite: 3, quantiteDisponible: 2 },
-    { id: '2', type: 'cle', numero: 'K002', description: 'Clé bureau A2', statut: 'disponible', batimentId: buildings[0]?.id || '', quantite: 2, quantiteDisponible: 1 },
-    { id: '3', type: 'badge', numero: 'B001', description: 'Badge accès principal', statut: 'disponible', batimentId: buildings[1]?.id || '', quantite: 1, quantiteDisponible: 1 },
-    { id: '4', type: 'badge', numero: 'B002', description: 'Badge accès principal', statut: 'attribue', clientActuel: 'Marie Martin', batimentId: buildings[1]?.id || '', quantite: 1, quantiteDisponible: 0 },
-    { id: '5', type: 'telecommande', numero: 'T001', description: 'Télécommande portail', statut: 'disponible', batimentId: buildings[2]?.id || '', quantite: 1, quantiteDisponible: 1 },
-    { id: '6', type: 'telecommande', numero: 'T002', description: 'Télécommande portail', statut: 'perdu', batimentId: buildings[2]?.id || '', quantite: 1, quantiteDisponible: 0 },
-  ]);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('tous');
@@ -168,17 +146,12 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
   const handleSaveEdit = () => {
     if (!editingItem) return;
     
-    setStockItems(items => items.map(item => 
-      item.id === editingItem.id 
-        ? { 
-            ...item, 
-            numero: editForm.numero,
-            description: editForm.description,
-            statut: editForm.statut,
-            clientActuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined
-          }
-        : item
-    ));
+    updateStockItem(editingItem.id, {
+      numero: editForm.numero,
+      description: editForm.description,
+      statut: editForm.statut,
+      clientActuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined
+    });
     
     setEditingItem(null);
     toast.success('Équipement modifié avec succès');
@@ -203,8 +176,7 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     }
     // Pour les clés, on permet les doublons (pas de vérification d'unicité)
 
-    const newItem: StockItem = {
-      id: crypto.randomUUID(),
+    addStockItem({
       type: addForm.type,
       numero: addForm.numero,
       description: addForm.description || undefined,
@@ -212,9 +184,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       batimentId: addForm.batimentId,
       quantite: addForm.quantite,
       quantiteDisponible: addForm.quantite
-    };
+    });
 
-    setStockItems(items => [...items, newItem]);
     setAddForm({
       type: 'cle',
       numero: '',
@@ -228,7 +199,7 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
   };
 
   const handleDeleteEquipment = (itemId: string) => {
-    setStockItems(items => items.filter(item => item.id !== itemId));
+    deleteStockItem(itemId);
     setItemToDelete(null);
     toast.success('Équipement supprimé avec succès');
   };

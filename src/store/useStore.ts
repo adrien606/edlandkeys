@@ -2,9 +2,22 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Client, Equipment, ClientFormData, EquipmentFormData, Building, BuildingFormData } from '@/types';
 
+export interface StockItem {
+  id: string;
+  type: 'cle' | 'badge' | 'telecommande';
+  numero: string;
+  description?: string;
+  statut: 'disponible' | 'attribue' | 'perdu';
+  clientActuel?: string;
+  batimentId: string;
+  quantite: number;
+  quantiteDisponible: number;
+}
+
 interface Store {
   clients: Client[];
   buildings: Building[];
+  stockItems: StockItem[];
   currentBuildingId: string | null;
   searchTerm: string;
   
@@ -14,6 +27,12 @@ interface Store {
   deleteBuilding: (id: string) => void;
   setCurrentBuilding: (buildingId: string | null) => void;
   getCurrentBuilding: () => Building | undefined;
+  
+  // Stock Actions
+  addStockItem: (itemData: Omit<StockItem, 'id'>) => void;
+  updateStockItem: (id: string, itemData: Partial<StockItem>) => void;
+  deleteStockItem: (id: string) => void;
+  getStockItems: () => StockItem[];
   
   // Client Actions
   addClient: (clientData: ClientFormData) => void;
@@ -43,6 +62,14 @@ export const useStore = create<Store>()(
   persist(
     (set, get) => ({
       clients: [],
+      stockItems: [
+        { id: generateId(), type: 'cle', numero: 'K001', description: 'Clé bureau A1', statut: 'disponible', batimentId: '', quantite: 3, quantiteDisponible: 2 },
+        { id: generateId(), type: 'cle', numero: 'K002', description: 'Clé bureau A2', statut: 'disponible', batimentId: '', quantite: 2, quantiteDisponible: 1 },
+        { id: generateId(), type: 'badge', numero: 'B001', description: 'Badge accès principal', statut: 'disponible', batimentId: '', quantite: 1, quantiteDisponible: 1 },
+        { id: generateId(), type: 'badge', numero: 'B002', description: 'Badge accès principal', statut: 'attribue', clientActuel: 'Marie Martin', batimentId: '', quantite: 1, quantiteDisponible: 0 },
+        { id: generateId(), type: 'telecommande', numero: 'T001', description: 'Télécommande portail', statut: 'disponible', batimentId: '', quantite: 1, quantiteDisponible: 1 },
+        { id: generateId(), type: 'telecommande', numero: 'T002', description: 'Télécommande portail', statut: 'perdu', batimentId: '', quantite: 1, quantiteDisponible: 0 },
+      ],
       buildings: [
         { id: generateId(), nom: 'Bâtiment AI', code: 'BAI', dateCreation: new Date().toISOString() },
         { id: generateId(), nom: 'Bâtiment AS', code: 'BAS', dateCreation: new Date().toISOString() },
@@ -91,6 +118,36 @@ export const useStore = create<Store>()(
       getCurrentBuilding: () => {
         const { buildings, currentBuildingId } = get();
         return buildings.find((building) => building.id === currentBuildingId);
+      },
+      
+      // Stock Actions
+      addStockItem: (itemData) => {
+        const newStockItem: StockItem = {
+          id: generateId(),
+          ...itemData,
+        };
+        
+        set((state) => ({
+          stockItems: [...state.stockItems, newStockItem],
+        }));
+      },
+      
+      updateStockItem: (id, itemData) => {
+        set((state) => ({
+          stockItems: state.stockItems.map((item) =>
+            item.id === id ? { ...item, ...itemData } : item
+          ),
+        }));
+      },
+      
+      deleteStockItem: (id) => {
+        set((state) => ({
+          stockItems: state.stockItems.filter((item) => item.id !== id),
+        }));
+      },
+      
+      getStockItems: () => {
+        return get().stockItems;
       },
       
       addClient: (clientData) => {
