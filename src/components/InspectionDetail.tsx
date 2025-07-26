@@ -27,6 +27,11 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
   const exitInspection = inspection?.type === 'entry' 
     ? inspections.find(i => i.type === 'exit' && i.entryInspectionId === inspection.id)
     : null;
+    
+  // Trouver l'état d'entrée associé si c'est un état de sortie
+  const entryInspection = inspection?.type === 'exit' && inspection.entryInspectionId
+    ? inspections.find(i => i.id === inspection.entryInspectionId)
+    : null;
 
   if (!inspection) {
     return (
@@ -477,20 +482,52 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             <div className="space-y-4">
               {INSPECTION_AREAS.map((area) => {
                 const item = inspection.items[area.key as keyof typeof inspection.items];
+                const entryItem = entryInspection?.items[area.key as keyof typeof entryInspection.items];
+                const isExitInspection = inspection.type === 'exit';
+                
                 return (
                   <Card key={area.key} className="bg-muted/30">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <h3 className="font-medium text-lg">{area.label}</h3>
-                        <Badge className={getStatusColor(item.status)}>
-                          {getStatusIcon(item.status)}
-                          <span className="ml-1">{getStatusLabel(item.status)}</span>
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {isExitInspection && entryItem && (
+                            <>
+                              <div className="text-right">
+                                <div className="text-xs text-muted-foreground">Entrée</div>
+                                <Badge className={getStatusColor(entryItem.status)} variant="outline">
+                                  {getStatusIcon(entryItem.status)}
+                                  <span className="ml-1">{getStatusLabel(entryItem.status)}</span>
+                                </Badge>
+                              </div>
+                              <div className="text-muted-foreground">→</div>
+                            </>
+                          )}
+                          <div className="text-right">
+                            {isExitInspection && entryItem && (
+                              <div className="text-xs text-muted-foreground">Sortie</div>
+                            )}
+                            <Badge className={getStatusColor(item.status)}>
+                              {getStatusIcon(item.status)}
+                              <span className="ml-1">{getStatusLabel(item.status)}</span>
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
+                      
+                      {/* Comparaison des commentaires pour l'état de sortie */}
+                      {isExitInspection && entryItem && entryItem.comment && (
+                        <div className="mb-3">
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Commentaire d'entrée:</p>
+                          <p className="text-sm bg-muted p-2 rounded italic">{entryItem.comment}</p>
+                        </div>
+                      )}
                       
                       {item.comment && (
                         <div className="mb-3">
-                          <p className="text-sm font-medium text-muted-foreground mb-1">Commentaire:</p>
+                          <p className="text-sm font-medium text-muted-foreground mb-1">
+                            {isExitInspection ? 'Commentaire de sortie:' : 'Commentaire:'}
+                          </p>
                           <p className="text-sm bg-background p-2 rounded">{item.comment}</p>
                         </div>
                       )}
