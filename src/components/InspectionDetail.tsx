@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useInspectionStore } from "@/store/useInspectionStore";
-import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut } from "lucide-react";
+import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { INSPECTION_AREAS } from "@/types/inspection";
@@ -330,6 +330,29 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Lien vers l'état d'entrée originel (si c'est un état de sortie) */}
+            {inspection.type === 'exit' && inspection.entryInspectionId && (
+              <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-primary">État d'entrée de référence</p>
+                    <p className="text-xs text-muted-foreground">
+                      Cliquez pour consulter l'état des lieux d'entrée originel
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onNavigate(`inspection-detail/${inspection.entryInspectionId}`)}
+                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Voir l'entrée
+                  </Button>
+                </div>
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Client</p>
