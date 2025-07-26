@@ -216,17 +216,22 @@ export const StockManagement = ({
           <h1 className="text-xl font-bold">Gestion du stock</h1>
           <p className="text-sm text-muted-foreground">Inventaire des équipements</p>
         </div>
-        {onSwitchApp && <Button variant="outline" size="sm" onClick={onSwitchApp}>
-            État des lieux
-          </Button>}
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-1" />
-              Ajouter
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+        <div className="flex gap-2">
+          {onSwitchApp && <Button variant="outline" size="sm" onClick={onSwitchApp}>
+              État des lieux
+            </Button>}
+          <Button variant="outline" size="sm" onClick={() => setCurrentView('buildings')}>
+            <Settings className="h-4 w-4 mr-2" />
+            Gérer les bâtiments
+          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-1" />
+                Ajouter
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
             <DialogHeader>
               <DialogTitle>Ajouter un équipement</DialogTitle>
             </DialogHeader>
@@ -300,6 +305,7 @@ export const StockManagement = ({
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Stats */}
@@ -355,13 +361,6 @@ export const StockManagement = ({
           
           {/* Filter dropdowns */}
           <div className="grid grid-cols-1 gap-3">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium">Filtres</span>
-              <Button variant="outline" size="sm" onClick={() => setCurrentView('buildings')}>
-                <Settings className="h-4 w-4 mr-2" />
-                Gérer les bâtiments
-              </Button>
-            </div>
             <div className="grid grid-cols-3 gap-3">
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger>
