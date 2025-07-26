@@ -97,7 +97,44 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     }
   };
 
-  const filteredItems = stockItems.filter(item => {
+  // Fonction pour calculer les quantités réelles basées sur les distributions aux clients
+  const getUpdatedStockItem = (stockItem: StockItem) => {
+    const distributedCount = clients
+      .flatMap(client => client.equipements)
+      .filter(eq => 
+        eq.type === stockItem.type && 
+        eq.numero === stockItem.numero &&
+        eq.statut === 'remis'
+      ).length;
+    
+    const lostCount = clients
+      .flatMap(client => client.equipements)
+      .filter(eq => 
+        eq.type === stockItem.type && 
+        eq.numero === stockItem.numero &&
+        eq.statut === 'perdu'
+      ).length;
+
+    const quantiteDisponible = Math.max(0, stockItem.quantite - distributedCount - lostCount);
+    
+    let statut: StockItem['statut'] = 'disponible';
+    if (lostCount > 0) {
+      statut = 'perdu';
+    } else if (quantiteDisponible === 0 && distributedCount > 0) {
+      statut = 'attribue';
+    }
+
+    return {
+      ...stockItem,
+      quantiteDisponible,
+      statut
+    };
+  };
+
+  // Mettre à jour tous les items du stock avec les données réelles
+  const updatedStockItems = stockItems.map(item => getUpdatedStockItem(item));
+
+  const filteredItems = updatedStockItems.filter(item => {
     const matchesSearch = item.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.clientActuel?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -108,10 +145,10 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
   });
 
   const getStats = () => {
-    const total = stockItems.reduce((sum, item) => sum + item.quantite, 0);
-    const disponible = stockItems.reduce((sum, item) => sum + item.quantiteDisponible, 0);
-    const attribue = stockItems.reduce((sum, item) => sum + (item.quantite - item.quantiteDisponible), 0);
-    const perdu = stockItems.filter(item => item.statut === 'perdu').reduce((sum, item) => sum + item.quantite, 0);
+    const total = updatedStockItems.reduce((sum, item) => sum + item.quantite, 0);
+    const disponible = updatedStockItems.reduce((sum, item) => sum + item.quantiteDisponible, 0);
+    const attribue = updatedStockItems.reduce((sum, item) => sum + (item.quantite - item.quantiteDisponible), 0);
+    const perdu = updatedStockItems.filter(item => item.statut === 'perdu').reduce((sum, item) => sum + item.quantite, 0);
     
     return { total, disponible, attribue, perdu };
   };
