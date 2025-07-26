@@ -152,11 +152,18 @@ export const StockManagement = () => {
       return;
     }
 
-    // Vérifier si la référence existe déjà
-    if (stockItems.some(item => item.numero.toLowerCase() === addForm.numero.toLowerCase())) {
-      toast.error('Cette référence existe déjà');
-      return;
+    // Vérifier l'unicité seulement pour les télécommandes et badges
+    if (addForm.type === 'telecommande' || addForm.type === 'badge') {
+      if (stockItems.some(item => 
+        item.type === addForm.type && 
+        item.numero.toLowerCase() === addForm.numero.toLowerCase()
+      )) {
+        const typeLabel = addForm.type === 'telecommande' ? 'télécommande' : 'badge';
+        toast.error(`Cette référence de ${typeLabel} existe déjà. Les ${typeLabel}s doivent être uniques.`);
+        return;
+      }
     }
+    // Pour les clés, on permet les doublons (pas de vérification d'unicité)
 
     const newItem: StockItem = {
       id: crypto.randomUUID(),
