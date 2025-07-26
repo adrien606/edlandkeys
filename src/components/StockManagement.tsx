@@ -53,7 +53,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     switch (status) {
       case 'disponible': return 'bg-success text-success-foreground';
       case 'attribue': return 'bg-primary text-primary-foreground';
-      case 'perdu': return 'bg-destructive text-destructive-foreground';
       default: return 'bg-muted text-muted-foreground';
     }
   };
@@ -62,7 +61,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     switch (status) {
       case 'disponible': return 'Disponible';
       case 'attribue': return 'Attribué';
-      case 'perdu': return 'Perdu';
       default: return status;
     }
   };
@@ -86,20 +84,11 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
         eq.statut === 'remis'
       ).length;
     
-    const lostCount = clients
-      .flatMap(client => client.equipements)
-      .filter(eq => 
-        eq.type === stockItem.type && 
-        eq.numero === stockItem.numero &&
-        eq.statut === 'perdu'
-      ).length;
-
-    const quantiteDisponible = Math.max(0, stockItem.quantite - distributedCount - lostCount);
+    
+    const quantiteDisponible = Math.max(0, stockItem.quantite - distributedCount);
     
     let statut: StockItem['statut'] = 'disponible';
-    if (lostCount > 0) {
-      statut = 'perdu';
-    } else if (quantiteDisponible === 0 && distributedCount > 0) {
+    if (quantiteDisponible === 0 && distributedCount > 0) {
       statut = 'attribue';
     }
 
@@ -127,9 +116,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     const total = updatedStockItems.reduce((sum, item) => sum + item.quantite, 0);
     const disponible = updatedStockItems.reduce((sum, item) => sum + item.quantiteDisponible, 0);
     const attribue = updatedStockItems.reduce((sum, item) => sum + (item.quantite - item.quantiteDisponible), 0);
-    const perdu = updatedStockItems.filter(item => item.statut === 'perdu').reduce((sum, item) => sum + item.quantite, 0);
     
-    return { total, disponible, attribue, perdu };
+    return { total, disponible, attribue };
   };
 
   const stats = getStats();
@@ -356,19 +344,12 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       {/* Detailed Stats */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Répartition par statut</CardTitle>
+          <CardTitle className="text-base">Répartition</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
-              <span className="text-sm font-medium">Attribués</span>
-              <Badge className="bg-primary text-primary-foreground">{stats.attribue}</Badge>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg">
-              <span className="text-sm font-medium">Perdus</span>
-              <Badge variant="destructive">{stats.perdu}</Badge>
-            </div>
+          <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
+            <span className="text-sm font-medium">Attribués</span>
+            <Badge className="bg-primary text-primary-foreground">{stats.attribue}</Badge>
           </div>
         </CardContent>
       </Card>
@@ -398,18 +379,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                 <SelectItem value="cle">Clés</SelectItem>
                 <SelectItem value="badge">Badges</SelectItem>
                 <SelectItem value="telecommande">Télécommandes</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger>
-                <SelectValue placeholder="Statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tous">Tous les statuts</SelectItem>
-                <SelectItem value="disponible">Disponible</SelectItem>
-                <SelectItem value="attribue">Attribué</SelectItem>
-                <SelectItem value="perdu">Perdu</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -536,7 +505,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                                   <SelectContent>
                                     <SelectItem value="disponible">Disponible</SelectItem>
                                     <SelectItem value="attribue">Attribué</SelectItem>
-                                    <SelectItem value="perdu">Perdu</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
