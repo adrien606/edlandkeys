@@ -15,6 +15,10 @@ import { EquipmentForm } from "./components/EquipmentForm";
 import { EquipmentValidation } from "./components/EquipmentValidation";
 import { StockManagement } from "./components/StockManagement";
 import { LoginScreen } from "./components/LoginScreen";
+import { InspectionDashboard } from "./components/InspectionDashboard";
+import { NewInspection } from "./components/NewInspection";
+import { InspectionForm } from "./components/InspectionForm";
+import { InspectionSignature } from "./components/InspectionSignature";
 
 const queryClient = new QueryClient();
 
@@ -67,25 +71,35 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <div className="min-h-screen bg-background p-4">
-          <div className="max-w-md mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold mb-2">États des Lieux</h1>
-              <p className="text-muted-foreground">Application en développement</p>
-            </div>
-            <Button 
-              onClick={() => {
-                setCurrentApp('equipment');
-              }}
-              className="w-full"
-            >
-              Retour à Gestion Équipements
-            </Button>
-          </div>
-        </div>
+        <InspectionApp onBackToApps={() => setIsLoggedIn(false)} />
       </TooltipProvider>
     </QueryClientProvider>
   );
+};
+
+const InspectionApp = ({ onBackToApps }: { onBackToApps: () => void }) => {
+  const [currentRoute, setCurrentRoute] = useState('dashboard');
+
+  const handleNavigate = (route: string) => {
+    setCurrentRoute(route);
+  };
+
+  const renderCurrentPage = () => {
+    switch (currentRoute) {
+      case 'dashboard':
+        return <InspectionDashboard onNavigate={handleNavigate} onBackToApps={onBackToApps} />;
+      case 'new-inspection':
+        return <NewInspection onNavigate={handleNavigate} onBack={() => setCurrentRoute('dashboard')} />;
+      case 'inspection-form':
+        return <InspectionForm onNavigate={handleNavigate} onBack={() => setCurrentRoute('new-inspection')} />;
+      case 'inspection-signature':
+        return <InspectionSignature onNavigate={handleNavigate} onBack={() => setCurrentRoute('inspection-form')} />;
+      default:
+        return <InspectionDashboard onNavigate={handleNavigate} onBackToApps={onBackToApps} />;
+    }
+  };
+
+  return renderCurrentPage();
 };
 
 export default App;
