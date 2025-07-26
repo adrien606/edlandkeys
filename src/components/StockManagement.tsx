@@ -5,10 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3 } from 'lucide-react';
+import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3, Trash2, MoreVertical } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 interface StockItem {
   id: string;
@@ -38,11 +42,19 @@ export const StockManagement = () => {
   const [filterType, setFilterType] = useState<string>('tous');
   const [filterStatus, setFilterStatus] = useState<string>('tous');
   const [editingItem, setEditingItem] = useState<StockItem | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     numero: '',
     description: '',
-    statut: '' as StockItem['statut'],
+    statut: 'disponible' as StockItem['statut'],
     clientActuel: ''
+  });
+  const [addForm, setAddForm] = useState({
+    type: 'cle' as StockItem['type'],
+    numero: '',
+    description: '',
+    statut: 'disponible' as StockItem['statut']
   });
 
   const getEquipmentIcon = (type: string) => {
@@ -131,6 +143,44 @@ export const StockManagement = () => {
     ));
     
     setEditingItem(null);
+    toast.success('Équipement modifié avec succès');
+  };
+
+  const handleAddEquipment = () => {
+    if (!addForm.numero.trim()) {
+      toast.error('La référence est obligatoire');
+      return;
+    }
+
+    // Vérifier si la référence existe déjà
+    if (stockItems.some(item => item.numero.toLowerCase() === addForm.numero.toLowerCase())) {
+      toast.error('Cette référence existe déjà');
+      return;
+    }
+
+    const newItem: StockItem = {
+      id: crypto.randomUUID(),
+      type: addForm.type,
+      numero: addForm.numero,
+      description: addForm.description || undefined,
+      statut: addForm.statut
+    };
+
+    setStockItems(items => [...items, newItem]);
+    setAddForm({
+      type: 'cle',
+      numero: '',
+      description: '',
+      statut: 'disponible'
+    });
+    setIsAddDialogOpen(false);
+    toast.success('Équipement ajouté avec succès');
+  };
+
+  const handleDeleteEquipment = (itemId: string) => {
+    setStockItems(items => items.filter(item => item.id !== itemId));
+    setItemToDelete(null);
+    toast.success('Équipement supprimé avec succès');
   };
 
   return (
@@ -144,10 +194,65 @@ export const StockManagement = () => {
           <h1 className="text-xl font-bold">Gestion du stock</h1>
           <p className="text-sm text-muted-foreground">Inventaire des équipements</p>
         </div>
-        <Button variant="outline" size="sm">
-          <Plus className="h-4 w-4 mr-1" />
-          Ajouter
-        </Button>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Plus className="h-4 w-4 mr-1" />
+              Ajouter
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ajouter un équipement</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="type">Type d'équipement</Label>
+                <Select value={addForm.type} onValueChange={(value: StockItem['type']) => 
+                  setAddForm(prev => ({ ...prev, type: value }))
+                }>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cle">Clé</SelectItem>
+                    <SelectItem value="badge">Badge</SelectItem>
+                    <SelectItem value="telecommande">Télécommande</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="add-numero">Référence *</Label>
+                <Input
+                  id="add-numero"
+                  value={addForm.numero}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, numero: e.target.value }))}
+                  placeholder="ex: K001, B001, T001"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="add-description">Description</Label>
+                <Textarea
+                  id="add-description"
+                  value={addForm.description}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Description de l'équipement"
+                />
+              </div>
+              
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="flex-1">
+                  Annuler
+                </Button>
+                <Button onClick={handleAddEquipment} className="flex-1">
+                  Ajouter
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats */}
@@ -289,72 +394,86 @@ export const StockManagement = () => {
                     <Badge className={getStatusColor(item.statut)}>
                       {getStatusLabel(item.statut)}
                     </Badge>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm" onClick={() => handleEditClick(item)}>
-                          <Edit3 className="h-3 w-3" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="h-3 w-3" />
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Modifier l'équipement</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="numero">Référence</Label>
-                            <Input
-                              id="numero"
-                              value={editForm.numero}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, numero: e.target.value }))}
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Input
-                              id="description"
-                              value={editForm.description}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="statut">Statut</Label>
-                            <Select value={editForm.statut} onValueChange={(value: StockItem['statut']) => 
-                              setEditForm(prev => ({ ...prev, statut: value }))
-                            }>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="disponible">Disponible</SelectItem>
-                                <SelectItem value="attribue">Attribué</SelectItem>
-                                <SelectItem value="perdu">Perdu</SelectItem>
-                                <SelectItem value="maintenance">Maintenance</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          {editForm.statut === 'attribue' && (
-                            <div>
-                              <Label htmlFor="clientActuel">Client actuel</Label>
-                              <Input
-                                id="clientActuel"
-                                value={editForm.clientActuel}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, clientActuel: e.target.value }))}
-                                placeholder="Nom du client"
-                              />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                              <Edit3 className="h-4 w-4 mr-2" />
+                              Modifier
+                            </DropdownMenuItem>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Modifier l'équipement</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label htmlFor="numero">Référence</Label>
+                                <Input
+                                  id="numero"
+                                  value={editForm.numero}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, numero: e.target.value }))}
+                                />
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="description">Description</Label>
+                                <Textarea
+                                  id="description"
+                                  value={editForm.description}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                                />
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="statut">Statut</Label>
+                                <Select value={editForm.statut} onValueChange={(value: StockItem['statut']) => 
+                                  setEditForm(prev => ({ ...prev, statut: value }))
+                                }>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="disponible">Disponible</SelectItem>
+                                    <SelectItem value="attribue">Attribué</SelectItem>
+                                    <SelectItem value="perdu">Perdu</SelectItem>
+                                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              {editForm.statut === 'attribue' && (
+                                <div>
+                                  <Label htmlFor="clientActuel">Client actuel</Label>
+                                  <Input
+                                    id="clientActuel"
+                                    value={editForm.clientActuel}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, clientActuel: e.target.value }))}
+                                    placeholder="Nom du client"
+                                  />
+                                </div>
+                              )}
+                              
+                              <div className="flex gap-2 pt-4">
+                                <Button onClick={handleSaveEdit} className="flex-1">
+                                  Sauvegarder
+                                </Button>
+                              </div>
                             </div>
-                          )}
-                          
-                          <div className="flex gap-2 pt-4">
-                            <Button onClick={handleSaveEdit} className="flex-1">
-                              Sauvegarder
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                          </DialogContent>
+                        </Dialog>
+                        <DropdownMenuItem onClick={() => setItemToDelete(item.id)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Supprimer
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </CardContent>
@@ -362,6 +481,27 @@ export const StockManagement = () => {
           ))
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!itemToDelete} onOpenChange={() => setItemToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer l'équipement</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer cet équipement ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => itemToDelete && handleDeleteEquipment(itemToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
