@@ -159,6 +159,12 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
               <h5 style="margin: 0 0 5px 0; color: #6c757d;">État d'entrée (référence)</h5>
               <p style="margin: 0; color: #6c757d;"><strong>État:</strong> ${getStatusLabel(entryItem.status)}</p>
               ${entryItem.comment ? `<p style="margin: 5px 0 0 0; color: #6c757d; font-style: italic;">"${entryItem.comment}"</p>` : ''}
+              ${entryItem.photos && entryItem.photos.length > 0 ? `
+                <p style="margin: 10px 0 5px 0; color: #6c757d;"><strong>Photos d'entrée (${entryItem.photos.length}):</strong></p>
+                <div class="photos">
+                  ${entryItem.photos.map(photo => `<img src="${photo}" class="photo" alt="Photo entrée ${area.label}" style="border: 2px solid #6c757d;">`).join('')}
+                </div>
+              ` : ''}
             </div>
           ` : ''}
           
@@ -175,7 +181,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
           ${item.photos && item.photos.length > 0 ? `
             <p><strong>Photos actuelles (${item.photos.length}):</strong></p>
             <div class="photos">
-              ${item.photos.map(photo => `<img src="${photo}" class="photo" alt="Photo ${area.label}">`).join('')}
+              ${item.photos.map(photo => `<img src="${photo}" class="photo" alt="Photo actuelle ${area.label}">`).join('')}
             </div>
           ` : ''}
         </div>`;
