@@ -10,14 +10,16 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useStore, StockItem } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3, Trash2, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3, Trash2, MoreVertical, Settings } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { StockBuildingManagement } from './StockBuildingManagement';
 export const StockManagement = ({
   onSwitchApp
 }: {
   onSwitchApp?: () => void;
 }) => {
+  const [currentView, setCurrentView] = useState<'stock' | 'buildings'>('stock');
   const {
     clients,
     buildings,
@@ -199,6 +201,11 @@ export const StockManagement = ({
   const getClientsForEquipment = (stockItem: StockItem) => {
     return clients.filter(client => client.equipements.some(eq => eq.type === stockItem.type && eq.numero === stockItem.numero && eq.statut === 'remis')).map(client => `${client.prenom} ${client.nom}`);
   };
+
+  if (currentView === 'buildings') {
+    return <StockBuildingManagement onBack={() => setCurrentView('stock')} />;
+  }
+
   return <div className="p-4 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
@@ -348,6 +355,13 @@ export const StockManagement = ({
           
           {/* Filter dropdowns */}
           <div className="grid grid-cols-1 gap-3">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium">Filtres</span>
+              <Button variant="outline" size="sm" onClick={() => setCurrentView('buildings')}>
+                <Settings className="h-4 w-4 mr-2" />
+                Gérer les bâtiments
+              </Button>
+            </div>
             <div className="grid grid-cols-3 gap-3">
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger>
