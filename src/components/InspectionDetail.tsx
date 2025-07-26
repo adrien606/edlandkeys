@@ -122,6 +122,12 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                 <p className="text-sm font-medium text-muted-foreground">Email</p>
                 <p className="text-lg">{inspection.clientEmail}</p>
               </div>
+              {inspection.buildingCode && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Bâtiment</p>
+                  <p className="text-lg">{inspection.buildingCode}</p>
+                </div>
+              )}
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Type</p>
                 <Badge variant={inspection.type === 'entry' ? 'default' : 'secondary'}>

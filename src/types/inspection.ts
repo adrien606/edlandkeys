@@ -1,3 +1,12 @@
+export interface InspectionBuilding {
+  id: string;
+  nom: string;
+  code: string;
+  adresse?: string;
+  description?: string;
+  dateCreation: string;
+}
+
 export interface InspectionItem {
   id: string;
   name: string;
@@ -11,6 +20,8 @@ export interface Inspection {
   clientId: string;
   clientName: string;
   clientEmail: string;
+  buildingId?: string;
+  buildingCode?: string;
   type: 'entry' | 'exit';
   date: string;
   items: {

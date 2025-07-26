@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Inspection, InspectionItem } from '@/types/inspection';
+import { Inspection, InspectionItem, InspectionBuilding } from '@/types/inspection';
 
 interface InspectionStore {
   inspections: Inspection[];
   currentInspection: Inspection | null;
+  inspectionBuildings: InspectionBuilding[];
   
   // Actions
-  createInspection: (clientId: string, clientName: string, clientEmail: string, type: 'entry' | 'exit') => void;
+  createInspection: (clientId: string, clientName: string, clientEmail: string, type: 'entry' | 'exit', buildingId?: string) => void;
   updateInspectionItem: (itemKey: keyof Inspection['items'], data: Partial<InspectionItem>) => void;
   addPhotoToItem: (itemKey: keyof Inspection['items'], photo: string) => void;
   removePhotoFromItem: (itemKey: keyof Inspection['items'], photoIndex: number) => void;
@@ -15,6 +16,13 @@ interface InspectionStore {
   completeInspection: () => void;
   getInspectionsByClient: (clientId: string) => Inspection[];
   setCurrentInspection: (inspection: Inspection | null) => void;
+  setInspectionBuilding: (buildingId: string) => void;
+  
+  // Building management
+  addInspectionBuilding: (building: Omit<InspectionBuilding, 'id' | 'dateCreation'>) => void;
+  updateInspectionBuilding: (id: string, building: Partial<InspectionBuilding>) => void;
+  deleteInspectionBuilding: (id: string) => void;
+  getInspectionBuildingById: (id: string) => InspectionBuilding | undefined;
 }
 
 const createEmptyInspectionItem = (name: string): InspectionItem => ({
@@ -30,13 +38,35 @@ export const useInspectionStore = create<InspectionStore>()(
     (set, get) => ({
       inspections: [],
       currentInspection: null,
+      inspectionBuildings: [
+        {
+          id: '1',
+          nom: 'Bâtiment A',
+          code: 'BAT-A',
+          adresse: '123 Rue Example',
+          description: 'Bâtiment principal',
+          dateCreation: new Date().toISOString()
+        },
+        {
+          id: '2',
+          nom: 'Bâtiment B',
+          code: 'BAT-B',
+          adresse: '456 Avenue Test',
+          description: 'Bâtiment secondaire',
+          dateCreation: new Date().toISOString()
+        }
+      ],
 
-      createInspection: (clientId, clientName, clientEmail, type) => {
+      createInspection: (clientId, clientName, clientEmail, type, buildingId) => {
+        const building = buildingId ? get().inspectionBuildings.find(b => b.id === buildingId) : undefined;
+        
         const newInspection: Inspection = {
           id: Math.random().toString(36).substr(2, 9),
           clientId,
           clientName,
           clientEmail,
+          buildingId,
+          buildingCode: building?.code,
           type,
           date: new Date().toISOString(),
           items: {
@@ -141,6 +171,51 @@ export const useInspectionStore = create<InspectionStore>()(
 
       setCurrentInspection: (inspection) => {
         set({ currentInspection: inspection });
+      },
+
+      setInspectionBuilding: (buildingId) => {
+        const { currentInspection, inspectionBuildings } = get();
+        if (!currentInspection) return;
+
+        const building = inspectionBuildings.find(b => b.id === buildingId);
+        
+        set({
+          currentInspection: {
+            ...currentInspection,
+            buildingId,
+            buildingCode: building?.code
+          }
+        });
+      },
+
+      addInspectionBuilding: (building) => {
+        const newBuilding: InspectionBuilding = {
+          ...building,
+          id: Math.random().toString(36).substr(2, 9),
+          dateCreation: new Date().toISOString()
+        };
+
+        set(state => ({
+          inspectionBuildings: [...state.inspectionBuildings, newBuilding]
+        }));
+      },
+
+      updateInspectionBuilding: (id, buildingData) => {
+        set(state => ({
+          inspectionBuildings: state.inspectionBuildings.map(building =>
+            building.id === id ? { ...building, ...buildingData } : building
+          )
+        }));
+      },
+
+      deleteInspectionBuilding: (id) => {
+        set(state => ({
+          inspectionBuildings: state.inspectionBuildings.filter(building => building.id !== id)
+        }));
+      },
+
+      getInspectionBuildingById: (id) => {
+        return get().inspectionBuildings.find(building => building.id === id);
       }
     }),
     {

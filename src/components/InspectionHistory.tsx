@@ -130,6 +130,9 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
                           Date: {format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}
                         </p>
                         <p>Email: {inspection.clientEmail}</p>
+                        {inspection.buildingCode && (
+                          <p>Bâtiment: {inspection.buildingCode}</p>
+                        )}
                       </div>
                     </div>
                     <Button 

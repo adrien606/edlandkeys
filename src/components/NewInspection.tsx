@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/store/useStore";
 import { useInspectionStore } from "@/store/useInspectionStore";
-import { ArrowLeft, Home, LogOut } from "lucide-react";
+import { ArrowLeft, Home, LogOut, Building, Settings } from "lucide-react";
 
 interface NewInspectionProps {
   onNavigate: (route: string) => void;
@@ -15,11 +15,13 @@ interface NewInspectionProps {
 
 export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspectionProps) => {
   const { clients } = useStore();
-  const { createInspection } = useInspectionStore();
+  const { createInspection, inspectionBuildings } = useInspectionStore();
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string>("");
   const [inspectionType, setInspectionType] = useState<'entry' | 'exit'>('entry');
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
+  const selectedBuilding = inspectionBuildings.find(b => b.id === selectedBuildingId);
 
   const handleStartInspection = () => {
     if (!selectedClient) return;
@@ -28,7 +30,8 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
       selectedClient.id,
       `${selectedClient.prenom} ${selectedClient.nom}`,
       selectedClient.email,
-      inspectionType
+      inspectionType,
+      selectedBuildingId || undefined
     );
     
     onNavigate('inspection-form');
@@ -107,6 +110,75 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
                 <p className="text-sm text-muted-foreground">
                   {selectedClient.telephone}
                 </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Sélectionner un Bâtiment</CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => onNavigate('building-management')}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Gérer
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Select value={selectedBuildingId} onValueChange={setSelectedBuildingId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choisir un bâtiment (optionnel)..." />
+              </SelectTrigger>
+              <SelectContent>
+                {inspectionBuildings.map((building) => (
+                  <SelectItem key={building.id} value={building.id}>
+                    <div className="flex items-center gap-2">
+                      <Building className="w-4 h-4" />
+                      <span>{building.code} - {building.nom}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {selectedBuilding && (
+              <div className="p-4 bg-muted rounded-lg space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">
+                    {selectedBuilding.nom}
+                  </span>
+                  <Badge variant="outline">{selectedBuilding.code}</Badge>
+                </div>
+                {selectedBuilding.adresse && (
+                  <p className="text-sm text-muted-foreground">
+                    📍 {selectedBuilding.adresse}
+                  </p>
+                )}
+                {selectedBuilding.description && (
+                  <p className="text-sm text-muted-foreground">
+                    {selectedBuilding.description}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {inspectionBuildings.length === 0 && (
+              <div className="text-center text-muted-foreground p-4 border border-dashed rounded-lg">
+                <Building className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Aucun bâtiment enregistré</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => onNavigate('building-management')}
+                >
+                  Ajouter un bâtiment
+                </Button>
               </div>
             )}
           </CardContent>

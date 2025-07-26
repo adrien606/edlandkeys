@@ -18,6 +18,7 @@ import { LoginScreen } from "./components/LoginScreen";
 import { InspectionDashboard } from "./components/InspectionDashboard";
 import { InspectionHistory } from "./components/InspectionHistory";
 import { InspectionDetail } from "./components/InspectionDetail";
+import { BuildingManagement } from "./components/BuildingManagement";
 import { NewInspection } from "./components/NewInspection";
 import { InspectionForm } from "./components/InspectionForm";
 import { InspectionSignature } from "./components/InspectionSignature";
@@ -98,6 +99,8 @@ const InspectionApp = ({ onBackToApps, onSwitchApp }: { onBackToApps: () => void
         return <InspectionSignature onNavigate={handleNavigate} onBack={() => setCurrentRoute('inspection-form')} onSwitchApp={onSwitchApp} />;
       case 'inspection-history':
         return <InspectionHistory onNavigate={handleNavigate} onBack={() => setCurrentRoute('dashboard')} onSwitchApp={onSwitchApp} />;
+      case 'building-management':
+        return <BuildingManagement onNavigate={handleNavigate} onBack={() => setCurrentRoute('new-inspection')} onSwitchApp={onSwitchApp} />;
       default:
         // Handle inspection-detail routes
         if (currentRoute.startsWith('inspection-detail/')) {
