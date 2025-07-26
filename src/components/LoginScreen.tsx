@@ -5,17 +5,18 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import logoBelair from "@/assets/logo-belaircamp.png";
 
 interface LoginScreenProps {
-  onLogin: () => void;
+  onLogin: (appType: 'equipment' | 'inspection') => void;
 }
 
 export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
+  const [selectedApp, setSelectedApp] = useState<'equipment' | 'inspection'>('equipment');
   const [pin, setPin] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simple PIN validation - you can customize this
     if (pin === "1234" || pin === "admin") {
-      onLogin();
+      onLogin(selectedApp);
     } else {
       alert("Code d'accès incorrect");
       setPin("");
@@ -44,6 +45,35 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         </CardHeader>
         
         <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-foreground">
+                Choisir l'application
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                <Button
+                  type="button"
+                  variant={selectedApp === 'equipment' ? 'default' : 'outline'}
+                  className="w-full p-4 h-auto flex flex-col items-center gap-2"
+                  onClick={() => setSelectedApp('equipment')}
+                >
+                  <div className="text-lg font-semibold">Gestion Équipements</div>
+                  <div className="text-sm opacity-80">Clés, badges, télécommandes</div>
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant={selectedApp === 'inspection' ? 'default' : 'outline'}
+                  className="w-full p-4 h-auto flex flex-col items-center gap-2"
+                  onClick={() => setSelectedApp('inspection')}
+                >
+                  <div className="text-lg font-semibold">États des Lieux</div>
+                  <div className="text-sm opacity-80">Entrée et sortie</div>
+                </Button>
+              </div>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
