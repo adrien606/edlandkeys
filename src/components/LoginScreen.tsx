@@ -9,17 +9,8 @@ interface LoginScreenProps {
 export const LoginScreen = ({
   onLogin
 }: LoginScreenProps) => {
-  const [selectedApp, setSelectedApp] = useState<'equipment' | 'inspection'>('equipment');
-  const [pin, setPin] = useState("");
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simple PIN validation - you can customize this
-    if (pin === "1234" || pin === "admin") {
-      onLogin(selectedApp);
-    } else {
-      alert("Code d'accès incorrect");
-      setPin("");
-    }
+  const handleAppSelect = (appType: 'equipment' | 'inspection') => {
+    onLogin(appType);
   };
   return <div className="min-h-screen bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center p-4 bg-amber-300">
       <Card className="w-full max-w-md mx-auto shadow-xl bg-indigo-950">
@@ -44,12 +35,12 @@ export const LoginScreen = ({
                 Choisir l'application
               </label>
               <div className="grid grid-cols-1 gap-3">
-                <Button type="button" variant={selectedApp === 'equipment' ? 'default' : 'outline'} className="w-full p-4 h-auto flex flex-col items-center gap-2" onClick={() => setSelectedApp('equipment')}>
+                <Button type="button" variant="default" className="w-full p-4 h-auto flex flex-col items-center gap-2" onClick={() => handleAppSelect('equipment')}>
                   <div className="text-lg font-semibold">Gestion Équipements</div>
                   <div className="text-sm opacity-80">Clés, badges, télécommandes</div>
                 </Button>
                 
-                <Button type="button" variant={selectedApp === 'inspection' ? 'default' : 'outline'} className="w-full p-4 h-auto flex flex-col items-center gap-2" onClick={() => setSelectedApp('inspection')}>
+                <Button type="button" variant="default" className="w-full p-4 h-auto flex flex-col items-center gap-2" onClick={() => handleAppSelect('inspection')}>
                   <div className="text-lg font-semibold">États des Lieux</div>
                   <div className="text-sm opacity-80">Entrée et sortie</div>
                 </Button>
@@ -57,18 +48,6 @@ export const LoginScreen = ({
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Code d'accès
-              </label>
-              <Input type="password" placeholder="Entrez votre code" value={pin} onChange={e => setPin(e.target.value)} className="text-center text-lg tracking-wider" autoFocus />
-            </div>
-            
-            <Button type="submit" className="w-full text-lg py-6" disabled={!pin}>
-              Accéder à l'application
-            </Button>
-          </form>
           
           
         </CardContent>
