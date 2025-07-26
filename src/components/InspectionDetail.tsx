@@ -91,6 +91,12 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     const entryInspection = inspection.type === 'exit' && inspection.entryInspectionId 
       ? inspections.find(i => i.id === inspection.entryInspectionId)
       : null;
+
+    // Récupérer les informations du bâtiment
+    const { inspectionBuildings } = useInspectionStore.getState();
+    const building = inspection.buildingId 
+      ? inspectionBuildings.find(b => b.id === inspection.buildingId)
+      : null;
     
     let html = `
       <html>
@@ -98,7 +104,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
           <meta charset="utf-8">
           <title>État des Lieux - ${inspection.clientName}</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
+            body { font-family: Arial, sans-serif; margin: 20px; position: relative; min-height: 100vh; }
             .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
             .client-info { margin-bottom: 30px; }
             .inspection-item { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; }
@@ -106,9 +112,25 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             .status-damaged { color: #ea580c; }
             .status-missing { color: #dc2626; }
             .status-attention { color: #d97706; }
-            .signature { margin-top: 30px; text-align: center; }
+            .signature { margin-top: 30px; text-align: center; margin-bottom: 100px; }
             .signature img { max-width: 300px; border: 1px solid #ddd; }
             .photo { width: 150px; height: 150px; object-fit: cover; margin: 5px; border: 1px solid #ddd; }
+            .footer { 
+              position: fixed; 
+              bottom: 20px; 
+              left: 20px; 
+              right: 20px; 
+              border-top: 2px solid #333; 
+              padding-top: 15px; 
+              background: white; 
+              font-size: 12px; 
+            }
+            .footer-content { display: flex; justify-content: space-between; align-items: center; }
+            .approval { text-align: center; font-weight: bold; margin-top: 10px; }
+            @media print {
+              .footer { position: fixed; bottom: 0; }
+              body { padding-bottom: 100px; }
+            }
           </style>
         </head>
         <body>
@@ -172,7 +194,21 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
         </div>`;
     }
     
+    // Ajouter le pied de page avec nom du client, adresse du bâtiment et "lu et approuvé"
     html += `
+          <div class="footer">
+            <div class="footer-content">
+              <div>
+                <strong>Client :</strong> ${inspection.clientName}
+              </div>
+              <div>
+                ${building && building.adresse ? `<strong>Adresse :</strong> ${building.adresse}` : ''}
+              </div>
+            </div>
+            <div class="approval">
+              Lu et approuvé
+            </div>
+          </div>
           </div>
         </body>
       </html>`;
