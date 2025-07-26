@@ -56,7 +56,7 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
         {/* Filters */}
         <Card>
           <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -75,16 +75,6 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
                   <SelectItem value="all">Tous les types</SelectItem>
                   <SelectItem value="entry">Entrée</SelectItem>
                   <SelectItem value="exit">Sortie</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="pending">En cours</SelectItem>
                 </SelectContent>
               </Select>
             </div>
