@@ -28,7 +28,7 @@ export const LoginScreen = ({
             <img src={logoBelair} alt="Bel Air Camp" className="h-20 w-auto" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-2xl font-bold text-amber-300">
               Gestion Équipements
             </h1>
             <p className="text-yellow-300">
@@ -70,9 +70,7 @@ export const LoginScreen = ({
             </Button>
           </form>
           
-          <div className="text-center text-xs text-muted-foreground">
-            Application de gestion des clés, badges et télécommandes
-          </div>
+          
         </CardContent>
       </Card>
     </div>;
