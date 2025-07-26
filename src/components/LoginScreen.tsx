@@ -14,19 +14,7 @@ export const LoginScreen = ({
   };
   return <div className="min-h-screen bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center p-4 bg-amber-300">
       <Card className="w-full max-w-md mx-auto shadow-xl bg-indigo-950">
-        <CardHeader className="text-center space-y-6 pb-8 bg-indigo-950">
-          <div className="flex justify-center">
-            <img src={logoBelair} alt="Bel Air Camp" className="h-20 w-auto" />
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-amber-300">
-              Gestion Équipements
-            </h1>
-            <p className="text-yellow-300">
-              Espace de coworking - Accès réservé
-            </p>
-          </div>
-        </CardHeader>
+        
         
         <CardContent className="space-y-6 bg-indigo-950">
           <div className="space-y-4">
