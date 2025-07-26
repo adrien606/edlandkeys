@@ -86,6 +86,8 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
   };
 
   const handleDeleteBuilding = (buildingId: string) => {
+    console.log('Tentative de suppression du bâtiment:', buildingId);
+    console.log('Bâtiments avant suppression:', inspectionBuildings);
     deleteInspectionBuilding(buildingId);
     setBuildingToDelete(null);
     toast.success('Bâtiment supprimé avec succès');
