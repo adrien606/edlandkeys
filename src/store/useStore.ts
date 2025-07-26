@@ -1,12 +1,21 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Client, Equipment, ClientFormData, EquipmentFormData } from '@/types';
+import { Client, Equipment, ClientFormData, EquipmentFormData, Building, BuildingFormData } from '@/types';
 
 interface Store {
   clients: Client[];
+  buildings: Building[];
+  currentBuildingId: string | null;
   searchTerm: string;
   
-  // Actions
+  // Building Actions
+  addBuilding: (buildingData: BuildingFormData) => void;
+  updateBuilding: (id: string, buildingData: Partial<Building>) => void;
+  deleteBuilding: (id: string) => void;
+  setCurrentBuilding: (buildingId: string | null) => void;
+  getCurrentBuilding: () => Building | undefined;
+  
+  // Client Actions
   addClient: (clientData: ClientFormData) => void;
   updateClient: (id: string, clientData: Partial<Client>) => void;
   deleteClient: (id: string) => void;
@@ -33,7 +42,51 @@ export const useStore = create<Store>()(
   persist(
     (set, get) => ({
       clients: [],
+      buildings: [
+        { id: generateId(), nom: 'Bâtiment AI', code: 'BAI', dateCreation: new Date().toISOString() },
+        { id: generateId(), nom: 'Bâtiment AS', code: 'BAS', dateCreation: new Date().toISOString() },
+        { id: generateId(), nom: 'Bâtiment AB', code: 'BAB', dateCreation: new Date().toISOString() },
+        { id: generateId(), nom: 'Bâtiment AT', code: 'BAT', dateCreation: new Date().toISOString() },
+      ],
+      currentBuildingId: null,
       searchTerm: '',
+      
+      // Building Actions
+      addBuilding: (buildingData) => {
+        const newBuilding: Building = {
+          id: generateId(),
+          ...buildingData,
+          dateCreation: new Date().toISOString(),
+        };
+        
+        set((state) => ({
+          buildings: [...state.buildings, newBuilding],
+        }));
+      },
+      
+      updateBuilding: (id, buildingData) => {
+        set((state) => ({
+          buildings: state.buildings.map((building) =>
+            building.id === id ? { ...building, ...buildingData } : building
+          ),
+        }));
+      },
+      
+      deleteBuilding: (id) => {
+        set((state) => ({
+          buildings: state.buildings.filter((building) => building.id !== id),
+          clients: state.clients.filter((client) => client.batimentId !== id),
+        }));
+      },
+      
+      setCurrentBuilding: (buildingId) => {
+        set({ currentBuildingId: buildingId });
+      },
+      
+      getCurrentBuilding: () => {
+        const { buildings, currentBuildingId } = get();
+        return buildings.find((building) => building.id === currentBuildingId);
+      },
       
       addClient: (clientData) => {
         const newClient: Client = {
@@ -135,11 +188,15 @@ export const useStore = create<Store>()(
       },
       
       getFilteredClients: () => {
-        const { clients, searchTerm } = get();
-        if (!searchTerm) return clients;
+        const { clients, searchTerm, currentBuildingId } = get();
+        let filteredClients = currentBuildingId 
+          ? clients.filter((client) => client.batimentId === currentBuildingId)
+          : clients;
+        
+        if (!searchTerm) return filteredClients;
         
         const term = searchTerm.toLowerCase();
-        return clients.filter((client) =>
+        return filteredClients.filter((client) =>
           client.nom.toLowerCase().includes(term) ||
           client.prenom.toLowerCase().includes(term) ||
           client.email.toLowerCase().includes(term) ||
@@ -157,8 +214,11 @@ export const useStore = create<Store>()(
       },
       
       getEquipmentStats: () => {
-        const clients = get().clients;
-        const allEquipments = clients.flatMap((client) => client.equipements);
+        const { clients, currentBuildingId } = get();
+        const filteredClients = currentBuildingId 
+          ? clients.filter((client) => client.batimentId === currentBuildingId)
+          : clients;
+        const allEquipments = filteredClients.flatMap((client) => client.equipements);
         
         return {
           total: allEquipments.length,

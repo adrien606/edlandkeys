@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const ClientForm = () => {
-  const { addClient } = useStore();
+  const { addClient, buildings } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -18,6 +19,7 @@ export const ClientForm = () => {
     prenom: '',
     email: '',
     telephone: '',
+    batimentId: '',
   });
 
   const handleChange = (field: string, value: string) => {
@@ -30,10 +32,10 @@ export const ClientForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nom || !formData.prenom) {
+    if (!formData.nom || !formData.prenom || !formData.batimentId) {
       toast({
         title: "Erreur",
-        description: "Le nom et prénom sont obligatoires",
+        description: "Le nom, prénom et bâtiment sont obligatoires",
         variant: "destructive",
       });
       return;
@@ -117,6 +119,22 @@ export const ClientForm = () => {
                   placeholder="06 12 34 56 78"
                   className="h-12"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="batiment">Bâtiment *</Label>
+                <Select value={formData.batimentId} onValueChange={(value) => handleChange('batimentId', value)}>
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="Sélectionner un bâtiment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {buildings.map((building) => (
+                      <SelectItem key={building.id} value={building.id}>
+                        {building.code} - {building.nom}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

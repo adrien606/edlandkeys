@@ -1,3 +1,11 @@
+export interface Building {
+  id: string;
+  nom: string;
+  code: string;
+  description?: string;
+  dateCreation: string;
+}
+
 export interface Client {
   id: string;
   nom: string;
@@ -5,6 +13,7 @@ export interface Client {
   email: string;
   telephone: string;
   dateInscription: string;
+  batimentId: string;
   equipements: Equipment[];
 }
 
@@ -36,4 +45,11 @@ export interface ClientFormData {
   prenom: string;
   email: string;
   telephone: string;
+  batimentId: string;
+}
+
+export interface BuildingFormData {
+  nom: string;
+  code: string;
+  description?: string;
 }

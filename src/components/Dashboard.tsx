@@ -4,21 +4,29 @@ import { Button } from '@/components/ui/button';
 import { useStore } from '@/store/useStore';
 import { Users, Key, CreditCard, Radio, AlertTriangle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BuildingSelector } from '@/components/BuildingSelector';
 
 export const Dashboard = () => {
-  const { clients, getEquipmentStats } = useStore();
+  const { getFilteredClients, getEquipmentStats, getCurrentBuilding } = useStore();
   const navigate = useNavigate();
   const stats = getEquipmentStats();
+  const filteredClients = getFilteredClients();
+  const currentBuilding = getCurrentBuilding();
 
-  const recentClients = clients.slice(-5).reverse();
+  const recentClients = filteredClients.slice(-5).reverse();
 
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-2xl font-bold text-foreground">Gestion Équipements</h1>
-        <p className="text-muted-foreground">Espace de coworking</p>
+        <p className="text-muted-foreground">
+          {currentBuilding ? `${currentBuilding.code} - ${currentBuilding.nom}` : 'Tous les bâtiments'}
+        </p>
       </div>
+
+      {/* Building Selector */}
+      <BuildingSelector />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4">
@@ -30,7 +38,7 @@ export const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{clients.length}</div>
+            <div className="text-2xl font-bold">{filteredClients.length}</div>
             <p className="text-xs text-muted-foreground">Total actifs</p>
           </CardContent>
         </Card>
