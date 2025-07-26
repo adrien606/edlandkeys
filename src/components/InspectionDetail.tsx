@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useInspectionStore } from "@/store/useInspectionStore";
-import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { INSPECTION_AREAS } from "@/types/inspection";
@@ -16,7 +16,7 @@ interface InspectionDetailProps {
 }
 
 export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp }: InspectionDetailProps) => {
-  const { inspections } = useInspectionStore();
+  const { inspections, createInspection, setCurrentInspection } = useInspectionStore();
   
   const inspection = inspections.find(i => i.id === inspectionId);
 
@@ -223,6 +223,23 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     }
   };
 
+  // Fonction pour créer un état de sortie basé sur l'état d'entrée
+  const handleCreateExitInspection = () => {
+    if (inspection.type !== 'entry') return;
+    
+    // Créer un nouvel état de sortie avec les mêmes informations client
+    createInspection(
+      inspection.clientId,
+      inspection.clientName,
+      inspection.clientEmail,
+      'exit',
+      inspection.buildingId
+    );
+    
+    toast.success('État de sortie créé. Vous pouvez maintenant faire la nouvelle inspection.');
+    onNavigate('inspection-form');
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -377,6 +394,23 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             <CardTitle>Actions</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Bouton spécial pour créer un état de sortie à partir d'un état d'entrée */}
+            {inspection.type === 'entry' && inspection.completed && (
+              <div className="mb-4">
+                <Button 
+                  onClick={handleCreateExitInspection}
+                  className="w-full h-12 text-lg"
+                  size="lg"
+                >
+                  <LogOut className="w-5 h-5 mr-2" />
+                  Créer l'État de Sortie
+                </Button>
+                <p className="text-sm text-muted-foreground text-center mt-2">
+                  Créer un nouvel état des lieux de sortie basé sur cet état d'entrée
+                </p>
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button variant="outline" className="h-12" onClick={handleDownloadPDF}>
                 <Download className="w-4 h-4 mr-2" />
