@@ -24,7 +24,7 @@ export const ClientDetail = () => {
   const [equipmentToDelete, setEquipmentToDelete] = useState<string | null>(null);
   
   const client = clientId ? getClientById(clientId) : null;
-  const building = client ? buildings.find(b => b.id === client.batimentId) : null;
+  // Le bâtiment est maintenant associé aux équipements, pas au client
 
   const handleStatusChange = (equipmentId: string, newStatus: string) => {
     if (!clientId) return;
@@ -170,7 +170,6 @@ export const ClientDetail = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">
                 Inscrit le {new Date(client.dateInscription).toLocaleDateString('fr-FR')}
-                {building && ` - ${building.code}`}
               </span>
             </div>
           </div>
@@ -220,6 +219,9 @@ export const ClientDetail = () => {
                                 {equipment.description}
                               </p>
                             )}
+                            <p className="text-xs text-muted-foreground">
+                              Bâtiment: {buildings.find(b => b.id === equipment.batimentId)?.code || 'N/A'}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">

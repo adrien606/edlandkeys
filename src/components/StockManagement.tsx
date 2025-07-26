@@ -21,21 +21,22 @@ interface StockItem {
   description?: string;
   statut: 'disponible' | 'attribue' | 'perdu' | 'maintenance';
   clientActuel?: string;
+  batimentId: string;
 }
 
 export const StockManagement = () => {
-  const { clients } = useStore();
+  const { clients, buildings } = useStore();
   const navigate = useNavigate();
   
   // Stock fictif pour démonstration - dans une vraie app, ceci serait dans le store
   const [stockItems, setStockItems] = useState<StockItem[]>([
-    { id: '1', type: 'cle', numero: 'K001', description: 'Clé bureau A1', statut: 'disponible' },
-    { id: '2', type: 'cle', numero: 'K002', description: 'Clé bureau A2', statut: 'attribue', clientActuel: 'Jean Dupont' },
-    { id: '3', type: 'badge', numero: 'B001', description: 'Badge accès principal', statut: 'disponible' },
-    { id: '4', type: 'badge', numero: 'B002', description: 'Badge accès principal', statut: 'attribue', clientActuel: 'Marie Martin' },
-    { id: '5', type: 'telecommande', numero: 'T001', description: 'Télécommande portail', statut: 'disponible' },
-    { id: '6', type: 'telecommande', numero: 'T002', description: 'Télécommande portail', statut: 'perdu' },
-    { id: '7', type: 'cle', numero: 'K003', description: 'Clé bureau B1', statut: 'maintenance' },
+    { id: '1', type: 'cle', numero: 'K001', description: 'Clé bureau A1', statut: 'disponible', batimentId: buildings[0]?.id || '' },
+    { id: '2', type: 'cle', numero: 'K002', description: 'Clé bureau A2', statut: 'attribue', clientActuel: 'Jean Dupont', batimentId: buildings[0]?.id || '' },
+    { id: '3', type: 'badge', numero: 'B001', description: 'Badge accès principal', statut: 'disponible', batimentId: buildings[1]?.id || '' },
+    { id: '4', type: 'badge', numero: 'B002', description: 'Badge accès principal', statut: 'attribue', clientActuel: 'Marie Martin', batimentId: buildings[1]?.id || '' },
+    { id: '5', type: 'telecommande', numero: 'T001', description: 'Télécommande portail', statut: 'disponible', batimentId: buildings[2]?.id || '' },
+    { id: '6', type: 'telecommande', numero: 'T002', description: 'Télécommande portail', statut: 'perdu', batimentId: buildings[2]?.id || '' },
+    { id: '7', type: 'cle', numero: 'K003', description: 'Clé bureau B1', statut: 'maintenance', batimentId: buildings[3]?.id || '' },
   ]);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -54,7 +55,8 @@ export const StockManagement = () => {
     type: 'cle' as StockItem['type'],
     numero: '',
     description: '',
-    statut: 'disponible' as StockItem['statut']
+    statut: 'disponible' as StockItem['statut'],
+    batimentId: ''
   });
 
   const getEquipmentIcon = (type: string) => {
@@ -147,8 +149,8 @@ export const StockManagement = () => {
   };
 
   const handleAddEquipment = () => {
-    if (!addForm.numero.trim()) {
-      toast.error('La référence est obligatoire');
+    if (!addForm.numero.trim() || !addForm.batimentId) {
+      toast.error('La référence et le bâtiment sont obligatoires');
       return;
     }
 
@@ -170,7 +172,8 @@ export const StockManagement = () => {
       type: addForm.type,
       numero: addForm.numero,
       description: addForm.description || undefined,
-      statut: addForm.statut
+      statut: addForm.statut,
+      batimentId: addForm.batimentId
     };
 
     setStockItems(items => [...items, newItem]);
@@ -178,7 +181,8 @@ export const StockManagement = () => {
       type: 'cle',
       numero: '',
       description: '',
-      statut: 'disponible'
+      statut: 'disponible',
+      batimentId: ''
     });
     setIsAddDialogOpen(false);
     toast.success('Équipement ajouté avec succès');
@@ -247,6 +251,24 @@ export const StockManagement = () => {
                   onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Description de l'équipement"
                 />
+              </div>
+              
+              <div>
+                <Label htmlFor="add-batiment">Bâtiment *</Label>
+                <Select value={addForm.batimentId} onValueChange={(value) => 
+                  setAddForm(prev => ({ ...prev, batimentId: value }))
+                }>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un bâtiment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {buildings.map((building) => (
+                      <SelectItem key={building.id} value={building.id}>
+                        {building.code} - {building.nom}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="flex gap-2 pt-4">
@@ -394,6 +416,10 @@ export const StockManagement = () => {
                           Attribué à: <span className="font-medium">{item.clientActuel}</span>
                         </p>
                       )}
+                      
+                      <p className="text-xs text-muted-foreground">
+                        Bâtiment: <span className="font-medium">{buildings.find(b => b.id === item.batimentId)?.code || 'N/A'}</span>
+                      </p>
                     </div>
                   </div>
                   

@@ -19,7 +19,6 @@ export const ClientForm = () => {
     prenom: '',
     email: '',
     telephone: '',
-    batimentId: '',
   });
 
   const handleChange = (field: string, value: string) => {
@@ -32,10 +31,10 @@ export const ClientForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nom || !formData.prenom || !formData.batimentId) {
+    if (!formData.nom || !formData.prenom) {
       toast({
         title: "Erreur",
-        description: "Le nom, prénom et bâtiment sont obligatoires",
+        description: "Le nom et prénom sont obligatoires",
         variant: "destructive",
       });
       return;
@@ -121,21 +120,6 @@ export const ClientForm = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="batiment">Bâtiment *</Label>
-                <Select value={formData.batimentId} onValueChange={(value) => handleChange('batimentId', value)}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="Sélectionner un bâtiment" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {buildings.map((building) => (
-                      <SelectItem key={building.id} value={building.id}>
-                        {building.code} - {building.nom}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             <div className="flex gap-3 pt-4">

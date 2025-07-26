@@ -76,7 +76,11 @@ export const useStore = create<Store>()(
       deleteBuilding: (id) => {
         set((state) => ({
           buildings: state.buildings.filter((building) => building.id !== id),
-          clients: state.clients.filter((client) => client.batimentId !== id),
+          // Supprimer les équipements du bâtiment supprimé
+          clients: state.clients.map((client) => ({
+            ...client,
+            equipements: client.equipements.filter((eq) => eq.batimentId !== id),
+          })),
         }));
       },
       
@@ -123,6 +127,7 @@ export const useStore = create<Store>()(
           numero: data.numero,
           description: data.description,
           statut: 'remis',
+          batimentId: data.batimentId,
           dateRemise: new Date().toISOString(),
         };
         
@@ -204,7 +209,9 @@ export const useStore = create<Store>()(
       getFilteredClients: () => {
         const { clients, searchTerm, currentBuildingId } = get();
         let filteredClients = currentBuildingId 
-          ? clients.filter((client) => client.batimentId === currentBuildingId)
+          ? clients.filter((client) => 
+              client.equipements.some((eq) => eq.batimentId === currentBuildingId)
+            )
           : clients;
         
         if (!searchTerm) return filteredClients;
@@ -229,17 +236,17 @@ export const useStore = create<Store>()(
       
       getEquipmentStats: () => {
         const { clients, currentBuildingId } = get();
-        const filteredClients = currentBuildingId 
-          ? clients.filter((client) => client.batimentId === currentBuildingId)
-          : clients;
-        const allEquipments = filteredClients.flatMap((client) => client.equipements);
+        const allEquipments = clients.flatMap((client) => client.equipements);
+        const filteredEquipments = currentBuildingId 
+          ? allEquipments.filter((eq) => eq.batimentId === currentBuildingId)
+          : allEquipments;
         
         return {
-          total: allEquipments.length,
-          remis: allEquipments.filter((eq) => eq.statut === 'remis').length,
-          restitue: allEquipments.filter((eq) => eq.statut === 'restitue').length,
-          perdu: allEquipments.filter((eq) => eq.statut === 'perdu').length,
-          nonRendu: allEquipments.filter((eq) => eq.statut === 'non_rendu').length,
+          total: filteredEquipments.length,
+          remis: filteredEquipments.filter((eq) => eq.statut === 'remis').length,
+          restitue: filteredEquipments.filter((eq) => eq.statut === 'restitue').length,
+          perdu: filteredEquipments.filter((eq) => eq.statut === 'perdu').length,
+          nonRendu: filteredEquipments.filter((eq) => eq.statut === 'non_rendu').length,
         };
       },
     }),

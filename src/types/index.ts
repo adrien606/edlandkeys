@@ -13,7 +13,6 @@ export interface Client {
   email: string;
   telephone: string;
   dateInscription: string;
-  batimentId: string;
   equipements: Equipment[];
 }
 
@@ -23,6 +22,7 @@ export interface Equipment {
   numero?: string;
   description?: string;
   statut: 'remis' | 'restitue' | 'perdu' | 'non_rendu';
+  batimentId: string;
   dateRemise?: string;
   dateRestitution?: string;
   validationClient?: {
@@ -38,6 +38,7 @@ export interface EquipmentFormData {
   equipmentType: 'cle' | 'badge' | 'telecommande';
   numero?: string;
   description?: string;
+  batimentId: string;
 }
 
 export interface ClientFormData {
@@ -45,7 +46,6 @@ export interface ClientFormData {
   prenom: string;
   email: string;
   telephone: string;
-  batimentId: string;
 }
 
 export interface BuildingFormData {

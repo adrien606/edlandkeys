@@ -11,7 +11,7 @@ import { ArrowLeft, Package, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const EquipmentForm = () => {
-  const { clients, addEquipment } = useStore();
+  const { clients, addEquipment, buildings } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -20,15 +20,16 @@ export const EquipmentForm = () => {
     equipmentType: '' as 'cle' | 'badge' | 'telecommande' | '',
     numero: '',
     description: '',
+    batimentId: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.clientId || !formData.equipmentType) {
+    if (!formData.clientId || !formData.equipmentType || !formData.batimentId) {
       toast({
         title: "Erreur",
-        description: "Veuillez sélectionner un client et un type d'équipement",
+        description: "Veuillez sélectionner un client, un type d'équipement et un bâtiment",
         variant: "destructive",
       });
       return;
@@ -39,6 +40,7 @@ export const EquipmentForm = () => {
       equipmentType: formData.equipmentType,
       numero: formData.numero,
       description: formData.description,
+      batimentId: formData.batimentId,
     });
 
     const client = clients.find(c => c.id === formData.clientId);
@@ -142,6 +144,25 @@ export const EquipmentForm = () => {
             </div>
 
             <div>
+              <Label htmlFor="batiment">Bâtiment *</Label>
+              <Select 
+                value={formData.batimentId} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, batimentId: value }))}
+              >
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Sélectionner un bâtiment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {buildings.map((building) => (
+                    <SelectItem key={building.id} value={building.id}>
+                      {building.code} - {building.nom}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label htmlFor="numero">Numéro/Référence</Label>
               <Input
                 id="numero"
@@ -175,7 +196,7 @@ export const EquipmentForm = () => {
               <Button 
                 type="submit" 
                 className="flex-1 h-12"
-                disabled={!formData.clientId || !formData.equipmentType}
+                disabled={!formData.clientId || !formData.equipmentType || !formData.batimentId}
               >
                 {getEquipmentIcon(formData.equipmentType)}
                 <span className="ml-2">Remettre équipement</span>
