@@ -21,7 +21,7 @@ export const EquipmentValidation = ({ onSwitchApp }: { onSwitchApp?: () => void 
   const [signature, setSignature] = useState<string | null>(null);
   
   const client = clientId ? getClientById(clientId) : null;
-  const equipment = client?.equipements[parseInt(equipmentIndex || '0') - 1];
+  const equipment = client?.equipements[parseInt(equipmentIndex || '0')];
 
   useEffect(() => {
     if (client) {
