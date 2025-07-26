@@ -9,6 +9,7 @@ import { fr } from "date-fns/locale";
 import { INSPECTION_AREAS } from "@/types/inspection";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import logoImage from '@/assets/logo-belaircamp.png';
 
 interface InspectionDetailProps {
   inspectionId: string;
@@ -140,6 +141,22 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
               min-width: 250px; 
               margin-top: 0; 
             }
+            .signature-with-logo {
+              display: flex;
+              align-items: center;
+              gap: 20px;
+              justify-content: space-between;
+            }
+            .signature-img {
+              max-width: 250px;
+              height: auto;
+              border: 1px solid #ddd;
+            }
+            .company-logo {
+              max-width: 120px;
+              height: auto;
+              opacity: 0.8;
+            }
             .footer { 
               margin-top: 40px; 
               border-top: 2px solid #333; 
@@ -228,7 +245,10 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
         html += `
           <div class="signature">
             <h3>Responsable de site${inspection.siteManagerName ? ' - ' + inspection.siteManagerName : ''}</h3>
-            <img src="${inspection.siteManagerSignature}" alt="Signature du responsable de site">
+            <div class="signature-with-logo">
+              <img src="${inspection.siteManagerSignature}" alt="Signature du responsable de site" class="signature-img">
+              <img src="${logoImage}" alt="Logo BEL AIR CAMP" class="company-logo">
+            </div>
           </div>`;
       }
       
