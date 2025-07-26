@@ -245,10 +245,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
         html += `
           <div class="signature">
             <h3>Responsable de site${inspection.siteManagerName ? ' - ' + inspection.siteManagerName : ''}</h3>
-            <div class="signature-with-logo">
-              <img src="${inspection.siteManagerSignature}" alt="Signature du responsable de site" class="signature-img">
-              <img src="${logoImage}" alt="Logo BEL AIR CAMP" class="company-logo">
-            </div>
+            <img src="${inspection.siteManagerSignature}" alt="Signature du responsable de site" class="signature-img">
           </div>`;
       }
       
