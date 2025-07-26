@@ -191,18 +191,39 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
       const item = inspection.items[area.key as keyof typeof inspection.items];
       const entryItem = entryInspection?.items[area.key as keyof typeof entryInspection.items];
       const statusClass = `status-${item.status.replace('_', '-')}`;
-      const isProblematic = item.status !== 'good';
       
       html += `
-        <div class="inspection-item" style="${isProblematic ? 'background-color: #fee; border-left: 4px solid #dc2626;' : ''}">
+        <div class="inspection-item">
           <h4>${area.label}</h4>
-          <p class="${statusClass}"><strong>État:</strong> ${getStatusLabel(item.status)}</p>
+          
+          ${entryItem ? `
+            <div style="background: #f8f9fa; padding: 10px; margin-bottom: 15px; border-left: 3px solid #6c757d;">
+              <h5 style="margin: 0 0 5px 0; color: #6c757d;">État d'entrée (référence)</h5>
+              <p style="margin: 0; color: #6c757d;"><strong>État:</strong> ${getStatusLabel(entryItem.status)}</p>
+              ${entryItem.comment ? `<p style="margin: 5px 0 0 0; color: #6c757d; font-style: italic;">"${entryItem.comment}"</p>` : ''}
+              ${entryItem.photos && entryItem.photos.length > 0 ? `
+                <p style="margin: 10px 0 5px 0; color: #6c757d;"><strong>Photos d'entrée (${entryItem.photos.length}):</strong></p>
+                <div class="photos">
+                  ${entryItem.photos.map(photo => `<img src="${photo}" class="photo" alt="Photo entrée ${area.label}" style="border: 2px solid #6c757d;">`).join('')}
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+          
+          <p class="${statusClass}"><strong>État actuel:</strong> ${getStatusLabel(item.status)}</p>
           ${item.comment ? `<p><strong>Commentaire:</strong> ${item.comment}</p>` : ''}
           
+          ${entryItem && entryItem.status !== item.status ? `
+            <div style="background: #fff3cd; padding: 10px; margin: 10px 0; border: 1px solid #ffeaa7; border-radius: 4px;">
+              <strong style="color: #856404;">⚠️ Changement détecté:</strong>
+              <br><span style="color: #856404;">${getStatusLabel(entryItem.status)} → ${getStatusLabel(item.status)}</span>
+            </div>
+          ` : ''}
+          
           ${item.photos && item.photos.length > 0 ? `
-            <p><strong>Photos (${item.photos.length}):</strong></p>
+            <p><strong>Photos actuelles (${item.photos.length}):</strong></p>
             <div class="photos">
-              ${item.photos.map(photo => `<img src="${photo}" class="photo" alt="Photo ${area.label}">`).join('')}
+              ${item.photos.map(photo => `<img src="${photo}" class="photo" alt="Photo actuelle ${area.label}">`).join('')}
             </div>
           ` : ''}
         </div>`;
@@ -480,9 +501,10 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                 const item = inspection.items[area.key as keyof typeof inspection.items];
                 const entryItem = entryInspection?.items[area.key as keyof typeof entryInspection.items];
                 const isExitInspection = inspection.type === 'exit';
+                const isProblematic = item.status !== 'good';
                 
                 return (
-                  <Card key={area.key} className="bg-muted/30">
+                  <Card key={area.key} className={`bg-muted/30 ${isProblematic ? 'border-destructive/50 bg-destructive/5' : ''}`}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <h3 className="font-medium text-lg">{area.label}</h3>
