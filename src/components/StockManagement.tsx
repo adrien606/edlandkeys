@@ -436,7 +436,12 @@ export const StockManagement = () => {
                       <DropdownMenuContent>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <DropdownMenuItem 
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                handleEditClick(item);
+                              }}
+                            >
                               <Edit3 className="h-4 w-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
