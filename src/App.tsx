@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useSupabaseStore } from "./hooks/useSupabaseStore";
+import { useSupabaseInspectionStore } from "./hooks/useSupabaseInspectionStore";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { Dashboard } from "./components/Dashboard";
@@ -28,6 +30,15 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection'>('equipment');
+  const loadSupabaseData = useSupabaseStore(state => state.loadData);
+  const loadInspectionData = useSupabaseInspectionStore(state => state.loadData);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      loadSupabaseData();
+      loadInspectionData();
+    }
+  }, [isLoggedIn, loadSupabaseData, loadInspectionData]);
 
   if (!isLoggedIn) {
     return (
