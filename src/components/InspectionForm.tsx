@@ -86,20 +86,20 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-4">
+      <div className="max-w-md mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={onBack}>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button variant="ghost" size="sm" onClick={onBack} className="shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">{currentInspection.clientName}</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold truncate">{currentInspection.clientName}</h1>
             <div className="flex items-center gap-2">
-              <Badge variant={currentInspection.type === 'entry' ? 'default' : 'secondary'}>
+              <Badge variant={currentInspection.type === 'entry' ? 'default' : 'secondary'} className="text-xs">
                 {currentInspection.type === 'entry' ? 'Entrée' : 'Sortie'}
               </Badge>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 {currentAreaIndex + 1}/{INSPECTION_AREAS.length}
               </span>
             </div>
@@ -116,10 +116,10 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
 
         {/* Current Area */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">{currentArea.label}</CardTitle>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl">{currentArea.label}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6">
             {/* Status Selection */}
             <div className="space-y-3">
               <label className="text-sm font-medium">État de l'élément</label>
@@ -130,11 +130,11 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
                     <Button
                       key={option.value}
                       variant={currentItem.status === option.value ? 'default' : 'outline'}
-                      className="h-auto p-3 flex flex-col gap-2"
+                      className="h-auto p-2 sm:p-3 flex flex-col gap-1 sm:gap-2 text-center"
                       onClick={() => updateInspectionItem(currentArea.key as keyof typeof currentInspection.items, { status: option.value })}
                     >
-                      <Icon className={`w-5 h-5 ${currentItem.status === option.value ? 'text-primary-foreground' : option.color}`} />
-                      <span className="text-xs">{option.label}</span>
+                      <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${currentItem.status === option.value ? 'text-primary-foreground' : option.color}`} />
+                      <span className="text-xs leading-tight">{option.label}</span>
                     </Button>
                   );
                 })}
@@ -244,13 +244,13 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
               />
 
               {currentItem.photos.length > 0 && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   {currentItem.photos.map((photo, index) => (
                     <div key={index} className="relative">
                       <img
                         src={photo}
                         alt={`Photo ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg border"
+                        className="w-full h-20 sm:h-24 object-cover rounded-lg border"
                       />
                       <Button
                         variant="destructive"
@@ -276,18 +276,18 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
         </Card>
 
         {/* Navigation */}
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <Button 
             variant="outline" 
             onClick={handlePreviousArea}
             disabled={currentAreaIndex === 0}
-            className="flex-1"
+            className="flex-1 text-sm sm:text-base"
           >
             Précédent
           </Button>
           <Button 
             onClick={handleNextArea}
-            className="flex-1"
+            className="flex-1 text-sm sm:text-base"
           >
             {currentAreaIndex === INSPECTION_AREAS.length - 1 ? 'Terminer' : 'Suivant'}
           </Button>

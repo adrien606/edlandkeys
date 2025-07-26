@@ -103,15 +103,15 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-md mx-auto space-y-6">
+      <div className="max-w-md mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={onBack}>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button variant="ghost" size="sm" onClick={onBack} className="shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <div>
-            <h1 className="text-xl font-bold">Signature Client</h1>
-            <p className="text-muted-foreground">Finalisation de l'état des lieux</p>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold">Signature Client</h1>
+            <p className="text-sm text-muted-foreground">Finalisation de l'état des lieux</p>
           </div>
         </div>
 
@@ -200,7 +200,7 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
           <Button 
             onClick={handleCompleteInspection}
             disabled={!currentInspection.signature || !siteManagerName.trim() || !siteManagerSignature || isProcessing}
-            className="w-full h-12 text-lg"
+            className="w-full h-12 text-base sm:text-lg"
             size="lg"
           >
             {isProcessing ? (

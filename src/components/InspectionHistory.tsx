@@ -33,21 +33,21 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-4">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" onClick={onBack}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Button variant="outline" size="icon" onClick={onBack} className="shrink-0">
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Historique des États des Lieux</h1>
-              <p className="text-muted-foreground">Tous les états des lieux enregistrés</p>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-bold text-foreground">Historique des États des Lieux</h1>
+              <p className="text-sm text-muted-foreground">Tous les états des lieux enregistrés</p>
             </div>
           </div>
           {onSwitchApp && (
-            <Button variant="outline" onClick={onSwitchApp}>
+            <Button variant="outline" onClick={onSwitchApp} className="w-full sm:w-auto">
               Gestion Équipements
             </Button>
           )}
@@ -55,8 +55,8 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
 
         {/* Filters */}
         <Card>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="p-3 sm:p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -89,7 +89,7 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
         </div>
 
         {/* Inspections List */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {filteredInspections.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
@@ -99,20 +99,20 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
           ) : (
             filteredInspections.map((inspection) => (
               <Card key={inspection.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-lg">{inspection.clientName}</h3>
-                        <Badge variant={inspection.type === 'entry' ? 'default' : 'secondary'}>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-base sm:text-lg truncate">{inspection.clientName}</h3>
+                        <Badge variant={inspection.type === 'entry' ? 'default' : 'secondary'} className="text-xs">
                           {inspection.type === 'entry' ? 'Entrée' : 'Sortie'}
                         </Badge>
                       </div>
-                      <div className="space-y-1 text-sm text-muted-foreground">
+                      <div className="space-y-1 text-xs sm:text-sm text-muted-foreground">
                         <p>
                           Date: {format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}
                         </p>
-                        <p>Email: {inspection.clientEmail}</p>
+                        <p className="truncate">Email: {inspection.clientEmail}</p>
                         {inspection.buildingCode && (
                           <p>Bâtiment: {inspection.buildingCode}</p>
                         )}
@@ -121,6 +121,7 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
                     <Button 
                       variant="ghost" 
                       size="sm"
+                      className="w-full sm:w-auto mt-2 sm:mt-0"
                       onClick={() => onNavigate(`inspection-detail/${inspection.id}`)}
                     >
                       Voir

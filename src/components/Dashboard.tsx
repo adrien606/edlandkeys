@@ -16,17 +16,17 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const recentClients = filteredClients.slice(-5).reverse();
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="text-center flex-1">
-          <h1 className="text-2xl font-bold text-foreground">Gestion Équipements</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="text-center sm:text-left flex-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion Équipements</h1>
+          <p className="text-sm text-muted-foreground">
             {currentBuilding ? `${currentBuilding.code} - ${currentBuilding.nom}` : 'Tous les bâtiments'}
           </p>
         </div>
         {onSwitchApp && (
-          <Button variant="outline" size="sm" onClick={onSwitchApp}>
+          <Button variant="outline" size="sm" onClick={onSwitchApp} className="w-full sm:w-auto">
             État des lieux
           </Button>
         )}
@@ -36,7 +36,7 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       <BuildingSelector />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -69,8 +69,8 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
         <CardHeader>
           <CardTitle className="text-lg">Statut des équipements</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-success" />
@@ -137,11 +137,11 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       </Card>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4">
         <Button 
           size="lg" 
           onClick={() => navigate('/ajouter-client')}
-          className="h-14"
+          className="h-12 sm:h-14 text-sm sm:text-base"
         >
           <Users className="mr-2 h-5 w-5" />
           Ajouter un client
@@ -151,18 +151,18 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
           variant="outline" 
           size="lg" 
           onClick={() => navigate('/remettre-equipement')}
-          className="h-14"
+          className="h-12 sm:h-14 text-sm sm:text-base"
         >
           <Key className="mr-2 h-5 w-5" />
           Remettre équipement
         </Button>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Button 
             variant="outline" 
             size="lg" 
             onClick={() => navigate('/clients')}
-            className="h-14"
+            className="h-12 sm:h-14 text-sm sm:text-base"
           >
             <CreditCard className="mr-2 h-5 w-5" />
             Voir clients
@@ -172,7 +172,7 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
             variant="outline" 
             size="lg" 
             onClick={() => navigate('/stock')}
-            className="h-14"
+            className="h-12 sm:h-14 text-sm sm:text-base"
           >
             <Radio className="mr-2 h-5 w-5" />
             Gérer stock
