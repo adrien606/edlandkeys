@@ -19,6 +19,11 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
   const { inspections, createInspection, setCurrentInspection } = useInspectionStore();
   
   const inspection = inspections.find(i => i.id === inspectionId);
+  
+  // Trouver l'état de sortie associé si c'est un état d'entrée
+  const exitInspection = inspection?.type === 'entry' 
+    ? inspections.find(i => i.type === 'exit' && i.entryInspectionId === inspection.id)
+    : null;
 
   if (!inspection) {
     return (
@@ -354,6 +359,32 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Voir l'entrée
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Lien vers l'état de sortie (si c'est un état d'entrée et qu'il existe un état de sortie) */}
+            {inspection.type === 'entry' && exitInspection && (
+              <div className="mb-4 p-3 bg-secondary/10 border border-secondary/20 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-secondary-foreground">État de sortie associé</p>
+                    <p className="text-xs text-muted-foreground">
+                      Cliquez pour consulter l'état des lieux de sortie réalisé
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(exitInspection.date), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onNavigate(`inspection-detail/${exitInspection.id}`)}
+                    className="border-secondary text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Voir la sortie
                   </Button>
                 </div>
               </div>
