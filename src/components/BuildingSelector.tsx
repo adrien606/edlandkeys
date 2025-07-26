@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStore } from '@/store/useStore';
-import { Building, Plus } from 'lucide-react';
+import { Building, Plus, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
-export const BuildingSelector = () => {
+interface BuildingSelectorProps {
+  onManageBuildings?: () => void;
+}
+
+export const BuildingSelector = ({ onManageBuildings }: BuildingSelectorProps) => {
   const { buildings, currentBuildingId, setCurrentBuilding, addBuilding, getCurrentBuilding } = useStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -116,6 +120,13 @@ export const BuildingSelector = () => {
               </form>
             </DialogContent>
           </Dialog>
+          
+          {onManageBuildings && (
+            <Button variant="outline" size="sm" onClick={onManageBuildings}>
+              <Settings className="h-4 w-4 mr-2" />
+              Gérer
+            </Button>
+          )}
         </div>
 
         {currentBuilding && (

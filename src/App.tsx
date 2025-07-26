@@ -60,6 +60,7 @@ const App = () => {
               <Route path="/remettre-equipement" element={<EquipmentForm onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/valider-equipement/:clientId/:equipmentIndex" element={<EquipmentValidation onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/stock" element={<StockManagement onSwitchApp={() => setCurrentApp('inspection')} />} />
+              <Route path="/gestion-batiments" element={<BuildingManagement onNavigate={() => {}} onBack={() => window.history.back()} onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
