@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 
 export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clientId } = useParams();
-  const { getClientById, updateEquipmentStatus, deleteClient, deleteEquipment, buildings } = useStore();
+  const { getClientById, updateEquipmentStatus, deleteClient, deleteEquipment, buildings, stockItems } = useStore();
   const navigate = useNavigate();
   const { toast: useToastHook } = useToast();
   
@@ -104,6 +104,14 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       case 'telecommande': return 'Télécommande';
       default: return type;
     }
+  };
+
+  // Fonction pour vérifier si l'équipement existe dans le stock
+  const isEquipmentMissingFromStock = (equipment: any) => {
+    return !stockItems.some(stockItem => 
+      stockItem.type === equipment.type && 
+      stockItem.numero === equipment.numero
+    );
   };
 
   if (!client) {
@@ -244,6 +252,18 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
                           </DropdownMenu>
                         </div>
                       </div>
+
+                      {/* Error Alert - Missing from Stock */}
+                      {isEquipmentMissingFromStock(equipment) && (
+                        <div className="p-2 bg-destructive/10 rounded border-l-4 border-destructive">
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4 text-destructive" />
+                            <span className="text-destructive font-medium text-xs">
+                              Erreur: Élément manquant dans le stock
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Equipment Details */}
                       <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground">
