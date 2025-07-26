@@ -396,7 +396,7 @@ export const StockManagement = ({
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">Aucun équipement trouvé</p>
             </CardContent>
-          </Card> : filteredItems.map(item => <Card key={item.id}>
+          </Card> : filteredItems.map(item => <Card key={item.id} className={item.type === 'cle' && item.quantiteDisponible === 0 ? 'border-destructive bg-destructive/5' : ''}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
