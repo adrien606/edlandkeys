@@ -38,7 +38,8 @@ export const StockManagement = ({
     description: '',
     statut: 'disponible' as StockItem['statut'],
     clientActuel: '',
-    batimentId: ''
+    batimentId: '',
+    quantite: 1
   });
   const [addForm, setAddForm] = useState({
     type: 'cle' as StockItem['type'],
@@ -143,7 +144,8 @@ export const StockManagement = ({
       description: item.description || '',
       statut: item.statut,
       clientActuel: item.clientActuel || '',
-      batimentId: item.batimentId
+      batimentId: item.batimentId,
+      quantite: item.quantite
     });
   };
   const handleSaveEdit = () => {
@@ -153,7 +155,8 @@ export const StockManagement = ({
       description: editForm.description,
       statut: editForm.statut,
       clientActuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined,
-      batimentId: editForm.batimentId
+      batimentId: editForm.batimentId,
+      quantite: editForm.quantite
     });
     setEditingItem(null);
     toast.success('Équipement modifié avec succès');
@@ -500,6 +503,20 @@ export const StockManagement = ({
                             clientActuel: e.target.value
                           }))} placeholder="Nom du client" />
                                 </div>}
+                              
+                              <div>
+                                <Label htmlFor="edit-quantite">Quantité</Label>
+                                <Input 
+                                  id="edit-quantite" 
+                                  type="number" 
+                                  min="1" 
+                                  value={editForm.quantite} 
+                                  onChange={e => setEditForm(prev => ({
+                                    ...prev,
+                                    quantite: parseInt(e.target.value) || 1
+                                  }))} 
+                                />
+                              </div>
                               
                               <div>
                                 <Label htmlFor="edit-batiment">Bâtiment</Label>
