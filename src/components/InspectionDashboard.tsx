@@ -10,9 +10,10 @@ import { fr } from "date-fns/locale";
 interface InspectionDashboardProps {
   onNavigate: (route: string) => void;
   onBackToApps: () => void;
+  onSwitchApp?: () => void;
 }
 
-export const InspectionDashboard = ({ onNavigate, onBackToApps }: InspectionDashboardProps) => {
+export const InspectionDashboard = ({ onNavigate, onBackToApps, onSwitchApp }: InspectionDashboardProps) => {
   const { clients } = useStore();
   const { inspections } = useInspectionStore();
 
@@ -32,10 +33,17 @@ export const InspectionDashboard = ({ onNavigate, onBackToApps }: InspectionDash
             <h1 className="text-3xl font-bold text-foreground">États des Lieux</h1>
             <p className="text-muted-foreground">Gestion des entrées et sorties</p>
           </div>
-          <Button variant="outline" onClick={onBackToApps}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour aux apps
-          </Button>
+          <div className="flex gap-2">
+            {onSwitchApp && (
+              <Button variant="outline" onClick={onSwitchApp}>
+                Gestion Équipements
+              </Button>
+            )}
+            <Button variant="outline" onClick={onBackToApps}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour aux apps
+            </Button>
+          </div>
         </div>
 
         {/* Statistiques */}

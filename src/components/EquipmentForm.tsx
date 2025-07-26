@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export const EquipmentForm = () => {
+export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clients, addEquipment, buildings } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();

@@ -50,13 +50,13 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/ajouter-client" element={<ClientForm />} />
-              <Route path="/clients" element={<ClientList />} />
-              <Route path="/client/:clientId" element={<ClientDetail />} />
-              <Route path="/remettre-equipement" element={<EquipmentForm />} />
-              <Route path="/valider-equipement/:clientId/:equipmentIndex" element={<EquipmentValidation />} />
-              <Route path="/stock" element={<StockManagement />} />
+              <Route path="/" element={<Dashboard onSwitchApp={() => setCurrentApp('inspection')} />} />
+              <Route path="/ajouter-client" element={<ClientForm onSwitchApp={() => setCurrentApp('inspection')} />} />
+              <Route path="/clients" element={<ClientList onSwitchApp={() => setCurrentApp('inspection')} />} />
+              <Route path="/client/:clientId" element={<ClientDetail onSwitchApp={() => setCurrentApp('inspection')} />} />
+              <Route path="/remettre-equipement" element={<EquipmentForm onSwitchApp={() => setCurrentApp('inspection')} />} />
+              <Route path="/valider-equipement/:clientId/:equipmentIndex" element={<EquipmentValidation onSwitchApp={() => setCurrentApp('inspection')} />} />
+              <Route path="/stock" element={<StockManagement onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
@@ -71,13 +71,13 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <InspectionApp onBackToApps={() => setIsLoggedIn(false)} />
+        <InspectionApp onBackToApps={() => setIsLoggedIn(false)} onSwitchApp={() => setCurrentApp('equipment')} />
       </TooltipProvider>
     </QueryClientProvider>
   );
 };
 
-const InspectionApp = ({ onBackToApps }: { onBackToApps: () => void }) => {
+const InspectionApp = ({ onBackToApps, onSwitchApp }: { onBackToApps: () => void; onSwitchApp: () => void }) => {
   const [currentRoute, setCurrentRoute] = useState('dashboard');
 
   const handleNavigate = (route: string) => {
@@ -87,15 +87,15 @@ const InspectionApp = ({ onBackToApps }: { onBackToApps: () => void }) => {
   const renderCurrentPage = () => {
     switch (currentRoute) {
       case 'dashboard':
-        return <InspectionDashboard onNavigate={handleNavigate} onBackToApps={onBackToApps} />;
+        return <InspectionDashboard onNavigate={handleNavigate} onBackToApps={onBackToApps} onSwitchApp={onSwitchApp} />;
       case 'new-inspection':
-        return <NewInspection onNavigate={handleNavigate} onBack={() => setCurrentRoute('dashboard')} />;
+        return <NewInspection onNavigate={handleNavigate} onBack={() => setCurrentRoute('dashboard')} onSwitchApp={onSwitchApp} />;
       case 'inspection-form':
-        return <InspectionForm onNavigate={handleNavigate} onBack={() => setCurrentRoute('new-inspection')} />;
+        return <InspectionForm onNavigate={handleNavigate} onBack={() => setCurrentRoute('new-inspection')} onSwitchApp={onSwitchApp} />;
       case 'inspection-signature':
-        return <InspectionSignature onNavigate={handleNavigate} onBack={() => setCurrentRoute('inspection-form')} />;
+        return <InspectionSignature onNavigate={handleNavigate} onBack={() => setCurrentRoute('inspection-form')} onSwitchApp={onSwitchApp} />;
       default:
-        return <InspectionDashboard onNavigate={handleNavigate} onBackToApps={onBackToApps} />;
+        return <InspectionDashboard onNavigate={handleNavigate} onBackToApps={onBackToApps} onSwitchApp={onSwitchApp} />;
     }
   };
 

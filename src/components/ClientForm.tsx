@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export const ClientForm = () => {
+export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { addClient, buildings } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();

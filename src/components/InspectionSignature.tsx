@@ -9,9 +9,10 @@ import { toast } from "@/hooks/use-toast";
 interface InspectionSignatureProps {
   onNavigate: (route: string) => void;
   onBack: () => void;
+  onSwitchApp?: () => void;
 }
 
-export const InspectionSignature = ({ onNavigate, onBack }: InspectionSignatureProps) => {
+export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: InspectionSignatureProps) => {
   const { currentInspection, setSignature, completeInspection } = useInspectionStore();
   const [isProcessing, setIsProcessing] = useState(false);
 

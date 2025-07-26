@@ -7,7 +7,7 @@ import { useStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail } from 'lucide-react';
 
-export const ClientList = () => {
+export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { getFilteredClients, setSearchTerm, searchTerm } = useStore();
   const navigate = useNavigate();
   const clients = getFilteredClients();

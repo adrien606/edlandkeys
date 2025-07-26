@@ -13,7 +13,7 @@ import { EditClientDialog, DeleteClientDialog } from '@/components/EditClientDia
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
-export const ClientDetail = () => {
+export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clientId } = useParams();
   const { getClientById, updateEquipmentStatus, deleteClient, deleteEquipment, buildings } = useStore();
   const navigate = useNavigate();

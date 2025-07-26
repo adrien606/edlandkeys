@@ -10,9 +10,10 @@ import { ArrowLeft, Home, LogOut } from "lucide-react";
 interface NewInspectionProps {
   onNavigate: (route: string) => void;
   onBack: () => void;
+  onSwitchApp?: () => void;
 }
 
-export const NewInspection = ({ onNavigate, onBack }: NewInspectionProps) => {
+export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspectionProps) => {
   const { clients } = useStore();
   const { createInspection } = useInspectionStore();
   const [selectedClientId, setSelectedClientId] = useState<string>("");

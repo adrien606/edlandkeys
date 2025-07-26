@@ -24,7 +24,7 @@ interface StockItem {
   batimentId: string;
 }
 
-export const StockManagement = () => {
+export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clients, buildings } = useStore();
   const navigate = useNavigate();
   
@@ -205,6 +205,11 @@ export const StockManagement = () => {
           <h1 className="text-xl font-bold">Gestion du stock</h1>
           <p className="text-sm text-muted-foreground">Inventaire des équipements</p>
         </div>
+        {onSwitchApp && (
+          <Button variant="outline" size="sm" onClick={onSwitchApp}>
+            État des lieux
+          </Button>
+        )}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">

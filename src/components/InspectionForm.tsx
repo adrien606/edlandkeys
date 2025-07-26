@@ -11,9 +11,10 @@ import { toast } from "@/hooks/use-toast";
 interface InspectionFormProps {
   onNavigate: (route: string) => void;
   onBack: () => void;
+  onSwitchApp?: () => void;
 }
 
-export const InspectionForm = ({ onNavigate, onBack }: InspectionFormProps) => {
+export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFormProps) => {
   const { currentInspection, updateInspectionItem, addPhotoToItem, removePhotoFromItem } = useInspectionStore();
   const [currentAreaIndex, setCurrentAreaIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);

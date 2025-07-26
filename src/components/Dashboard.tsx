@@ -6,7 +6,7 @@ import { Users, Key, CreditCard, Radio, AlertTriangle, CheckCircle2, XCircle, Cl
 import { useNavigate } from 'react-router-dom';
 import { BuildingSelector } from '@/components/BuildingSelector';
 
-export const Dashboard = () => {
+export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { getFilteredClients, getEquipmentStats, getCurrentBuilding } = useStore();
   const navigate = useNavigate();
   const stats = getEquipmentStats();
@@ -18,11 +18,18 @@ export const Dashboard = () => {
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-foreground">Gestion Équipements</h1>
-        <p className="text-muted-foreground">
-          {currentBuilding ? `${currentBuilding.code} - ${currentBuilding.nom}` : 'Tous les bâtiments'}
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="text-center flex-1">
+          <h1 className="text-2xl font-bold text-foreground">Gestion Équipements</h1>
+          <p className="text-muted-foreground">
+            {currentBuilding ? `${currentBuilding.code} - ${currentBuilding.nom}` : 'Tous les bâtiments'}
+          </p>
+        </div>
+        {onSwitchApp && (
+          <Button variant="outline" size="sm" onClick={onSwitchApp}>
+            État des lieux
+          </Button>
+        )}
       </div>
 
       {/* Building Selector */}

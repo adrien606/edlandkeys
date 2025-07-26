@@ -10,7 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export const EquipmentValidation = () => {
+export const EquipmentValidation = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clientId, equipmentIndex } = useParams();
   const { getClientById, validateEquipment } = useStore();
   const navigate = useNavigate();
