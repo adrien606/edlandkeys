@@ -24,14 +24,14 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
   const selectedBuilding = inspectionBuildings.find(b => b.id === selectedBuildingId);
 
   const handleStartInspection = () => {
-    if (!selectedClient) return;
+    if (!selectedClient || !selectedBuildingId) return;
     
     createInspection(
       selectedClient.id,
       `${selectedClient.prenom} ${selectedClient.nom}`,
       selectedClient.email,
       inspectionType,
-      selectedBuildingId || undefined,
+      selectedBuildingId,
       undefined // Pas d'inspection d'entrée pour les nouvelles inspections
     );
     
@@ -133,7 +133,7 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
           <CardContent className="space-y-4">
             <Select value={selectedBuildingId} onValueChange={setSelectedBuildingId}>
               <SelectTrigger>
-                <SelectValue placeholder="Choisir un bâtiment (optionnel)..." />
+                <SelectValue placeholder="Choisir un bâtiment *" />
               </SelectTrigger>
               <SelectContent>
                 {inspectionBuildings.map((building) => (
@@ -187,7 +187,7 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
 
         <Button 
           onClick={handleStartInspection}
-          disabled={!selectedClientId}
+          disabled={!selectedClientId || !selectedBuildingId}
           className="w-full h-12 text-lg"
           size="lg"
         >
