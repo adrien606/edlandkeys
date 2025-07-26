@@ -101,14 +101,9 @@ export const StockManagement = ({
   // Fonction pour calculer les quantités réelles basées sur les distributions aux clients
   const getUpdatedStockItem = (stockItem: StockItem) => {
     const distributedCount = clients.flatMap(client => client.equipements).filter(eq => eq.type === stockItem.type && eq.numero === stockItem.numero && eq.statut === 'remis').length;
-    const lostCount = clients.flatMap(client => client.equipements).filter(eq => eq.type === stockItem.type && eq.numero === stockItem.numero && eq.statut === 'perdu').length;
-    const quantiteDisponible = Math.max(0, stockItem.quantite - distributedCount - lostCount);
-    let statut: StockItem['statut'] = 'disponible';
-    if (lostCount > 0) {
-      statut = 'perdu';
-    } else if (quantiteDisponible === 0 && distributedCount > 0) {
-      statut = 'attribue';
-    }
+    const quantiteDisponible = Math.max(0, stockItem.quantite - distributedCount);
+    const statut: StockItem['statut'] = quantiteDisponible === 0 && distributedCount > 0 ? 'attribue' : 'disponible';
+    
     return {
       ...stockItem,
       quantiteDisponible,
@@ -128,12 +123,11 @@ export const StockManagement = ({
     const total = updatedStockItems.reduce((sum, item) => sum + item.quantite, 0);
     const disponible = updatedStockItems.reduce((sum, item) => sum + item.quantiteDisponible, 0);
     const attribue = updatedStockItems.reduce((sum, item) => sum + (item.quantite - item.quantiteDisponible), 0);
-    const perdu = updatedStockItems.filter(item => item.statut === 'perdu').reduce((sum, item) => sum + item.quantite, 0);
+    
     return {
       total,
       disponible,
-      attribue,
-      perdu
+      attribue
     };
   };
   const stats = getStats();
@@ -336,15 +330,10 @@ export const StockManagement = ({
           <CardTitle className="text-base">Répartition par statut</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
               <span className="text-sm font-medium">Attribués</span>
               <Badge className="bg-primary text-primary-foreground">{stats.attribue}</Badge>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg">
-              <span className="text-sm font-medium">Perdus</span>
-              <Badge variant="destructive">{stats.perdu}</Badge>
             </div>
           </div>
         </CardContent>
@@ -381,7 +370,6 @@ export const StockManagement = ({
                 <SelectItem value="tous">Tous les statuts</SelectItem>
                 <SelectItem value="disponible">Disponible</SelectItem>
                 <SelectItem value="attribue">Attribué</SelectItem>
-                <SelectItem value="perdu">Perdu</SelectItem>
               </SelectContent>
             </Select>
           </div>
