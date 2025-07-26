@@ -33,7 +33,7 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       </div>
 
       {/* Building Selector */}
-      <BuildingSelector onManageBuildings={() => navigate('/gestion-batiments')} />
+      <BuildingSelector />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">

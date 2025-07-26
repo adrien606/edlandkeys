@@ -225,13 +225,9 @@ export const useInspectionStore = create<InspectionStore>()(
       },
 
       deleteInspectionBuilding: (id) => {
-        console.log('Store: Suppression du bâtiment avec ID:', id);
-        console.log('Store: Bâtiments avant suppression:', get().inspectionBuildings);
-        set(state => {
-          const newBuildings = state.inspectionBuildings.filter(building => building.id !== id);
-          console.log('Store: Bâtiments après suppression:', newBuildings);
-          return { inspectionBuildings: newBuildings };
-        });
+        set(state => ({
+          inspectionBuildings: state.inspectionBuildings.filter(building => building.id !== id)
+        }));
       },
 
       getInspectionBuildingById: (id) => {
