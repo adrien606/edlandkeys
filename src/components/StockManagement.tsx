@@ -19,7 +19,7 @@ interface StockItem {
   type: 'cle' | 'badge' | 'telecommande';
   numero: string;
   description?: string;
-  statut: 'disponible' | 'attribue' | 'perdu' | 'maintenance';
+  statut: 'disponible' | 'attribue' | 'perdu';
   clientActuel?: string;
   batimentId: string;
 }
@@ -36,7 +36,7 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     { id: '4', type: 'badge', numero: 'B002', description: 'Badge accès principal', statut: 'attribue', clientActuel: 'Marie Martin', batimentId: buildings[1]?.id || '' },
     { id: '5', type: 'telecommande', numero: 'T001', description: 'Télécommande portail', statut: 'disponible', batimentId: buildings[2]?.id || '' },
     { id: '6', type: 'telecommande', numero: 'T002', description: 'Télécommande portail', statut: 'perdu', batimentId: buildings[2]?.id || '' },
-    { id: '7', type: 'cle', numero: 'K003', description: 'Clé bureau B1', statut: 'maintenance', batimentId: buildings[3]?.id || '' },
+    { id: '7', type: 'cle', numero: 'K003', description: 'Clé bureau B1', statut: 'disponible', batimentId: buildings[3]?.id || '' },
   ]);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,7 +73,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       case 'disponible': return 'bg-success text-success-foreground';
       case 'attribue': return 'bg-primary text-primary-foreground';
       case 'perdu': return 'bg-destructive text-destructive-foreground';
-      case 'maintenance': return 'bg-warning text-warning-foreground';
       default: return 'bg-muted text-muted-foreground';
     }
   };
@@ -83,7 +82,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       case 'disponible': return 'Disponible';
       case 'attribue': return 'Attribué';
       case 'perdu': return 'Perdu';
-      case 'maintenance': return 'Maintenance';
       default: return status;
     }
   };
@@ -112,9 +110,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     const disponible = stockItems.filter(item => item.statut === 'disponible').length;
     const attribue = stockItems.filter(item => item.statut === 'attribue').length;
     const perdu = stockItems.filter(item => item.statut === 'perdu').length;
-    const maintenance = stockItems.filter(item => item.statut === 'maintenance').length;
     
-    return { total, disponible, attribue, perdu, maintenance };
+    return { total, disponible, attribue, perdu };
   };
 
   const stats = getStats();
@@ -332,11 +329,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
               <span className="text-sm font-medium">Perdus</span>
               <Badge variant="destructive">{stats.perdu}</Badge>
             </div>
-            
-            <div className="flex items-center justify-between p-3 bg-warning/10 rounded-lg col-span-2">
-              <span className="text-sm font-medium">En maintenance</span>
-              <Badge className="bg-warning text-warning-foreground">{stats.maintenance}</Badge>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -378,7 +370,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                 <SelectItem value="disponible">Disponible</SelectItem>
                 <SelectItem value="attribue">Attribué</SelectItem>
                 <SelectItem value="perdu">Perdu</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -486,7 +477,6 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                                     <SelectItem value="disponible">Disponible</SelectItem>
                                     <SelectItem value="attribue">Attribué</SelectItem>
                                     <SelectItem value="perdu">Perdu</SelectItem>
-                                    <SelectItem value="maintenance">Maintenance</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
