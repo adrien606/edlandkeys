@@ -84,7 +84,6 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="completed">Terminé</SelectItem>
                   <SelectItem value="pending">En cours</SelectItem>
                 </SelectContent>
               </Select>
@@ -117,12 +116,6 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
                         <h3 className="font-semibold text-lg">{inspection.clientName}</h3>
                         <Badge variant={inspection.type === 'entry' ? 'default' : 'secondary'}>
                           {inspection.type === 'entry' ? 'Entrée' : 'Sortie'}
-                        </Badge>
-                        <Badge 
-                          variant={inspection.completed ? 'outline' : 'destructive'}
-                          className={inspection.completed ? 'text-success border-success' : ''}
-                        >
-                          {inspection.completed ? 'Terminé' : 'En cours'}
                         </Badge>
                       </div>
                       <div className="space-y-1 text-sm text-muted-foreground">

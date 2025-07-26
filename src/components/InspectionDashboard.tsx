@@ -119,13 +119,8 @@ export const InspectionDashboard = ({ onNavigate, onBackToApps, onSwitchApp }: I
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold">{inspection.clientName}</h3>
                         <Badge variant={inspection.type === 'entry' ? 'default' : 'secondary'}>
-                          {inspection.type === 'entry' ? 'Entrée' : 'Sortie'}
+                        {inspection.type === 'entry' ? 'Entrée' : 'Sortie'}
                         </Badge>
-                        {inspection.completed && (
-                          <Badge variant="outline" className="text-success border-success">
-                            Terminé
-                          </Badge>
-                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}

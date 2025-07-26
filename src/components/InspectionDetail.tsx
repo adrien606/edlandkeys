@@ -437,15 +437,6 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                   {format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}
                 </p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Statut</p>
-                <Badge 
-                  variant={inspection.completed ? 'outline' : 'destructive'}
-                  className={inspection.completed ? 'text-success border-success' : ''}
-                >
-                  {inspection.completed ? 'Terminé' : 'En cours'}
-                </Badge>
-              </div>
             </div>
           </CardContent>
         </Card>
