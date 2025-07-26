@@ -9,7 +9,7 @@ import { fr } from "date-fns/locale";
 import { INSPECTION_AREAS } from "@/types/inspection";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import logoImage from '@/assets/logo-belaircamp.png';
+
 
 interface InspectionDetailProps {
   inspectionId: string;
