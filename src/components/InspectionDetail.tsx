@@ -181,7 +181,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             <h3>Informations Client</h3>
             <p><strong>Nom:</strong> ${inspection.clientName}</p>
             <p><strong>Email:</strong> ${inspection.clientEmail}</p>
-            ${inspection.buildingCode ? `<p><strong>Bâtiment:</strong> ${inspection.buildingCode}</p>` : ''}
+            ${building ? `<p><strong>Bâtiment:</strong> ${building.nom}${building.adresse ? ` - ${building.adresse}` : ''}</p>` : ''}
           </div>
           
           <div class="inspection-details">
