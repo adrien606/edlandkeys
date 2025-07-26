@@ -68,8 +68,6 @@ export const StockManagement = ({
         return 'bg-success text-success-foreground';
       case 'attribue':
         return 'bg-primary text-primary-foreground';
-      case 'perdu':
-        return 'bg-destructive text-destructive-foreground';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -80,8 +78,6 @@ export const StockManagement = ({
         return 'Disponible';
       case 'attribue':
         return 'Attribué';
-      case 'perdu':
-        return 'Perdu';
       default:
         return status;
     }
@@ -497,7 +493,6 @@ export const StockManagement = ({
                                   <SelectContent>
                                     <SelectItem value="disponible">Disponible</SelectItem>
                                     <SelectItem value="attribue">Attribué</SelectItem>
-                                    <SelectItem value="perdu">Perdu</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
