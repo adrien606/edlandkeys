@@ -196,6 +196,19 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     toast.success('Équipement supprimé avec succès');
   };
 
+  // Fonction pour récupérer les clients qui ont reçu un équipement spécifique
+  const getClientsForEquipment = (stockItem: StockItem) => {
+    return clients
+      .filter(client => 
+        client.equipements.some(eq => 
+          eq.type === stockItem.type && 
+          eq.numero === stockItem.numero &&
+          eq.statut === 'remis'
+        )
+      )
+      .map(client => `${client.prenom} ${client.nom}`);
+  };
+
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
@@ -432,7 +445,24 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                         </p>
                       )}
                       
-                      <p className="text-xs text-muted-foreground">
+                      {/* Affichage des clients qui ont reçu cet équipement */}
+                      {(() => {
+                        const clientsWithEquipment = getClientsForEquipment(item);
+                        return clientsWithEquipment.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs text-muted-foreground mb-1">Remis à :</p>
+                            <div className="flex flex-wrap gap-1">
+                              {clientsWithEquipment.map((clientName, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {clientName}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      
+                      <p className="text-xs text-muted-foreground mt-2">
                         Bâtiment: <span className="font-medium">{buildings.find(b => b.id === item.batimentId)?.code || 'N/A'}</span>
                       </p>
                     </div>
