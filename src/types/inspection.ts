@@ -23,6 +23,7 @@ export interface Inspection {
   buildingId?: string;
   buildingCode?: string;
   type: 'entry' | 'exit';
+  entryInspectionId?: string; // Référence à l'inspection d'entrée pour les sorties
   date: string;
   items: {
     prises: InspectionItem;

@@ -87,6 +87,11 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     const inspectionDate = format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr });
     const typeLabel = inspection.type === 'entry' ? 'État d\'entrée' : 'État de sortie';
     
+    // Récupérer l'inspection d'entrée si c'est un état de sortie
+    const entryInspection = inspection.type === 'exit' && inspection.entryInspectionId 
+      ? inspections.find(i => i.id === inspection.entryInspectionId)
+      : null;
+    
     let html = `
       <html>
         <head>
@@ -125,15 +130,33 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     
     INSPECTION_AREAS.forEach((area) => {
       const item = inspection.items[area.key as keyof typeof inspection.items];
+      const entryItem = entryInspection?.items[area.key as keyof typeof entryInspection.items];
       const statusClass = `status-${item.status.replace('_', '-')}`;
       
       html += `
         <div class="inspection-item">
           <h4>${area.label}</h4>
-          <p class="${statusClass}"><strong>État:</strong> ${getStatusLabel(item.status)}</p>
+          
+          ${entryItem ? `
+            <div style="background: #f8f9fa; padding: 10px; margin-bottom: 15px; border-left: 3px solid #6c757d;">
+              <h5 style="margin: 0 0 5px 0; color: #6c757d;">État d'entrée (référence)</h5>
+              <p style="margin: 0; color: #6c757d;"><strong>État:</strong> ${getStatusLabel(entryItem.status)}</p>
+              ${entryItem.comment ? `<p style="margin: 5px 0 0 0; color: #6c757d; font-style: italic;">"${entryItem.comment}"</p>` : ''}
+            </div>
+          ` : ''}
+          
+          <p class="${statusClass}"><strong>État actuel:</strong> ${getStatusLabel(item.status)}</p>
           ${item.comment ? `<p><strong>Commentaire:</strong> ${item.comment}</p>` : ''}
+          
+          ${entryItem && entryItem.status !== item.status ? `
+            <div style="background: #fff3cd; padding: 10px; margin: 10px 0; border: 1px solid #ffeaa7; border-radius: 4px;">
+              <strong style="color: #856404;">⚠️ Changement détecté:</strong>
+              <br><span style="color: #856404;">${getStatusLabel(entryItem.status)} → ${getStatusLabel(item.status)}</span>
+            </div>
+          ` : ''}
+          
           ${item.photos && item.photos.length > 0 ? `
-            <p><strong>Photos (${item.photos.length}):</strong></p>
+            <p><strong>Photos actuelles (${item.photos.length}):</strong></p>
             <div class="photos">
               ${item.photos.map(photo => `<img src="${photo}" class="photo" alt="Photo ${area.label}">`).join('')}
             </div>
@@ -227,13 +250,14 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
   const handleCreateExitInspection = () => {
     if (inspection.type !== 'entry') return;
     
-    // Créer un nouvel état de sortie avec les mêmes informations client
+    // Créer un nouvel état de sortie avec les mêmes informations client et référence à l'entrée
     createInspection(
       inspection.clientId,
       inspection.clientName,
       inspection.clientEmail,
       'exit',
-      inspection.buildingId
+      inspection.buildingId,
+      inspection.id // Référence à l'inspection d'entrée
     );
     
     toast.success('État de sortie créé. Vous pouvez maintenant faire la nouvelle inspection.');

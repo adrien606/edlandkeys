@@ -15,7 +15,7 @@ interface InspectionFormProps {
 }
 
 export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFormProps) => {
-  const { currentInspection, updateInspectionItem, addPhotoToItem, removePhotoFromItem } = useInspectionStore();
+  const { currentInspection, updateInspectionItem, addPhotoToItem, removePhotoFromItem, inspections } = useInspectionStore();
   const [currentAreaIndex, setCurrentAreaIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,6 +32,12 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
 
   const currentArea = INSPECTION_AREAS[currentAreaIndex];
   const currentItem = currentInspection.items[currentArea.key as keyof typeof currentInspection.items];
+  
+  // Récupérer l'inspection d'entrée si c'est un état de sortie
+  const entryInspection = currentInspection.type === 'exit' && currentInspection.entryInspectionId 
+    ? inspections.find(i => i.id === currentInspection.entryInspectionId)
+    : null;
+  const entryItem = entryInspection?.items[currentArea.key as keyof typeof entryInspection.items];
 
   const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -69,6 +75,15 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
     { value: 'damaged', label: 'Endommagé', icon: XCircle, color: 'text-destructive' },
     { value: 'missing', label: 'Manquant', icon: FileSearch, color: 'text-muted-foreground' }
   ] as const;
+
+  const getStatusLabel = (status: string) => {
+    return statusOptions.find(option => option.value === status)?.label || status;
+  };
+
+  const getStatusIcon = (status: string) => {
+    const option = statusOptions.find(opt => opt.value === status);
+    return option ? option.icon : Check;
+  };
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -136,6 +151,74 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
                 rows={3}
               />
             </div>
+
+            {/* Comparaison avec l'état d'entrée (si applicable) */}
+            {entryItem && currentInspection.type === 'exit' && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">État lors de l'entrée</label>
+                  <Badge variant="outline" className="text-xs">
+                    Référence
+                  </Badge>
+                </div>
+                <div className="p-3 bg-muted/30 rounded-lg border border-dashed">
+                  <div className="flex items-center gap-2 mb-2">
+                    {(() => {
+                      const EntryIcon = getStatusIcon(entryItem.status);
+                      const statusOption = statusOptions.find(opt => opt.value === entryItem.status);
+                      return (
+                        <>
+                          <EntryIcon className={`w-4 h-4 ${statusOption?.color || 'text-muted-foreground'}`} />
+                          <span className="text-sm font-medium">{getStatusLabel(entryItem.status)}</span>
+                        </>
+                      );
+                    })()}
+                  </div>
+                  {entryItem.comment && (
+                    <p className="text-sm text-muted-foreground">
+                      "{entryItem.comment}"
+                    </p>
+                  )}
+                  {entryItem.photos && entryItem.photos.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Photos d'entrée ({entryItem.photos.length})
+                      </p>
+                      <div className="grid grid-cols-3 gap-1">
+                        {entryItem.photos.slice(0, 3).map((photo, index) => (
+                          <img
+                            key={index}
+                            src={photo}
+                            alt={`Entrée ${index + 1}`}
+                            className="w-full h-12 object-cover rounded border opacity-70"
+                          />
+                        ))}
+                        {entryItem.photos.length > 3 && (
+                          <div className="flex items-center justify-center bg-muted rounded border text-xs text-muted-foreground">
+                            +{entryItem.photos.length - 3}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Indicateur de changement */}
+                  {entryItem.status !== currentItem.status && (
+                    <div className="mt-2 p-2 bg-warning/10 border border-warning/20 rounded text-xs">
+                      <div className="flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-warning" />
+                        <span className="text-warning font-medium">
+                          Changement détecté
+                        </span>
+                      </div>
+                      <div className="text-muted-foreground mt-1">
+                        {getStatusLabel(entryItem.status)} → {getStatusLabel(currentItem.status)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Photos */}
             <div className="space-y-3">

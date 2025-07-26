@@ -8,7 +8,7 @@ interface InspectionStore {
   inspectionBuildings: InspectionBuilding[];
   
   // Actions
-  createInspection: (clientId: string, clientName: string, clientEmail: string, type: 'entry' | 'exit', buildingId?: string) => void;
+  createInspection: (clientId: string, clientName: string, clientEmail: string, type: 'entry' | 'exit', buildingId?: string, entryInspectionId?: string) => void;
   updateInspectionItem: (itemKey: keyof Inspection['items'], data: Partial<InspectionItem>) => void;
   addPhotoToItem: (itemKey: keyof Inspection['items'], photo: string) => void;
   removePhotoFromItem: (itemKey: keyof Inspection['items'], photoIndex: number) => void;
@@ -57,7 +57,7 @@ export const useInspectionStore = create<InspectionStore>()(
         }
       ],
 
-      createInspection: (clientId, clientName, clientEmail, type, buildingId) => {
+      createInspection: (clientId, clientName, clientEmail, type, buildingId, entryInspectionId) => {
         const building = buildingId ? get().inspectionBuildings.find(b => b.id === buildingId) : undefined;
         
         const newInspection: Inspection = {
@@ -68,6 +68,7 @@ export const useInspectionStore = create<InspectionStore>()(
           buildingId,
           buildingCode: building?.code,
           type,
+          entryInspectionId: type === 'exit' ? entryInspectionId : undefined,
           date: new Date().toISOString(),
           items: {
             prises: createEmptyInspectionItem('Prises électriques'),

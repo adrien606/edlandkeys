@@ -31,7 +31,8 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
       `${selectedClient.prenom} ${selectedClient.nom}`,
       selectedClient.email,
       inspectionType,
-      selectedBuildingId || undefined
+      selectedBuildingId || undefined,
+      undefined // Pas d'inspection d'entrée pour les nouvelles inspections
     );
     
     onNavigate('inspection-form');
