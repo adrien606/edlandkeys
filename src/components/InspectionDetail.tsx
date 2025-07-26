@@ -501,10 +501,9 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                 const item = inspection.items[area.key as keyof typeof inspection.items];
                 const entryItem = entryInspection?.items[area.key as keyof typeof entryInspection.items];
                 const isExitInspection = inspection.type === 'exit';
-                const isProblematic = item.status !== 'good';
                 
                 return (
-                  <Card key={area.key} className={`bg-muted/30 ${isProblematic ? 'border-destructive/50 bg-destructive/5' : ''}`}>
+                  <Card key={area.key} className="bg-muted/30">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <h3 className="font-medium text-lg">{area.label}</h3>
