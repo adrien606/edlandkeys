@@ -104,7 +104,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
           <meta charset="utf-8">
           <title>État des Lieux - ${inspection.clientName}</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; position: relative; min-height: 100vh; }
+            body { font-family: Arial, sans-serif; margin: 20px; }
             .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
             .client-info { margin-bottom: 30px; }
             .inspection-item { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; }
@@ -112,25 +112,20 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             .status-damaged { color: #ea580c; }
             .status-missing { color: #dc2626; }
             .status-attention { color: #d97706; }
-            .signature { margin-top: 30px; text-align: center; margin-bottom: 100px; }
+            .signature { margin-top: 30px; text-align: center; margin-bottom: 40px; }
             .signature img { max-width: 300px; border: 1px solid #ddd; }
             .photo { width: 150px; height: 150px; object-fit: cover; margin: 5px; border: 1px solid #ddd; }
             .footer { 
-              position: fixed; 
-              bottom: 20px; 
-              left: 20px; 
-              right: 20px; 
+              margin-top: 40px; 
               border-top: 2px solid #333; 
-              padding-top: 15px; 
-              background: white; 
+              padding-top: 20px; 
               font-size: 12px; 
             }
-            .footer-content { display: flex; justify-content: space-between; align-items: center; }
-            .approval { text-align: center; font-weight: bold; margin-top: 10px; }
-            @media print {
-              .footer { position: fixed; bottom: 0; }
-              body { padding-bottom: 100px; }
-            }
+            .footer-content { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+            .footer-left, .footer-right { flex: 1; }
+            .footer-center { flex: 1; text-align: center; }
+            .approval { text-align: center; font-weight: bold; margin: 15px 0; font-size: 14px; }
+            .company-info { text-align: center; font-style: italic; color: #666; border-top: 1px solid #ddd; padding-top: 15px; margin-top: 20px; }
           </style>
         </head>
         <body>
@@ -207,6 +202,9 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             </div>
             <div class="approval">
               Lu et approuvé
+            </div>
+            <div class="company-info">
+              Fait par BEL AIR CAMP
             </div>
           </div>
           </div>
