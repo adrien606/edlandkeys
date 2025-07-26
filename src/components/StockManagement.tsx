@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { useStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3 } from 'lucide-react';
@@ -35,6 +37,13 @@ export const StockManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('tous');
   const [filterStatus, setFilterStatus] = useState<string>('tous');
+  const [editingItem, setEditingItem] = useState<StockItem | null>(null);
+  const [editForm, setEditForm] = useState({
+    numero: '',
+    description: '',
+    statut: '' as StockItem['statut'],
+    clientActuel: ''
+  });
 
   const getEquipmentIcon = (type: string) => {
     switch (type) {
@@ -95,6 +104,34 @@ export const StockManagement = () => {
   };
 
   const stats = getStats();
+
+  const handleEditClick = (item: StockItem) => {
+    setEditingItem(item);
+    setEditForm({
+      numero: item.numero,
+      description: item.description || '',
+      statut: item.statut,
+      clientActuel: item.clientActuel || ''
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingItem) return;
+    
+    setStockItems(items => items.map(item => 
+      item.id === editingItem.id 
+        ? { 
+            ...item, 
+            numero: editForm.numero,
+            description: editForm.description,
+            statut: editForm.statut,
+            clientActuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined
+          }
+        : item
+    ));
+    
+    setEditingItem(null);
+  };
 
   return (
     <div className="p-4 space-y-6">
@@ -252,9 +289,72 @@ export const StockManagement = () => {
                     <Badge className={getStatusColor(item.statut)}>
                       {getStatusLabel(item.statut)}
                     </Badge>
-                    <Button variant="ghost" size="sm">
-                      <Edit3 className="h-3 w-3" />
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm" onClick={() => handleEditClick(item)}>
+                          <Edit3 className="h-3 w-3" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Modifier l'équipement</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="numero">Référence</Label>
+                            <Input
+                              id="numero"
+                              value={editForm.numero}
+                              onChange={(e) => setEditForm(prev => ({ ...prev, numero: e.target.value }))}
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="description">Description</Label>
+                            <Input
+                              id="description"
+                              value={editForm.description}
+                              onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="statut">Statut</Label>
+                            <Select value={editForm.statut} onValueChange={(value: StockItem['statut']) => 
+                              setEditForm(prev => ({ ...prev, statut: value }))
+                            }>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="disponible">Disponible</SelectItem>
+                                <SelectItem value="attribue">Attribué</SelectItem>
+                                <SelectItem value="perdu">Perdu</SelectItem>
+                                <SelectItem value="maintenance">Maintenance</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          {editForm.statut === 'attribue' && (
+                            <div>
+                              <Label htmlFor="clientActuel">Client actuel</Label>
+                              <Input
+                                id="clientActuel"
+                                value={editForm.clientActuel}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, clientActuel: e.target.value }))}
+                                placeholder="Nom du client"
+                              />
+                            </div>
+                          )}
+                          
+                          <div className="flex gap-2 pt-4">
+                            <Button onClick={handleSaveEdit} className="flex-1">
+                              Sauvegarder
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </div>
               </CardContent>
