@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useStore } from '@/store/useStore';
@@ -18,18 +19,44 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
   const [formData, setFormData] = useState({
     clientId: '',
     equipmentType: '' as 'cle' | 'badge' | 'telecommande' | '',
-    numero: '',
-    description: '',
+    stockItemId: '', // ID de l'élément sélectionné dans le stock
     batimentId: '',
   });
+  
+  // Simuler l'accès au stock (dans une vraie app, ceci viendrait du store)
+  const getAvailableStockItems = () => {
+    // Mock des données de stock
+    return [
+      { id: '1', type: 'cle', numero: 'K001', description: 'Clé bureau A1', batimentId: buildings[0]?.id || '', quantiteDisponible: 2 },
+      { id: '2', type: 'cle', numero: 'K002', description: 'Clé bureau A2', batimentId: buildings[0]?.id || '', quantiteDisponible: 1 },
+      { id: '3', type: 'badge', numero: 'B001', description: 'Badge accès principal', batimentId: buildings[1]?.id || '', quantiteDisponible: 1 },
+      { id: '5', type: 'telecommande', numero: 'T001', description: 'Télécommande portail', batimentId: buildings[2]?.id || '', quantiteDisponible: 1 },
+    ].filter(item => 
+      item.quantiteDisponible > 0 && 
+      (!formData.equipmentType || item.type === formData.equipmentType) &&
+      (!formData.batimentId || item.batimentId === formData.batimentId)
+    );
+  };
+  
+  const availableItems = getAvailableStockItems();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.clientId || !formData.equipmentType || !formData.batimentId) {
+    if (!formData.clientId || !formData.equipmentType || !formData.stockItemId) {
       toast({
         title: "Erreur",
-        description: "Veuillez sélectionner un client, un type d'équipement et un bâtiment",
+        description: "Veuillez sélectionner un client, un équipement du stock",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const selectedItem = availableItems.find(item => item.id === formData.stockItemId);
+    if (!selectedItem) {
+      toast({
+        title: "Erreur",
+        description: "Équipement sélectionné non trouvé",
         variant: "destructive",
       });
       return;
@@ -38,16 +65,16 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
     addEquipment({
       clientId: formData.clientId,
       equipmentType: formData.equipmentType,
-      numero: formData.numero,
-      description: formData.description,
-      batimentId: formData.batimentId,
+      numero: selectedItem.numero,
+      description: selectedItem.description,
+      batimentId: selectedItem.batimentId,
     });
 
     const client = clients.find(c => c.id === formData.clientId);
     
     toast({
       title: "Équipement remis",
-      description: `${formData.equipmentType} remis à ${client?.prenom} ${client?.nom}`,
+      description: `${selectedItem.numero} remis à ${client?.prenom} ${client?.nom}`,
     });
     
     navigate(`/valider-equipement/${formData.clientId}/${clients.find(c => c.id === formData.clientId)?.equipements?.length || 0}`);
@@ -114,7 +141,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
               <Select 
                 value={formData.equipmentType} 
                 onValueChange={(value: 'cle' | 'badge' | 'telecommande') => 
-                  setFormData(prev => ({ ...prev, equipmentType: value }))
+                  setFormData(prev => ({ ...prev, equipmentType: value, stockItemId: '' }))
                 }
               >
                 <SelectTrigger className="h-12">
@@ -144,15 +171,16 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
             </div>
 
             <div>
-              <Label htmlFor="batiment">Bâtiment *</Label>
+              <Label htmlFor="batiment">Bâtiment</Label>
               <Select 
                 value={formData.batimentId} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, batimentId: value }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, batimentId: value, stockItemId: '' }))}
               >
                 <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Sélectionner un bâtiment" />
+                  <SelectValue placeholder="Filtrer par bâtiment (optionnel)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">Tous les bâtiments</SelectItem>
                   {buildings.map((building) => (
                     <SelectItem key={building.id} value={building.id}>
                       {building.code} - {building.nom}
@@ -163,25 +191,39 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
             </div>
 
             <div>
-              <Label htmlFor="numero">Numéro/Référence</Label>
-              <Input
-                id="numero"
-                value={formData.numero}
-                onChange={(e) => setFormData(prev => ({ ...prev, numero: e.target.value }))}
-                placeholder="ex: K001, B123..."
-                className="h-12"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Description optionnelle de l'équipement"
-                className="min-h-20"
-              />
+              <Label htmlFor="equipment">Équipement disponible *</Label>
+              <Select 
+                value={formData.stockItemId} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, stockItemId: value }))}
+                disabled={!formData.equipmentType}
+              >
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder={
+                    !formData.equipmentType 
+                      ? "Sélectionnez d'abord un type d'équipement" 
+                      : availableItems.length === 0 
+                        ? "Aucun équipement disponible"
+                        : "Sélectionner un équipement du stock"
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableItems.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>{item.numero} - {item.description || 'Sans description'}</span>
+                        <Badge variant="secondary" className="ml-2 text-xs">
+                          {item.quantiteDisponible} dispo
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {formData.equipmentType && availableItems.length === 0 && (
+                <p className="text-sm text-destructive mt-1">
+                  Aucun équipement de ce type disponible en stock
+                </p>
+              )}
             </div>
 
             <div className="flex gap-3 pt-4">
@@ -196,7 +238,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
               <Button 
                 type="submit" 
                 className="flex-1 h-12"
-                disabled={!formData.clientId || !formData.equipmentType || !formData.batimentId}
+                disabled={!formData.clientId || !formData.stockItemId}
               >
                 {getEquipmentIcon(formData.equipmentType)}
                 <span className="ml-2">Remettre équipement</span>

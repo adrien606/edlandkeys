@@ -22,6 +22,8 @@ interface StockItem {
   statut: 'disponible' | 'attribue' | 'perdu';
   clientActuel?: string;
   batimentId: string;
+  quantite: number; // Quantité totale
+  quantiteDisponible: number; // Quantité disponible
 }
 
 export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
@@ -30,13 +32,12 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
   
   // Stock fictif pour démonstration - dans une vraie app, ceci serait dans le store
   const [stockItems, setStockItems] = useState<StockItem[]>([
-    { id: '1', type: 'cle', numero: 'K001', description: 'Clé bureau A1', statut: 'disponible', batimentId: buildings[0]?.id || '' },
-    { id: '2', type: 'cle', numero: 'K002', description: 'Clé bureau A2', statut: 'attribue', clientActuel: 'Jean Dupont', batimentId: buildings[0]?.id || '' },
-    { id: '3', type: 'badge', numero: 'B001', description: 'Badge accès principal', statut: 'disponible', batimentId: buildings[1]?.id || '' },
-    { id: '4', type: 'badge', numero: 'B002', description: 'Badge accès principal', statut: 'attribue', clientActuel: 'Marie Martin', batimentId: buildings[1]?.id || '' },
-    { id: '5', type: 'telecommande', numero: 'T001', description: 'Télécommande portail', statut: 'disponible', batimentId: buildings[2]?.id || '' },
-    { id: '6', type: 'telecommande', numero: 'T002', description: 'Télécommande portail', statut: 'perdu', batimentId: buildings[2]?.id || '' },
-    { id: '7', type: 'cle', numero: 'K003', description: 'Clé bureau B1', statut: 'disponible', batimentId: buildings[3]?.id || '' },
+    { id: '1', type: 'cle', numero: 'K001', description: 'Clé bureau A1', statut: 'disponible', batimentId: buildings[0]?.id || '', quantite: 3, quantiteDisponible: 2 },
+    { id: '2', type: 'cle', numero: 'K002', description: 'Clé bureau A2', statut: 'disponible', batimentId: buildings[0]?.id || '', quantite: 2, quantiteDisponible: 1 },
+    { id: '3', type: 'badge', numero: 'B001', description: 'Badge accès principal', statut: 'disponible', batimentId: buildings[1]?.id || '', quantite: 1, quantiteDisponible: 1 },
+    { id: '4', type: 'badge', numero: 'B002', description: 'Badge accès principal', statut: 'attribue', clientActuel: 'Marie Martin', batimentId: buildings[1]?.id || '', quantite: 1, quantiteDisponible: 0 },
+    { id: '5', type: 'telecommande', numero: 'T001', description: 'Télécommande portail', statut: 'disponible', batimentId: buildings[2]?.id || '', quantite: 1, quantiteDisponible: 1 },
+    { id: '6', type: 'telecommande', numero: 'T002', description: 'Télécommande portail', statut: 'perdu', batimentId: buildings[2]?.id || '', quantite: 1, quantiteDisponible: 0 },
   ]);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,7 +57,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     numero: '',
     description: '',
     statut: 'disponible' as StockItem['statut'],
-    batimentId: ''
+    batimentId: '',
+    quantite: 1
   });
 
   const getEquipmentIcon = (type: string) => {
@@ -106,10 +108,10 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
   });
 
   const getStats = () => {
-    const total = stockItems.length;
-    const disponible = stockItems.filter(item => item.statut === 'disponible').length;
-    const attribue = stockItems.filter(item => item.statut === 'attribue').length;
-    const perdu = stockItems.filter(item => item.statut === 'perdu').length;
+    const total = stockItems.reduce((sum, item) => sum + item.quantite, 0);
+    const disponible = stockItems.reduce((sum, item) => sum + item.quantiteDisponible, 0);
+    const attribue = stockItems.reduce((sum, item) => sum + (item.quantite - item.quantiteDisponible), 0);
+    const perdu = stockItems.filter(item => item.statut === 'perdu').reduce((sum, item) => sum + item.quantite, 0);
     
     return { total, disponible, attribue, perdu };
   };
@@ -170,7 +172,9 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       numero: addForm.numero,
       description: addForm.description || undefined,
       statut: addForm.statut,
-      batimentId: addForm.batimentId
+      batimentId: addForm.batimentId,
+      quantite: addForm.quantite,
+      quantiteDisponible: addForm.quantite
     };
 
     setStockItems(items => [...items, newItem]);
@@ -179,7 +183,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       numero: '',
       description: '',
       statut: 'disponible',
-      batimentId: ''
+      batimentId: '',
+      quantite: 1
     });
     setIsAddDialogOpen(false);
     toast.success('Équipement ajouté avec succès');
@@ -252,6 +257,17 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                   value={addForm.description}
                   onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Description de l'équipement"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="add-quantite">Quantité *</Label>
+                <Input
+                  id="add-quantite"
+                  type="number"
+                  min="1"
+                  value={addForm.quantite}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, quantite: parseInt(e.target.value) || 1 }))}
                 />
               </div>
               
@@ -398,6 +414,9 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                         <span className="font-medium">{getTypeLabel(item.type)}</span>
                         <Badge variant="outline" className="text-xs">
                           {item.numero}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {item.quantiteDisponible}/{item.quantite}
                         </Badge>
                       </div>
                       
