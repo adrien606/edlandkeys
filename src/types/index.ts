@@ -20,6 +20,7 @@ export interface Equipment {
     nomClient: string;
     dateValidation: string;
     confirme: boolean;
+    signature?: string;
   };
 }
 

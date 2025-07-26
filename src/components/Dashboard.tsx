@@ -141,16 +141,28 @@ export const Dashboard = () => {
           <Key className="mr-2 h-5 w-5" />
           Remettre équipement
         </Button>
-        
-        <Button 
-          variant="outline" 
-          size="lg" 
-          onClick={() => navigate('/clients')}
-          className="h-14"
-        >
-          <CreditCard className="mr-2 h-5 w-5" />
-          Voir tous les clients
-        </Button>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={() => navigate('/clients')}
+            className="h-14"
+          >
+            <CreditCard className="mr-2 h-5 w-5" />
+            Voir clients
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={() => navigate('/stock')}
+            className="h-14"
+          >
+            <Radio className="mr-2 h-5 w-5" />
+            Gérer stock
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { SignaturePad } from '@/components/SignaturePad';
 import { useStore } from '@/store/useStore';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Key, CreditCard, Radio } from 'lucide-react';
@@ -17,6 +18,7 @@ export const EquipmentValidation = () => {
   
   const [nomClient, setNomClient] = useState('');
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [signature, setSignature] = useState<string | null>(null);
   
   const client = clientId ? getClientById(clientId) : null;
   const equipment = client?.equipements[parseInt(equipmentIndex || '0') - 1];
@@ -28,16 +30,16 @@ export const EquipmentValidation = () => {
   }, [client]);
 
   const handleValidation = () => {
-    if (!clientId || !equipment || !nomClient.trim() || !isConfirmed) {
+    if (!clientId || !equipment || !nomClient.trim() || !isConfirmed || !signature) {
       toast({
         title: "Erreur",
-        description: "Veuillez compléter tous les champs et confirmer la réception",
+        description: "Veuillez compléter tous les champs, signer et confirmer la réception",
         variant: "destructive",
       });
       return;
     }
 
-    validateEquipment(clientId, equipment.id, nomClient);
+    validateEquipment(clientId, equipment.id, nomClient, signature);
     
     toast({
       title: "Validation confirmée",
@@ -179,6 +181,12 @@ export const EquipmentValidation = () => {
             </div>
           </div>
 
+          {/* Signature */}
+          <SignaturePad 
+            onSignatureChange={setSignature}
+            className="mt-4"
+          />
+
           <div className="flex gap-3 pt-4">
             <Button 
               variant="outline" 
@@ -190,10 +198,10 @@ export const EquipmentValidation = () => {
             <Button 
               className="flex-1 h-12"
               onClick={handleValidation}
-              disabled={!nomClient.trim() || !isConfirmed}
+              disabled={!nomClient.trim() || !isConfirmed || !signature}
             >
               <CheckCircle2 className="mr-2 h-4 w-4" />
-              Valider la réception
+              Valider avec signature
             </Button>
           </div>
         </CardContent>
@@ -207,8 +215,9 @@ export const EquipmentValidation = () => {
             <ol className="list-decimal list-inside space-y-1 text-xs">
               <li>Présentez cet écran au client</li>
               <li>Demandez-lui de saisir son nom complet</li>
+              <li>Demandez-lui de signer dans la zone prévue</li>
               <li>Demandez-lui de cocher la case de confirmation</li>
-              <li>Validez la réception une fois les champs complétés</li>
+              <li>Validez la réception une fois tous les champs complétés</li>
             </ol>
           </div>
         </CardContent>

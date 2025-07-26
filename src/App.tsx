@@ -11,6 +11,7 @@ import { ClientList } from "./components/ClientList";
 import { ClientDetail } from "./components/ClientDetail";
 import { EquipmentForm } from "./components/EquipmentForm";
 import { EquipmentValidation } from "./components/EquipmentValidation";
+import { StockManagement } from "./components/StockManagement";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/client/:clientId" element={<ClientDetail />} />
           <Route path="/remettre-equipement" element={<EquipmentForm />} />
           <Route path="/valider-equipement/:clientId/:equipmentIndex" element={<EquipmentValidation />} />
+          <Route path="/stock" element={<StockManagement />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

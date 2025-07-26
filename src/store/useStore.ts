@@ -13,7 +13,7 @@ interface Store {
   
   addEquipment: (data: EquipmentFormData) => void;
   updateEquipmentStatus: (clientId: string, equipmentId: string, status: Equipment['statut'], dateRestitution?: string) => void;
-  validateEquipment: (clientId: string, equipmentId: string, nomClient: string) => void;
+  validateEquipment: (clientId: string, equipmentId: string, nomClient: string, signature?: string) => void;
   
   setSearchTerm: (term: string) => void;
   getFilteredClients: () => Client[];
@@ -105,7 +105,7 @@ export const useStore = create<Store>()(
         }));
       },
       
-      validateEquipment: (clientId, equipmentId, nomClient) => {
+      validateEquipment: (clientId, equipmentId, nomClient, signature) => {
         set((state) => ({
           clients: state.clients.map((client) =>
             client.id === clientId
@@ -119,6 +119,7 @@ export const useStore = create<Store>()(
                             nomClient,
                             dateValidation: new Date().toISOString(),
                             confirme: true,
+                            signature,
                           },
                         }
                       : eq
