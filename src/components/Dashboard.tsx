@@ -1,17 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { Users, Key, CreditCard, Radio, AlertTriangle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BuildingSelector } from '@/components/BuildingSelector';
 
 export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { getFilteredClients, getEquipmentStats, getCurrentBuilding } = useStore();
+  const { getFilteredClients, getEquipmentStats, buildings, currentBuildingId } = useSupabaseStore();
   const navigate = useNavigate();
   const stats = getEquipmentStats();
   const filteredClients = getFilteredClients();
-  const currentBuilding = getCurrentBuilding();
+  const currentBuilding = buildings.find(b => b.id === currentBuildingId);
 
   const recentClients = filteredClients.slice(-5).reverse();
 
@@ -100,7 +100,7 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
                 <AlertTriangle className="h-4 w-4 text-warning" />
                 <span className="text-sm font-medium">Non rendus</span>
               </div>
-              <Badge className="bg-warning text-warning-foreground">{stats.nonRendu}</Badge>
+              <Badge className="bg-warning text-warning-foreground">{0}</Badge>
             </div>
           </div>
         </CardContent>

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useStore } from "@/store/useStore";
-import { useInspectionStore } from "@/store/useInspectionStore";
+import { useSupabaseStore } from "@/hooks/useSupabaseStore";
+import { useSupabaseInspectionStore } from "@/hooks/useSupabaseInspectionStore";
 import { ClipboardList, UserPlus, History, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -14,8 +14,8 @@ interface InspectionDashboardProps {
 }
 
 export const InspectionDashboard = ({ onNavigate, onBackToApps, onSwitchApp }: InspectionDashboardProps) => {
-  const { clients } = useStore();
-  const { inspections } = useInspectionStore();
+  const { clients } = useSupabaseStore();
+  const { inspections } = useSupabaseInspectionStore();
 
   const recentInspections = inspections
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

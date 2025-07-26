@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useStore, StockItem } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
+import { StockItem } from '@/hooks/useStockManagement';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3, Trash2, MoreVertical, Settings } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -27,7 +28,7 @@ export const StockManagement = ({
     addStockItem,
     updateStockItem,
     deleteStockItem
-  } = useStore();
+  } = useSupabaseStore();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('tous');

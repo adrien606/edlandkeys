@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { addClient, buildings } = useStore();
+  const { addClient, buildings } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   
