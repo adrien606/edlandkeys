@@ -6,6 +6,7 @@ import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTria
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { INSPECTION_AREAS } from "@/types/inspection";
+import { toast } from "sonner";
 
 interface InspectionDetailProps {
   inspectionId: string;
@@ -78,6 +79,147 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
         return 'bg-orange-500 text-white';
       default:
         return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  // Fonction pour générer le contenu HTML du PDF
+  const generatePDFContent = () => {
+    const inspectionDate = format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr });
+    const typeLabel = inspection.type === 'entry' ? 'État d\'entrée' : 'État de sortie';
+    
+    let html = `
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>État des Lieux - ${inspection.clientName}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .client-info { margin-bottom: 30px; }
+            .inspection-item { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; }
+            .status-good { color: #16a34a; }
+            .status-damaged { color: #ea580c; }
+            .status-missing { color: #dc2626; }
+            .status-attention { color: #d97706; }
+            .signature { margin-top: 30px; text-align: center; }
+            .signature img { max-width: 300px; border: 1px solid #ddd; }
+            .photo { width: 150px; height: 150px; object-fit: cover; margin: 5px; border: 1px solid #ddd; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ÉTAT DES LIEUX</h1>
+            <h2>${typeLabel}</h2>
+            <p><strong>Date:</strong> ${inspectionDate}</p>
+          </div>
+          
+          <div class="client-info">
+            <h3>Informations Client</h3>
+            <p><strong>Nom:</strong> ${inspection.clientName}</p>
+            <p><strong>Email:</strong> ${inspection.clientEmail}</p>
+            ${inspection.buildingCode ? `<p><strong>Bâtiment:</strong> ${inspection.buildingCode}</p>` : ''}
+          </div>
+          
+          <div class="inspection-details">
+            <h3>Détails de l'inspection</h3>`;
+    
+    INSPECTION_AREAS.forEach((area) => {
+      const item = inspection.items[area.key as keyof typeof inspection.items];
+      const statusClass = `status-${item.status.replace('_', '-')}`;
+      
+      html += `
+        <div class="inspection-item">
+          <h4>${area.label}</h4>
+          <p class="${statusClass}"><strong>État:</strong> ${getStatusLabel(item.status)}</p>
+          ${item.comment ? `<p><strong>Commentaire:</strong> ${item.comment}</p>` : ''}
+          ${item.photos && item.photos.length > 0 ? `
+            <p><strong>Photos (${item.photos.length}):</strong></p>
+            <div class="photos">
+              ${item.photos.map(photo => `<img src="${photo}" class="photo" alt="Photo ${area.label}">`).join('')}
+            </div>
+          ` : ''}
+        </div>`;
+    });
+    
+    if (inspection.signature) {
+      html += `
+        <div class="signature">
+          <h3>Signature du client</h3>
+          <img src="${inspection.signature}" alt="Signature du client">
+        </div>`;
+    }
+    
+    html += `
+          </div>
+        </body>
+      </html>`;
+    
+    return html;
+  };
+
+  // Fonction pour télécharger le PDF
+  const handleDownloadPDF = async () => {
+    try {
+      const htmlContent = generatePDFContent();
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `etat-des-lieux-${inspection.clientName.replace(/\s+/g, '-')}-${format(new Date(inspection.date), 'yyyy-MM-dd')}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success('État des lieux téléchargé avec succès');
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+      toast.error('Erreur lors du téléchargement');
+    }
+  };
+
+  // Fonction pour aperçu PDF
+  const handlePreviewPDF = () => {
+    try {
+      const htmlContent = generatePDFContent();
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write(htmlContent);
+        newWindow.document.close();
+        toast.success('Aperçu ouvert dans un nouvel onglet');
+      } else {
+        toast.error('Impossible d\'ouvrir l\'aperçu (pop-up bloqué)');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'aperçu:', error);
+      toast.error('Erreur lors de l\'aperçu');
+    }
+  };
+
+  // Fonction pour envoyer par email
+  const handleSendEmail = () => {
+    try {
+      const subject = `État des lieux - ${inspection.clientName}`;
+      const inspectionDate = format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr });
+      const typeLabel = inspection.type === 'entry' ? 'État d\'entrée' : 'État de sortie';
+      
+      let body = `Bonjour,\n\nVeuillez trouver ci-joint l'état des lieux suivant :\n\n`;
+      body += `Client: ${inspection.clientName}\n`;
+      body += `Type: ${typeLabel}\n`;
+      body += `Date: ${inspectionDate}\n`;
+      if (inspection.buildingCode) {
+        body += `Bâtiment: ${inspection.buildingCode}\n`;
+      }
+      body += `\nCordialement`;
+      
+      const mailtoLink = `mailto:${inspection.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailtoLink;
+      
+      toast.success('Client email ouvert');
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi email:', error);
+      toast.error('Erreur lors de l\'ouverture du client email');
     }
   };
 
@@ -236,17 +378,17 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="h-12">
+              <Button variant="outline" className="h-12" onClick={handleDownloadPDF}>
                 <Download className="w-4 h-4 mr-2" />
                 Télécharger PDF
               </Button>
               
-              <Button variant="outline" className="h-12">
+              <Button variant="outline" className="h-12" onClick={handleSendEmail}>
                 <Mail className="w-4 h-4 mr-2" />
                 Envoyer par email
               </Button>
               
-              <Button variant="outline" className="h-12">
+              <Button variant="outline" className="h-12" onClick={handlePreviewPDF}>
                 <Eye className="w-4 h-4 mr-2" />
                 Aperçu PDF
               </Button>
