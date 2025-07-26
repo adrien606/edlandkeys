@@ -28,7 +28,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
     numero: '',
     description: '',
     statut: 'disponible' as StockItem['statut'],
-    clientActuel: ''
+    clientActuel: '',
+    batimentId: ''
   });
   const [addForm, setAddForm] = useState({
     type: 'cle' as StockItem['type'],
@@ -139,7 +140,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       numero: item.numero,
       description: item.description || '',
       statut: item.statut,
-      clientActuel: item.clientActuel || ''
+      clientActuel: item.clientActuel || '',
+      batimentId: item.batimentId
     });
   };
 
@@ -150,7 +152,8 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
       numero: editForm.numero,
       description: editForm.description,
       statut: editForm.statut,
-      clientActuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined
+      clientActuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined,
+      batimentId: editForm.batimentId
     });
     
     setEditingItem(null);
@@ -549,6 +552,24 @@ export const StockManagement = ({ onSwitchApp }: { onSwitchApp?: () => void }) =
                                   />
                                 </div>
                               )}
+                              
+                              <div>
+                                <Label htmlFor="edit-batiment">Bâtiment</Label>
+                                <Select value={editForm.batimentId} onValueChange={(value) => 
+                                  setEditForm(prev => ({ ...prev, batimentId: value }))
+                                }>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner un bâtiment" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {buildings.map((building) => (
+                                      <SelectItem key={building.id} value={building.id}>
+                                        {building.code} - {building.nom}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
                               
                               <div className="flex gap-2 pt-4">
                                 <Button onClick={handleSaveEdit} className="flex-1">
