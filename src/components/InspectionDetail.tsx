@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useInspectionStore } from "@/store/useInspectionStore";
-import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut, ExternalLink } from "lucide-react";
+import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut, ExternalLink, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { INSPECTION_AREAS } from "@/types/inspection";
 import { toast } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface InspectionDetailProps {
   inspectionId: string;
@@ -16,7 +18,8 @@ interface InspectionDetailProps {
 }
 
 export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp }: InspectionDetailProps) => {
-  const { inspections, createInspection, setCurrentInspection } = useInspectionStore();
+  const { inspections, createInspection, setCurrentInspection, deleteInspection } = useInspectionStore();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   const inspection = inspections.find(i => i.id === inspectionId);
   
@@ -309,6 +312,14 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     onNavigate('inspection-form');
   };
 
+  // Fonction pour supprimer l'inspection
+  const handleDeleteInspection = () => {
+    deleteInspection(inspection.id);
+    setIsDeleteDialogOpen(false);
+    toast.success('État des lieux supprimé avec succès');
+    onBack(); // Retourner à la page précédente après suppression
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -324,6 +335,14 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             </div>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Supprimer
+            </Button>
             {onSwitchApp && (
               <Button variant="outline" onClick={onSwitchApp}>
                 Gestion Équipements
@@ -547,6 +566,38 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             </div>
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Supprimer l'état des lieux</AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir supprimer cet état des lieux ? Cette action est irréversible.
+                {inspection.type === 'entry' && exitInspection && (
+                  <div className="mt-2 p-2 bg-warning/10 border border-warning/20 rounded text-sm">
+                    <strong>⚠️ Attention :</strong> Cet état d'entrée est lié à un état de sortie. 
+                    Supprimer l'état d'entrée n'affectera pas l'état de sortie, mais la référence sera perdue.
+                  </div>
+                )}
+                {inspection.type === 'exit' && inspection.entryInspectionId && (
+                  <div className="mt-2 p-2 bg-info/10 border border-info/20 rounded text-sm">
+                    <strong>ℹ️ Info :</strong> L'état d'entrée de référence sera conservé.
+                  </div>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteInspection}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Supprimer définitivement
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

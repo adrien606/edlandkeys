@@ -17,6 +17,7 @@ interface InspectionStore {
   getInspectionsByClient: (clientId: string) => Inspection[];
   setCurrentInspection: (inspection: Inspection | null) => void;
   setInspectionBuilding: (buildingId: string) => void;
+  deleteInspection: (inspectionId: string) => void;
   
   // Building management
   addInspectionBuilding: (building: Omit<InspectionBuilding, 'id' | 'dateCreation'>) => void;
@@ -217,6 +218,12 @@ export const useInspectionStore = create<InspectionStore>()(
 
       getInspectionBuildingById: (id) => {
         return get().inspectionBuildings.find(building => building.id === id);
+      },
+
+      deleteInspection: (inspectionId) => {
+        set(state => ({
+          inspections: state.inspections.filter(inspection => inspection.id !== inspectionId)
+        }));
       }
     }),
     {
