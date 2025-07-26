@@ -30,6 +30,7 @@ export const StockManagement = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('tous');
   const [filterStatus, setFilterStatus] = useState<string>('tous');
+  const [filterBuilding, setFilterBuilding] = useState<string>('tous');
   const [editingItem, setEditingItem] = useState<StockItem | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
@@ -117,7 +118,8 @@ export const StockManagement = ({
     const matchesSearch = item.numero.toLowerCase().includes(searchTerm.toLowerCase()) || item.description?.toLowerCase().includes(searchTerm.toLowerCase()) || item.clientActuel?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'tous' || item.type === filterType;
     const matchesStatus = filterStatus === 'tous' || item.statut === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
+    const matchesBuilding = filterBuilding === 'tous' || item.batimentId === filterBuilding;
+    return matchesSearch && matchesType && matchesStatus && matchesBuilding;
   });
   const getStats = () => {
     const total = updatedStockItems.reduce((sum, item) => sum + item.quantite, 0);
@@ -349,29 +351,45 @@ export const StockManagement = ({
           </div>
           
           {/* Filter dropdowns */}
-          <div className="grid grid-cols-2 gap-3">
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tous">Tous les types</SelectItem>
-                <SelectItem value="cle">Clés</SelectItem>
-                <SelectItem value="badge">Badges</SelectItem>
-                <SelectItem value="telecommande">Télécommandes</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger>
-                <SelectValue placeholder="Statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tous">Tous les statuts</SelectItem>
-                <SelectItem value="disponible">Disponible</SelectItem>
-                <SelectItem value="attribue">Attribué</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-3 gap-3">
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tous">Tous les types</SelectItem>
+                  <SelectItem value="cle">Clés</SelectItem>
+                  <SelectItem value="badge">Badges</SelectItem>
+                  <SelectItem value="telecommande">Télécommandes</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tous">Tous les statuts</SelectItem>
+                  <SelectItem value="disponible">Disponible</SelectItem>
+                  <SelectItem value="attribue">Attribué</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={filterBuilding} onValueChange={setFilterBuilding}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Bâtiment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tous">Tous les bâtiments</SelectItem>
+                  {buildings.map(building => (
+                    <SelectItem key={building.id} value={building.id}>
+                      {building.code} - {building.nom}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
