@@ -29,6 +29,7 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
   } = useInspectionStore();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingBuilding, setEditingBuilding] = useState<any>(null);
   const [buildingToDelete, setBuildingToDelete] = useState<string | null>(null);
   
@@ -65,6 +66,7 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
       adresse: building.adresse || '',
       description: building.description || ''
     });
+    setIsEditDialogOpen(true);
   };
 
   const handleSaveEdit = () => {
@@ -79,6 +81,7 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
 
     setEditingBuilding(null);
     setBuildingForm({ nom: '', code: '', adresse: '', description: '' });
+    setIsEditDialogOpen(false);
     toast.success('Bâtiment modifié avec succès');
   };
 
@@ -207,68 +210,10 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => {
-                            e.preventDefault();
-                            handleEditBuilding(building);
-                          }}>
-                            <Edit3 className="h-4 w-4 mr-2" />
-                            Modifier
-                          </DropdownMenuItem>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Modifier le bâtiment</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="edit-nom">Nom du bâtiment *</Label>
-                              <Input
-                                id="edit-nom"
-                                value={buildingForm.nom}
-                                onChange={(e) => setBuildingForm(prev => ({ ...prev, nom: e.target.value }))}
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="edit-code">Code *</Label>
-                              <Input
-                                id="edit-code"
-                                value={buildingForm.code}
-                                onChange={(e) => setBuildingForm(prev => ({ ...prev, code: e.target.value }))}
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="edit-adresse">Adresse</Label>
-                              <Input
-                                id="edit-adresse"
-                                value={buildingForm.adresse}
-                                onChange={(e) => setBuildingForm(prev => ({ ...prev, adresse: e.target.value }))}
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="edit-description">Description</Label>
-                              <Textarea
-                                id="edit-description"
-                                value={buildingForm.description}
-                                onChange={(e) => setBuildingForm(prev => ({ ...prev, description: e.target.value }))}
-                              />
-                            </div>
-                            
-                            <div className="flex gap-2 pt-4">
-                              <Button variant="outline" onClick={() => setEditingBuilding(null)} className="flex-1">
-                                Annuler
-                              </Button>
-                              <Button onClick={handleSaveEdit} className="flex-1">
-                                Sauvegarder
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <DropdownMenuItem onSelect={() => handleEditBuilding(building)}>
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        Modifier
+                      </DropdownMenuItem>
                       
                       <DropdownMenuItem onClick={() => setBuildingToDelete(building.id)}>
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -289,6 +234,61 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
             </CardContent>
           </Card>
         )}
+
+        {/* Edit Building Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Modifier le bâtiment</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-nom">Nom du bâtiment *</Label>
+                <Input
+                  id="edit-nom"
+                  value={buildingForm.nom}
+                  onChange={(e) => setBuildingForm(prev => ({ ...prev, nom: e.target.value }))}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-code">Code *</Label>
+                <Input
+                  id="edit-code"
+                  value={buildingForm.code}
+                  onChange={(e) => setBuildingForm(prev => ({ ...prev, code: e.target.value }))}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-adresse">Adresse</Label>
+                <Input
+                  id="edit-adresse"
+                  value={buildingForm.adresse}
+                  onChange={(e) => setBuildingForm(prev => ({ ...prev, adresse: e.target.value }))}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={buildingForm.description}
+                  onChange={(e) => setBuildingForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="flex-1">
+                  Annuler
+                </Button>
+                <Button onClick={handleSaveEdit} className="flex-1">
+                  Sauvegarder
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={!!buildingToDelete} onOpenChange={() => setBuildingToDelete(null)}>
