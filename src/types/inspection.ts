@@ -34,6 +34,8 @@ export interface Inspection {
     portes: InspectionItem;
   };
   signature: string; // Base64 encoded signature
+  siteManagerName?: string; // Nom et prénom du responsable de site
+  siteManagerSignature?: string; // Base64 encoded signature du responsable
   completed: boolean;
   pdfGenerated?: boolean;
   emailSent?: boolean;

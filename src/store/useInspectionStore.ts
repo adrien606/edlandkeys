@@ -13,6 +13,7 @@ interface InspectionStore {
   addPhotoToItem: (itemKey: keyof Inspection['items'], photo: string) => void;
   removePhotoFromItem: (itemKey: keyof Inspection['items'], photoIndex: number) => void;
   setSignature: (signature: string) => void;
+  setSiteManagerData: (name: string, signature: string) => void;
   completeInspection: () => void;
   getInspectionsByClient: (clientId: string) => Inspection[];
   setCurrentInspection: (inspection: Inspection | null) => void;
@@ -148,6 +149,19 @@ export const useInspectionStore = create<InspectionStore>()(
           currentInspection: {
             ...currentInspection,
             signature
+          }
+        });
+      },
+
+      setSiteManagerData: (name, signature) => {
+        const { currentInspection } = get();
+        if (!currentInspection) return;
+
+        set({
+          currentInspection: {
+            ...currentInspection,
+            siteManagerName: name,
+            siteManagerSignature: signature
           }
         });
       },

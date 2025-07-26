@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { useInspectionStore } from "@/store/useInspectionStore";
 import { SignaturePad } from "@/components/SignaturePad";
 import { ArrowLeft, FileText, Send } from "lucide-react";
@@ -13,8 +16,10 @@ interface InspectionSignatureProps {
 }
 
 export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: InspectionSignatureProps) => {
-  const { currentInspection, setSignature, completeInspection } = useInspectionStore();
+  const { currentInspection, setSignature, setSiteManagerData, completeInspection } = useInspectionStore();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [siteManagerName, setSiteManagerName] = useState(currentInspection?.siteManagerName || "");
+  const [siteManagerSignature, setSiteManagerSignatureState] = useState(currentInspection?.siteManagerSignature || "");
 
   if (!currentInspection) {
     return (
@@ -31,11 +36,41 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
     setSignature(signatureData);
   };
 
+  const handleSiteManagerSignatureSave = (signatureData: string) => {
+    setSiteManagerSignatureState(signatureData);
+    setSiteManagerData(siteManagerName, signatureData);
+  };
+
+  const handleSiteManagerNameChange = (name: string) => {
+    setSiteManagerName(name);
+    if (siteManagerSignature) {
+      setSiteManagerData(name, siteManagerSignature);
+    }
+  };
+
   const handleCompleteInspection = async () => {
     if (!currentInspection.signature) {
       toast({
-        title: "Signature requise",
+        title: "Signature client requise",
         description: "Veuillez faire signer le client avant de continuer",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!siteManagerName.trim()) {
+      toast({
+        title: "Nom du responsable requis",
+        description: "Veuillez saisir le nom et prénom du responsable de site",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!siteManagerSignature) {
+      toast({
+        title: "Signature responsable requise",
+        description: "Veuillez faire signer le responsable de site avant de continuer",
         variant: "destructive"
       });
       return;
@@ -105,7 +140,7 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
           </CardContent>
         </Card>
 
-        {/* Signature */}
+        {/* Signature Client */}
         <Card>
           <CardHeader>
             <CardTitle>Signature du Client</CardTitle>
@@ -118,9 +153,44 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
               <SignaturePad onSignatureChange={handleSignatureSave} />
               {currentInspection.signature && (
                 <div className="text-center">
-                  <p className="text-sm text-success">✓ Signature enregistrée</p>
+                  <p className="text-sm text-success">✓ Signature client enregistrée</p>
                 </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Separator />
+
+        {/* Responsable de Site */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Responsable de Site</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="siteManagerName">Nom et Prénom</Label>
+                <Input
+                  id="siteManagerName"
+                  value={siteManagerName}
+                  onChange={(e) => handleSiteManagerNameChange(e.target.value)}
+                  placeholder="Nom et prénom du responsable de site"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Signature du Responsable</Label>
+                <p className="text-sm text-muted-foreground">
+                  Signature du responsable de site pour validation.
+                </p>
+                <SignaturePad onSignatureChange={handleSiteManagerSignatureSave} />
+                {siteManagerSignature && (
+                  <div className="text-center">
+                    <p className="text-sm text-success">✓ Signature responsable enregistrée</p>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -129,7 +199,7 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
         <div className="space-y-3">
           <Button 
             onClick={handleCompleteInspection}
-            disabled={!currentInspection.signature || isProcessing}
+            disabled={!currentInspection.signature || !siteManagerName.trim() || !siteManagerSignature || isProcessing}
             className="w-full h-12 text-lg"
             size="lg"
           >
