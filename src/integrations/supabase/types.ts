@@ -14,7 +14,257 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      buildings: {
+        Row: {
+          code: string
+          date_creation: string | null
+          description: string | null
+          id: string
+          nom: string
+        }
+        Insert: {
+          code: string
+          date_creation?: string | null
+          description?: string | null
+          id?: string
+          nom: string
+        }
+        Update: {
+          code?: string
+          date_creation?: string | null
+          description?: string | null
+          id?: string
+          nom?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          date_inscription: string | null
+          email: string
+          id: string
+          nom: string
+          prenom: string
+          telephone: string
+        }
+        Insert: {
+          date_inscription?: string | null
+          email: string
+          id?: string
+          nom: string
+          prenom: string
+          telephone: string
+        }
+        Update: {
+          date_inscription?: string | null
+          email?: string
+          id?: string
+          nom?: string
+          prenom?: string
+          telephone?: string
+        }
+        Relationships: []
+      }
+      equipment: {
+        Row: {
+          batiment_id: string | null
+          client_id: string | null
+          created_at: string | null
+          date_remise: string | null
+          date_restitution: string | null
+          description: string | null
+          id: string
+          numero: string | null
+          statut: string
+          type: string
+          updated_at: string | null
+          validation_client: Json | null
+        }
+        Insert: {
+          batiment_id?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          date_remise?: string | null
+          date_restitution?: string | null
+          description?: string | null
+          id?: string
+          numero?: string | null
+          statut: string
+          type: string
+          updated_at?: string | null
+          validation_client?: Json | null
+        }
+        Update: {
+          batiment_id?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          date_remise?: string | null
+          date_restitution?: string | null
+          description?: string | null
+          id?: string
+          numero?: string | null
+          statut?: string
+          type?: string
+          updated_at?: string | null
+          validation_client?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_batiment_id_fkey"
+            columns: ["batiment_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspection_buildings: {
+        Row: {
+          adresse: string | null
+          code: string
+          date_creation: string | null
+          description: string | null
+          id: string
+          nom: string
+        }
+        Insert: {
+          adresse?: string | null
+          code: string
+          date_creation?: string | null
+          description?: string | null
+          id?: string
+          nom: string
+        }
+        Update: {
+          adresse?: string | null
+          code?: string
+          date_creation?: string | null
+          description?: string | null
+          id?: string
+          nom?: string
+        }
+        Relationships: []
+      }
+      inspections: {
+        Row: {
+          building_code: string | null
+          building_id: string | null
+          client_email: string
+          client_id: string
+          client_name: string
+          completed: boolean | null
+          created_at: string | null
+          date: string | null
+          email_sent: boolean | null
+          entry_inspection_id: string | null
+          id: string
+          items: Json
+          pdf_generated: boolean | null
+          signature: string | null
+          site_manager_name: string | null
+          site_manager_signature: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          building_code?: string | null
+          building_id?: string | null
+          client_email: string
+          client_id: string
+          client_name: string
+          completed?: boolean | null
+          created_at?: string | null
+          date?: string | null
+          email_sent?: boolean | null
+          entry_inspection_id?: string | null
+          id?: string
+          items: Json
+          pdf_generated?: boolean | null
+          signature?: string | null
+          site_manager_name?: string | null
+          site_manager_signature?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          building_code?: string | null
+          building_id?: string | null
+          client_email?: string
+          client_id?: string
+          client_name?: string
+          completed?: boolean | null
+          created_at?: string | null
+          date?: string | null
+          email_sent?: boolean | null
+          entry_inspection_id?: string | null
+          id?: string
+          items?: Json
+          pdf_generated?: boolean | null
+          signature?: string | null
+          site_manager_name?: string | null
+          site_manager_signature?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      stock_items: {
+        Row: {
+          batiment_id: string | null
+          client_actuel: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          numero: string
+          quantite: number
+          quantite_disponible: number
+          statut: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          batiment_id?: string | null
+          client_actuel?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          numero: string
+          quantite?: number
+          quantite_disponible?: number
+          statut: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          batiment_id?: string | null
+          client_actuel?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          numero?: string
+          quantite?: number
+          quantite_disponible?: number
+          statut?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_items_batiment_id_fkey"
+            columns: ["batiment_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
