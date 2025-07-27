@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useInspectionStore } from "@/store/useInspectionStore";
+import { useSupabaseInspectionStore } from "@/hooks/useSupabaseInspectionStore";
 import { SignaturePad } from "@/components/SignaturePad";
 import { ArrowLeft, FileText, Send } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -16,7 +16,7 @@ interface InspectionSignatureProps {
 }
 
 export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: InspectionSignatureProps) => {
-  const { currentInspection, setSignature, setSiteManagerData, completeInspection } = useInspectionStore();
+  const { currentInspection, setSignature, setSiteManagerInfo, completeInspection } = useSupabaseInspectionStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [siteManagerName, setSiteManagerName] = useState(currentInspection?.siteManagerName || "");
   const [siteManagerSignature, setSiteManagerSignatureState] = useState(currentInspection?.siteManagerSignature || "");
@@ -38,13 +38,13 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
 
   const handleSiteManagerSignatureSave = (signatureData: string) => {
     setSiteManagerSignatureState(signatureData);
-    setSiteManagerData(siteManagerName, signatureData);
+    setSiteManagerInfo(siteManagerName, signatureData);
   };
 
   const handleSiteManagerNameChange = (name: string) => {
     setSiteManagerName(name);
     if (siteManagerSignature) {
-      setSiteManagerData(name, siteManagerSignature);
+      setSiteManagerInfo(name, siteManagerSignature);
     }
   };
 

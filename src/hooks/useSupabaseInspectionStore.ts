@@ -22,6 +22,8 @@ interface SupabaseInspectionStore {
   removePhotoFromItem: (areaKey: string, photoIndex: number) => void;
   setSignature: (signature: string) => void;
   setSiteManagerInfo: (name: string, signature: string) => void;
+  setCurrentInspection: (inspection: Inspection | null) => void;
+  deleteInspection: (id: string) => Promise<void>;
   completeInspection: () => Promise<void>;
   addInspectionBuilding: (building: Omit<InspectionBuilding, 'id' | 'dateCreation'>) => Promise<void>;
   updateInspectionBuilding: (id: string, updates: Partial<InspectionBuilding>) => Promise<void>;
@@ -295,5 +297,27 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
         b.id === id ? { ...b, ...updates } : b
       )
     }));
+  },
+
+  setCurrentInspection: (inspection) => {
+    set({ currentInspection: inspection });
+  },
+
+  deleteInspection: async (id) => {
+    try {
+      const { error } = await supabase
+        .from('inspections')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      set(state => ({
+        inspections: state.inspections.filter(i => i.id !== id)
+      }));
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'inspection:', error);
+      throw error;
+    }
   }
 }));

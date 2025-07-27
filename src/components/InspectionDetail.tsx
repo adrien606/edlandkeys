@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useInspectionStore } from "@/store/useInspectionStore";
+import { useSupabaseInspectionStore } from "@/hooks/useSupabaseInspectionStore";
 import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut, ExternalLink, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -19,7 +19,7 @@ interface InspectionDetailProps {
 }
 
 export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp }: InspectionDetailProps) => {
-  const { inspections, createInspection, setCurrentInspection, deleteInspection } = useInspectionStore();
+  const { inspections, createInspection, setCurrentInspection, deleteInspection, inspectionBuildings } = useSupabaseInspectionStore();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   const inspection = inspections.find(i => i.id === inspectionId);
@@ -107,10 +107,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
       : null;
 
     // Récupérer les informations du bâtiment
-    const { inspectionBuildings } = useInspectionStore.getState();
-    const building = inspection.buildingId 
-      ? inspectionBuildings.find(b => b.id === inspection.buildingId)
-      : null;
+    const building = inspectionBuildings.find(b => b.id === inspection.buildingId);
     
     let html = `
       <html>
