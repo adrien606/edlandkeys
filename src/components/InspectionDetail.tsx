@@ -7,6 +7,15 @@ import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTria
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+const INSPECTION_AREAS = [
+  { key: 'prises', label: 'Prises électriques' },
+  { key: 'murs', label: 'Murs' },
+  { key: 'sol', label: 'Sol' },
+  { key: 'plafond', label: 'Plafond' },
+  { key: 'fenetres', label: 'Fenêtres' },
+  { key: 'portes', label: 'Portes' }
+] as const;
+
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
