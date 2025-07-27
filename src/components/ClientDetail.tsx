@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Key, CreditCard, Radio, User, Mail, Phone, Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, Edit3, Trash2, MoreVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 
 export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clientId } = useParams();
-  const { getClientById, updateEquipmentStatus, deleteClient, deleteEquipment, buildings, stockItems } = useStore();
+  const { getClientById, updateEquipmentStatus, deleteClient, deleteEquipment, buildings, stockItems } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast: useToastHook } = useToast();
   

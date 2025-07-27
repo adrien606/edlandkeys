@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -19,7 +19,7 @@ interface EditClientDialogProps {
 }
 
 export const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) => {
-  const { updateClient, buildings } = useStore();
+  const { updateClient, buildings } = useSupabaseStore();
   const [formData, setFormData] = useState<ClientFormData>({
     nom: client?.nom || '',
     prenom: client?.prenom || '',

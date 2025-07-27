@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SignaturePad } from '@/components/SignaturePad';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const EquipmentValidation = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clientId, equipmentIndex } = useParams();
-  const { getClientById, validateEquipment } = useStore();
+  const { getClientById, validateEquipment } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   

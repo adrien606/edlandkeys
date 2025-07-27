@@ -8,8 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useStore } from '@/store/useStore';
-import type { StockItem } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
+import type { StockItem } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Package, Plus, Edit3, Trash2, MoreVertical, Settings } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -28,7 +28,7 @@ export const StockManagement = ({
     addStockItem,
     updateStockItem,
     deleteStockItem
-  } = useStore();
+  } = useSupabaseStore();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('tous');
@@ -114,10 +114,12 @@ export const StockManagement = ({
   // Mettre à jour tous les items du stock avec les données réelles
   const updatedStockItems = stockItems.map(item => getUpdatedStockItem(item));
   const filteredItems = updatedStockItems.filter(item => {
-    const matchesSearch = item.numero.toLowerCase().includes(searchTerm.toLowerCase()) || item.description?.toLowerCase().includes(searchTerm.toLowerCase()) || item.clientActuel?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = item.numero.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      item.client_actuel?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'tous' || item.type === filterType;
     const matchesStatus = filterStatus === 'tous' || item.statut === filterStatus;
-    const matchesBuilding = filterBuilding === 'tous' || item.batimentId === filterBuilding;
+    const matchesBuilding = filterBuilding === 'tous' || item.batiment_id === filterBuilding;
     return matchesSearch && matchesType && matchesStatus && matchesBuilding;
   });
   const getStats = () => {
@@ -138,8 +140,8 @@ export const StockManagement = ({
       numero: item.numero,
       description: item.description || '',
       statut: item.statut,
-      clientActuel: item.clientActuel || '',
-      batimentId: item.batimentId,
+      clientActuel: item.client_actuel || '',
+      batimentId: item.batiment_id,
       quantite: item.quantite
     });
   };
@@ -149,8 +151,8 @@ export const StockManagement = ({
       numero: editForm.numero,
       description: editForm.description,
       statut: editForm.statut,
-      clientActuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined,
-      batimentId: editForm.batimentId,
+      client_actuel: editForm.statut === 'attribue' ? editForm.clientActuel : undefined,
+      batiment_id: editForm.batimentId,
       quantite: editForm.quantite
     });
     setEditingItem(null);
@@ -177,9 +179,9 @@ export const StockManagement = ({
       numero: addForm.numero,
       description: addForm.description || undefined,
       statut: addForm.statut,
-      batimentId: addForm.batimentId,
+      batiment_id: addForm.batimentId,
       quantite: addForm.quantite,
-      quantiteDisponible: addForm.quantite
+      quantite_disponible: addForm.quantite
     });
     setAddForm({
       type: 'cle',
@@ -432,8 +434,8 @@ export const StockManagement = ({
                           {item.description}
                         </p>}
                       
-                      {item.clientActuel && <p className="text-xs text-muted-foreground">
-                          Attribué à: <span className="font-medium">{item.clientActuel}</span>
+                       {item.client_actuel && <p className="text-xs text-muted-foreground">
+                          Attribué à: <span className="font-medium">{item.client_actuel}</span>
                         </p>}
                       
                       {/* Affichage des clients qui ont reçu cet équipement */}
@@ -450,7 +452,7 @@ export const StockManagement = ({
                 })()}
                       
                       <p className="text-xs text-muted-foreground mt-2">
-                        Bâtiment: <span className="font-medium">{buildings.find(b => b.id === item.batimentId)?.code || 'N/A'}</span>
+                        Bâtiment: <span className="font-medium">{buildings.find(b => b.id === item.batiment_id)?.code || 'N/A'}</span>
                       </p>
                     </div>
                   </div>
