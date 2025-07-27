@@ -16,10 +16,11 @@ interface InspectionHistoryProps {
 }
 
 export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: InspectionHistoryProps) => {
-  const { inspections } = useSupabaseStore();
+  const { inspections, buildings } = useSupabaseStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterBuilding, setFilterBuilding] = useState<string>('all');
 
   const filteredInspections = inspections
     .filter(inspection => {
@@ -28,7 +29,8 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
       const matchesStatus = filterStatus === 'all' || 
         (filterStatus === 'completed' && inspection.completed) ||
         (filterStatus === 'pending' && !inspection.completed);
-      return matchesSearch && matchesType && matchesStatus;
+      const matchesBuilding = filterBuilding === 'all' || inspection.building_code === filterBuilding;
+      return matchesSearch && matchesType && matchesStatus && matchesBuilding;
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -56,7 +58,7 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
         {/* Filters */}
         <Card>
           <CardContent className="p-3 sm:p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -75,6 +77,20 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
                   <SelectItem value="all">Tous les types</SelectItem>
                   <SelectItem value="entry">Entrée</SelectItem>
                   <SelectItem value="exit">Sortie</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filterBuilding} onValueChange={setFilterBuilding}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrer par bâtiment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les bâtiments</SelectItem>
+                  {buildings.map((building) => (
+                    <SelectItem key={building.id} value={building.code}>
+                      {building.code} - {building.nom}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
