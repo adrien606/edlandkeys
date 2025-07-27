@@ -359,7 +359,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
       inspection.clientName,
       inspection.clientEmail,
       'exit',
-      inspection.buildingId,
+      inspection.building_id,
       inspection.id // Référence à l'inspection d'entrée
     );
     
