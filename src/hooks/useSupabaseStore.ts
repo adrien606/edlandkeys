@@ -506,7 +506,10 @@ export const useSupabaseStore = create<SupabaseStore>((set, get) => ({
         client.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesBuilding = !currentBuildingId || 
+      // Si aucun bâtiment n'est sélectionné OU si "Tous les bâtiments" est sélectionné,
+      // on affiche tous les clients. Sinon, on filtre par bâtiment.
+      const matchesBuilding = !currentBuildingId || currentBuildingId === '' ||
+        client.equipements.length === 0 || // Afficher les clients sans équipements
         client.equipements.some(eq => eq.batimentId === currentBuildingId);
       
       return matchesSearch && matchesBuilding;
