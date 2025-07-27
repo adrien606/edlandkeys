@@ -4,7 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/store/useStore";
-import { INSPECTION_AREAS } from "@/types/inspection";
+const INSPECTION_AREAS = [
+  { key: 'prises', label: 'Prises électriques' },
+  { key: 'murs', label: 'Murs' },
+  { key: 'sol', label: 'Sol' },
+  { key: 'plafond', label: 'Plafond' },
+  { key: 'fenetres', label: 'Fenêtres' },
+  { key: 'portes', label: 'Portes' }
+] as const;
 import { ArrowLeft, Camera, X, Check, AlertTriangle, XCircle, FileSearch } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 

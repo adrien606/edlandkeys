@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Client, Equipment, ClientFormData, EquipmentFormData, Building, BuildingFormData } from '@/types';
-import { Inspection, InspectionItem, INSPECTION_AREAS } from '@/types/inspection';
 
 export interface StockItem {
   id: string;
@@ -13,6 +12,39 @@ export interface StockItem {
   batimentId: string;
   quantite: number;
   quantiteDisponible: number;
+}
+
+// Types locaux simplifiés
+interface InspectionItem {
+  id: string;
+  name: string;
+  comment: string;
+  photos: string[];
+  status: 'good' | 'damaged' | 'missing' | 'needs_attention';
+}
+
+interface Inspection {
+  id: string;
+  clientId: string;
+  clientName: string;
+  clientEmail: string;
+  buildingId?: string;
+  buildingCode?: string;
+  type: 'entry' | 'exit';
+  entryInspectionId?: string;
+  date: string;
+  items: {
+    prises: InspectionItem;
+    murs: InspectionItem;
+    sol: InspectionItem;
+    plafond: InspectionItem;
+    fenetres: InspectionItem;
+    portes: InspectionItem;
+  };
+  signature: string;
+  siteManagerName?: string;
+  siteManagerSignature?: string;
+  completed: boolean;
 }
 
 interface Store {
