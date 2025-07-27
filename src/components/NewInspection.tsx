@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useStore } from "@/store/useStore";
+import { useSupabaseStore } from "@/hooks/useSupabaseStore";
 import { ArrowLeft, Home, LogOut, Building, Settings } from "lucide-react";
 
 interface NewInspectionProps {
@@ -13,7 +13,7 @@ interface NewInspectionProps {
 }
 
 export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspectionProps) => {
-  const { clients, buildings, createInspection } = useStore();
+  const { clients, buildings, createInspection } = useSupabaseStore();
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [selectedBuildingId, setSelectedBuildingId] = useState<string>("");
   const [inspectionType, setInspectionType] = useState<'entry' | 'exit'>('entry');

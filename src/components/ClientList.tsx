@@ -3,12 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail } from 'lucide-react';
 
 export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { getFilteredClients, setSearchTerm, searchTerm } = useStore();
+  const { getFilteredClients, setSearchTerm, searchTerm } = useSupabaseStore();
   const navigate = useNavigate();
   const clients = getFilteredClients();
 

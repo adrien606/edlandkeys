@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { useStore } from "@/store/useStore";
+import { useSupabaseStore } from "@/hooks/useSupabaseStore";
 const INSPECTION_AREAS = [
   { key: 'prises', label: 'Prises électriques' },
   { key: 'murs', label: 'Murs' },
@@ -22,7 +22,7 @@ interface InspectionFormProps {
 }
 
 export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFormProps) => {
-  const { currentInspection, updateInspectionItem, addPhotoToItem, removePhotoFromItem, inspections } = useStore();
+  const { currentInspection, updateInspectionItem, addPhotoToItem, removePhotoFromItem, inspections } = useSupabaseStore();
   const [currentAreaIndex, setCurrentAreaIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,8 +41,8 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
   const currentItem = currentInspection.items[currentArea.key as keyof typeof currentInspection.items];
   
   // Récupérer l'inspection d'entrée si c'est un état de sortie
-  const entryInspection = currentInspection.type === 'exit' && currentInspection.entryInspectionId 
-    ? inspections.find(i => i.id === currentInspection.entryInspectionId)
+  const entryInspection = currentInspection.type === 'exit' && currentInspection.entry_inspection_id 
+    ? inspections.find(i => i.id === currentInspection.entry_inspection_id)
     : null;
   const entryItem = entryInspection?.items[currentArea.key as keyof typeof entryInspection.items];
 
@@ -101,7 +101,7 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold truncate">{currentInspection.clientName}</h1>
+            <h1 className="text-lg sm:text-xl font-bold truncate">{currentInspection.client_name}</h1>
             <div className="flex items-center gap-2">
               <Badge variant={currentInspection.type === 'entry' ? 'default' : 'secondary'} className="text-xs">
                 {currentInspection.type === 'entry' ? 'Entrée' : 'Sortie'}

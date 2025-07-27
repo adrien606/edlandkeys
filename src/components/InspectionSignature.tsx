@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useStore } from "@/store/useStore";
+import { useSupabaseStore } from "@/hooks/useSupabaseStore";
 import { SignaturePad } from "@/components/SignaturePad";
 import { ArrowLeft, FileText, Send } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -16,10 +16,10 @@ interface InspectionSignatureProps {
 }
 
 export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: InspectionSignatureProps) => {
-  const { currentInspection, setSignature, setSiteManagerInfo, completeInspection } = useStore();
+  const { currentInspection, setSignature, setSiteManagerInfo, completeInspection } = useSupabaseStore();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [siteManagerName, setSiteManagerName] = useState(currentInspection?.siteManagerName || "");
-  const [siteManagerSignature, setSiteManagerSignatureState] = useState(currentInspection?.siteManagerSignature || "");
+  const [siteManagerName, setSiteManagerName] = useState(currentInspection?.site_manager_name || "");
+  const [siteManagerSignature, setSiteManagerSignatureState] = useState(currentInspection?.site_manager_signature || "");
 
   if (!currentInspection) {
     return (
@@ -123,7 +123,7 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
           <CardContent className="space-y-3">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Client :</span>
-              <span className="font-medium">{currentInspection.clientName}</span>
+              <span className="font-medium">{currentInspection.client_name}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Type :</span>

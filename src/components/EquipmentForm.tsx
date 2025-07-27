@@ -6,13 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { clients, addEquipment, buildings, stockItems } = useStore();
+  const { clients, addEquipment, buildings, stockItems } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -62,7 +62,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
   
   const availableItems = getAvailableStockItems();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.clientId || !formData.equipmentType || !formData.stockItemId) {
@@ -84,7 +84,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
       return;
     }
 
-    addEquipment({
+    await addEquipment({
       clientId: formData.clientId,
       equipmentType: formData.equipmentType,
       numero: selectedItem.numero,

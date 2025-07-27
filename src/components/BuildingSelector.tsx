@@ -1,7 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { Building, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 export const BuildingSelector = () => {
-  const { buildings, currentBuildingId, setCurrentBuilding, addBuilding } = useStore();
+  const { buildings, currentBuildingId, setCurrentBuilding, addBuilding } = useSupabaseStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     nom: '',
@@ -21,7 +21,7 @@ export const BuildingSelector = () => {
 
   const currentBuilding = buildings.find(b => b.id === currentBuildingId);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.nom.trim() || !formData.code.trim()) {
@@ -35,7 +35,7 @@ export const BuildingSelector = () => {
       return;
     }
 
-    addBuilding(formData);
+    await addBuilding(formData);
     setFormData({ nom: '', code: '', description: '' });
     setIsDialogOpen(false);
     toast.success('Bâtiment ajouté avec succès');

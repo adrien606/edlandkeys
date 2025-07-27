@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useStore } from "@/store/useStore";
+import { useSupabaseStore } from "@/hooks/useSupabaseStore";
 import { ClipboardList, UserPlus, History, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -14,7 +14,7 @@ interface InspectionDashboardProps {
 }
 
 export const InspectionDashboard = ({ onNavigate, onBackToApps, onSwitchApp }: InspectionDashboardProps) => {
-  const { clients, inspections } = useStore();
+  const { clients, inspections } = useSupabaseStore();
 
   const recentInspections = inspections
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -116,7 +116,7 @@ export const InspectionDashboard = ({ onNavigate, onBackToApps, onSwitchApp }: I
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold">{inspection.clientName}</h3>
+                        <h3 className="font-semibold">{inspection.client_name}</h3>
                         <Badge variant={inspection.type === 'entry' ? 'default' : 'secondary'}>
                         {inspection.type === 'entry' ? 'Entrée' : 'Sortie'}
                         </Badge>

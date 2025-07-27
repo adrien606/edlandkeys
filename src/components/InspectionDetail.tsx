@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useStore } from "@/store/useStore";
+import { useSupabaseStore } from "@/hooks/useSupabaseStore";
 import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut, ExternalLink, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -28,7 +28,7 @@ interface InspectionDetailProps {
 }
 
 export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp }: InspectionDetailProps) => {
-  const { inspections, createInspection, setCurrentInspection, deleteInspection, buildings } = useStore();
+  const { inspections, createInspection, setCurrentInspection, deleteInspection, buildings } = useSupabaseStore();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   const inspection = inspections.find(i => i.id === inspectionId);

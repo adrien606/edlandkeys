@@ -17,51 +17,63 @@ export type Database = {
       buildings: {
         Row: {
           code: string
+          created_at: string | null
           date_creation: string | null
           description: string | null
           id: string
           nom: string
+          updated_at: string | null
         }
         Insert: {
           code: string
+          created_at?: string | null
           date_creation?: string | null
           description?: string | null
           id?: string
           nom: string
+          updated_at?: string | null
         }
         Update: {
           code?: string
+          created_at?: string | null
           date_creation?: string | null
           description?: string | null
           id?: string
           nom?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       clients: {
         Row: {
+          created_at: string | null
           date_inscription: string | null
           email: string
           id: string
           nom: string
           prenom: string
           telephone: string
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
           date_inscription?: string | null
           email: string
           id?: string
           nom: string
           prenom: string
           telephone: string
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
           date_inscription?: string | null
           email?: string
           id?: string
           nom?: string
           prenom?: string
           telephone?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

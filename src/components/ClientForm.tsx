@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { addClient, buildings } = useStore();
+  const { addClient, buildings } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -28,7 +28,7 @@ export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.nom || !formData.prenom) {
@@ -40,14 +40,22 @@ export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       return;
     }
 
-    addClient(formData);
-    
-    toast({
-      title: "Client ajouté",
-      description: `${formData.prenom} ${formData.nom} a été ajouté avec succès`,
-    });
-    
-    navigate('/');
+    try {
+      await addClient(formData);
+      
+      toast({
+        title: "Client ajouté",
+        description: `${formData.prenom} ${formData.nom} a été ajouté avec succès`,
+      });
+      
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter le client",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useStore } from '@/store/useStore';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { Users, Key, CreditCard, Radio, AlertTriangle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BuildingSelector } from '@/components/BuildingSelector';
 
 export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { getFilteredClients, getEquipmentStats, buildings, currentBuildingId } = useStore();
+  const { getFilteredClients, getEquipmentStats, buildings, currentBuildingId, isOnline, syncPending } = useSupabaseStore();
   const navigate = useNavigate();
   const stats = getEquipmentStats();
   const filteredClients = getFilteredClients();
@@ -21,9 +21,18 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="text-center sm:text-left flex-1">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestion Équipements</h1>
-          <p className="text-sm text-muted-foreground">
-            {currentBuilding ? `${currentBuilding.code} - ${currentBuilding.nom}` : 'Tous les bâtiments'}
-          </p>
+          <div className="flex items-center gap-2 justify-center sm:justify-start">
+            <p className="text-sm text-muted-foreground">
+              {currentBuilding ? `${currentBuilding.code} - ${currentBuilding.nom}` : 'Tous les bâtiments'}
+            </p>
+            <div className="flex items-center space-x-1">
+              {syncPending && <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />}
+              <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
+              <span className="text-xs text-muted-foreground">
+                {isOnline ? 'En ligne' : 'Hors ligne'}
+              </span>
+            </div>
+          </div>
         </div>
         {onSwitchApp && (
           <Button variant="outline" size="sm" onClick={onSwitchApp} className="w-full sm:w-auto">
