@@ -40,6 +40,17 @@ const App = () => {
     }
   }, [isLoggedIn, loadSupabaseData, loadInspectionData]);
 
+  // Recharger les données quand on change d'app
+  useEffect(() => {
+    if (isLoggedIn) {
+      if (currentApp === 'equipment') {
+        loadSupabaseData();
+      } else {
+        loadInspectionData();
+      }
+    }
+  }, [currentApp, isLoggedIn, loadSupabaseData, loadInspectionData]);
+
   if (!isLoggedIn) {
     return (
       <QueryClientProvider client={queryClient}>
