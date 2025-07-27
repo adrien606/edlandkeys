@@ -35,12 +35,12 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
   
   // Trouver l'état de sortie associé si c'est un état d'entrée
   const exitInspection = inspection?.type === 'entry' 
-    ? inspections.find(i => i.type === 'exit' && i.entryInspectionId === inspection.id)
+    ? inspections.find(i => i.type === 'exit' && i.entry_inspection_id === inspection.id)
     : null;
-    
+     
   // Trouver l'état d'entrée associé si c'est un état de sortie
-  const entryInspection = inspection?.type === 'exit' && inspection.entryInspectionId
-    ? inspections.find(i => i.id === inspection.entryInspectionId)
+  const entryInspection = inspection?.type === 'exit' && inspection.entry_inspection_id
+    ? inspections.find(i => i.id === inspection.entry_inspection_id)
     : null;
 
   if (!inspection) {

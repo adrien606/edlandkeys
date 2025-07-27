@@ -23,7 +23,7 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
 
   const filteredInspections = inspections
     .filter(inspection => {
-      const matchesSearch = inspection.clientName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = inspection.client_name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = filterType === 'all' || inspection.type === filterType;
       const matchesStatus = filterStatus === 'all' || 
         (filterStatus === 'completed' && inspection.completed) ||
@@ -103,7 +103,7 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-base sm:text-lg truncate">{inspection.clientName}</h3>
+                        <h3 className="font-semibold text-base sm:text-lg truncate">{inspection.client_name}</h3>
                         <Badge variant={inspection.type === 'entry' ? 'default' : 'secondary'} className="text-xs">
                           {inspection.type === 'entry' ? 'Entrée' : 'Sortie'}
                         </Badge>
@@ -112,9 +112,9 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
                         <p>
                           Date: {format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr })}
                         </p>
-                        <p className="truncate">Email: {inspection.clientEmail}</p>
-                        {inspection.buildingCode && (
-                          <p>Bâtiment: {inspection.buildingCode}</p>
+                        <p className="truncate">Email: {inspection.client_email}</p>
+                        {inspection.building_code && (
+                          <p>Bâtiment: {inspection.building_code}</p>
                         )}
                       </div>
                     </div>
