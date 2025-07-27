@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSupabaseStore } from '@/hooks/useSupabaseStore';
-import { Building, Plus, RefreshCw } from 'lucide-react';
+import { Building, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 export const BuildingSelector = () => {
-  const { buildings, currentBuildingId, setCurrentBuildingId, addBuilding, loadData, loading } = useSupabaseStore();
+  const { buildings, currentBuildingId, setCurrentBuildingId, addBuilding } = useSupabaseStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     nom: '',
@@ -64,16 +64,6 @@ export const BuildingSelector = () => {
               ))}
             </SelectContent>
           </Select>
-
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={loadData}
-            disabled={loading}
-            title="Actualiser les données"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
