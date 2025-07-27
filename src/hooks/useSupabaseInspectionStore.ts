@@ -47,9 +47,9 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
     set({ loading: true });
     
     try {
-      // Load inspection buildings
+      // Load buildings from the main buildings table
       const { data: buildingsData } = await supabase
-        .from('inspection_buildings')
+        .from('buildings')
         .select('*')
         .order('nom');
       
@@ -63,7 +63,6 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
         id: b.id,
         nom: b.nom,
         code: b.code,
-        adresse: b.adresse,
         description: b.description,
         dateCreation: b.date_creation
       }));
@@ -252,11 +251,10 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
 
   addInspectionBuilding: async (building) => {
     const { data: newBuilding, error } = await supabase
-      .from('inspection_buildings')
+      .from('buildings')
       .insert({
         nom: building.nom,
         code: building.code,
-        adresse: building.adresse,
         description: building.description
       })
       .select()
@@ -268,7 +266,6 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
       id: newBuilding.id,
       nom: newBuilding.nom,
       code: newBuilding.code,
-      adresse: newBuilding.adresse,
       description: newBuilding.description,
       dateCreation: newBuilding.date_creation
     };
@@ -282,11 +279,10 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
     const updateData: any = {};
     if (updates.nom) updateData.nom = updates.nom;
     if (updates.code) updateData.code = updates.code;
-    if (updates.adresse !== undefined) updateData.adresse = updates.adresse;
     if (updates.description !== undefined) updateData.description = updates.description;
 
     const { error } = await supabase
-      .from('inspection_buildings')
+      .from('buildings')
       .update(updateData)
       .eq('id', id);
 

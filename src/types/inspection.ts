@@ -2,7 +2,6 @@ export interface InspectionBuilding {
   id: string;
   nom: string;
   code: string;
-  adresse?: string;
   description?: string;
   dateCreation: string;
 }

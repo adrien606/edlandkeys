@@ -178,7 +178,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             <h3>Informations Client</h3>
             <p><strong>Nom:</strong> ${inspection.clientName}</p>
             <p><strong>Email:</strong> ${inspection.clientEmail}</p>
-            ${building ? `<p><strong>Bâtiment:</strong> ${building.nom}${building.adresse ? ` - ${building.adresse}` : ''}</p>` : ''}
+            ${building ? `<p><strong>Bâtiment:</strong> ${building.nom} (${building.code})</p>` : ''}
           </div>
           
           <div class="inspection-details">
@@ -257,7 +257,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                 <strong>Client :</strong> ${inspection.clientName}
               </div>
               <div>
-                ${building && building.adresse ? `<strong>Adresse :</strong> ${building.adresse}` : ''}
+                ${building ? `<strong>Bâtiment :</strong> ${building.nom} (${building.code})` : ''}
               </div>
             </div>
             <div class="approval">
