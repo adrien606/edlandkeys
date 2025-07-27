@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useSupabaseStore } from "@/hooks/useSupabaseStore";
+import { useStore } from "@/store/useStore";
 import { useSupabaseInspectionStore } from "@/hooks/useSupabaseInspectionStore";
 import { ArrowLeft, Home, LogOut, Building, Settings } from "lucide-react";
 
@@ -14,14 +14,14 @@ interface NewInspectionProps {
 }
 
 export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspectionProps) => {
-  const { clients } = useSupabaseStore();
-  const { createInspection, inspectionBuildings } = useSupabaseInspectionStore();
+  const { clients, buildings } = useStore();
+  const { createInspection } = useSupabaseInspectionStore();
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [selectedBuildingId, setSelectedBuildingId] = useState<string>("");
   const [inspectionType, setInspectionType] = useState<'entry' | 'exit'>('entry');
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
-  const selectedBuilding = inspectionBuildings.find(b => b.id === selectedBuildingId);
+  const selectedBuilding = buildings.find(b => b.id === selectedBuildingId);
 
   const handleStartInspection = () => {
     if (!selectedClient || !selectedBuildingId) return;
@@ -136,7 +136,7 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
                 <SelectValue placeholder="Choisir un bâtiment *" />
               </SelectTrigger>
               <SelectContent>
-                {inspectionBuildings.map((building) => (
+                {buildings.map((building) => (
                   <SelectItem key={building.id} value={building.id}>
                     <div className="flex items-center gap-2">
                       <Building className="w-4 h-4" />
@@ -155,11 +155,6 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
                   </span>
                   <Badge variant="outline">{selectedBuilding.code}</Badge>
                 </div>
-                {selectedBuilding.adresse && (
-                  <p className="text-sm text-muted-foreground">
-                    📍 {selectedBuilding.adresse}
-                  </p>
-                )}
                 {selectedBuilding.description && (
                   <p className="text-sm text-muted-foreground">
                     {selectedBuilding.description}
@@ -168,7 +163,7 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
               </div>
             )}
 
-            {inspectionBuildings.length === 0 && (
+            {buildings.length === 0 && (
               <div className="text-center text-muted-foreground p-4 border border-dashed rounded-lg">
                 <Building className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">Aucun bâtiment enregistré</p>
