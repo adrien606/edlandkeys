@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useStore } from '@/store/useStore';
-import { useInspectionStore } from '@/store/useInspectionStore';
 import { ArrowLeft, Plus, Building, Edit3, Trash2, MoreVertical } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -22,11 +21,11 @@ interface BuildingManagementProps {
 
 export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: BuildingManagementProps) => {
   const { 
-    inspectionBuildings, 
-    addInspectionBuilding, 
-    updateInspectionBuilding, 
-    deleteInspectionBuilding 
-  } = useInspectionStore();
+    buildings: inspectionBuildings, 
+    addBuilding: addInspectionBuilding, 
+    updateBuilding: updateInspectionBuilding, 
+    deleteBuilding: deleteInspectionBuilding 
+  } = useStore();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -36,7 +35,6 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
   const [buildingForm, setBuildingForm] = useState({
     nom: '',
     code: '',
-    adresse: '',
     description: ''
   });
 
@@ -49,11 +47,10 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
     addInspectionBuilding({
       nom: buildingForm.nom,
       code: buildingForm.code,
-      adresse: buildingForm.adresse,
       description: buildingForm.description
     });
 
-    setBuildingForm({ nom: '', code: '', adresse: '', description: '' });
+    setBuildingForm({ nom: '', code: '', description: '' });
     setIsAddDialogOpen(false);
     toast.success('Bâtiment ajouté avec succès');
   };
@@ -63,7 +60,6 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
     setBuildingForm({
       nom: building.nom,
       code: building.code,
-      adresse: building.adresse || '',
       description: building.description || ''
     });
     setIsEditDialogOpen(true);
@@ -75,12 +71,11 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
     updateInspectionBuilding(editingBuilding.id, {
       nom: buildingForm.nom,
       code: buildingForm.code,
-      adresse: buildingForm.adresse,
       description: buildingForm.description
     });
 
     setEditingBuilding(null);
-    setBuildingForm({ nom: '', code: '', adresse: '', description: '' });
+    setBuildingForm({ nom: '', code: '', description: '' });
     setIsEditDialogOpen(false);
     toast.success('Bâtiment modifié avec succès');
   };
@@ -143,15 +138,6 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
                     />
                   </div>
                   
-                  <div>
-                    <Label htmlFor="adresse">Adresse</Label>
-                    <Input
-                      id="adresse"
-                      value={buildingForm.adresse}
-                      onChange={(e) => setBuildingForm(prev => ({ ...prev, adresse: e.target.value }))}
-                      placeholder="ex: 123 Rue Example"
-                    />
-                  </div>
                   
                   <div>
                     <Label htmlFor="description">Description</Label>
@@ -190,9 +176,6 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
                       <Badge variant="outline">{building.code}</Badge>
                     </div>
                     
-                    {building.adresse && (
-                      <p className="text-sm text-muted-foreground mb-1">📍 {building.adresse}</p>
-                    )}
                     
                     {building.description && (
                       <p className="text-sm text-muted-foreground">{building.description}</p>
@@ -260,14 +243,6 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
                 />
               </div>
               
-              <div>
-                <Label htmlFor="edit-adresse">Adresse</Label>
-                <Input
-                  id="edit-adresse"
-                  value={buildingForm.adresse}
-                  onChange={(e) => setBuildingForm(prev => ({ ...prev, adresse: e.target.value }))}
-                />
-              </div>
               
               <div>
                 <Label htmlFor="edit-description">Description</Label>
