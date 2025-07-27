@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { useInspectionStore } from "@/store/useInspectionStore";
+import { useSupabaseInspectionStore } from "@/hooks/useSupabaseInspectionStore";
 import { INSPECTION_AREAS } from "@/types/inspection";
 import { ArrowLeft, Camera, X, Check, AlertTriangle, XCircle, FileSearch } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -15,7 +15,7 @@ interface InspectionFormProps {
 }
 
 export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFormProps) => {
-  const { currentInspection, updateInspectionItem, addPhotoToItem, removePhotoFromItem, inspections } = useInspectionStore();
+  const { currentInspection, updateInspectionItem, addPhotoToItem, removePhotoFromItem, inspections } = useSupabaseInspectionStore();
   const [currentAreaIndex, setCurrentAreaIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

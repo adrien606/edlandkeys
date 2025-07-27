@@ -19,6 +19,7 @@ interface SupabaseInspectionStore {
   ) => void;
   updateInspectionItem: (areaKey: string, updates: Partial<InspectionItem>) => void;
   addPhotoToItem: (areaKey: string, photo: string) => void;
+  removePhotoFromItem: (areaKey: string, photoIndex: number) => void;
   setSignature: (signature: string) => void;
   setSiteManagerInfo: (name: string, signature: string) => void;
   completeInspection: () => Promise<void>;
@@ -96,7 +97,8 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
   },
 
   createInspection: (clientId, clientName, clientEmail, type, buildingId, entryInspectionId) => {
-    const building = get().inspectionBuildings.find(b => b.id === buildingId);
+    // Le building code sera fourni depuis l'extérieur si nécessaire
+    const buildingCode = buildingId; // Utilisé comme placeholder
     
     const newInspection: Inspection = {
       id: crypto.randomUUID(),
@@ -104,7 +106,7 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
       clientName,
       clientEmail,
       buildingId,
-      buildingCode: building?.code,
+      buildingCode: undefined, // Sera mis à jour par l'appelant si nécessaire
       type,
       entryInspectionId,
       date: new Date().toISOString(),
@@ -156,6 +158,28 @@ export const useSupabaseInspectionStore = create<SupabaseInspectionStore>((set, 
             [areaKey]: {
               ...currentItem,
               photos: [...currentItem.photos, photo]
+            }
+          }
+        }
+      };
+    });
+  },
+
+  removePhotoFromItem: (areaKey, photoIndex) => {
+    set(state => {
+      if (!state.currentInspection) return state;
+      
+      const currentItem = state.currentInspection.items[areaKey as keyof typeof state.currentInspection.items];
+      const updatedPhotos = currentItem.photos.filter((_, index) => index !== photoIndex);
+      
+      return {
+        currentInspection: {
+          ...state.currentInspection,
+          items: {
+            ...state.currentInspection.items,
+            [areaKey]: {
+              ...currentItem,
+              photos: updatedPhotos
             }
           }
         }
