@@ -125,33 +125,6 @@ export type Database = {
           },
         ]
       }
-      inspection_buildings: {
-        Row: {
-          adresse: string | null
-          code: string
-          date_creation: string | null
-          description: string | null
-          id: string
-          nom: string
-        }
-        Insert: {
-          adresse?: string | null
-          code: string
-          date_creation?: string | null
-          description?: string | null
-          id?: string
-          nom: string
-        }
-        Update: {
-          adresse?: string | null
-          code?: string
-          date_creation?: string | null
-          description?: string | null
-          id?: string
-          nom?: string
-        }
-        Relationships: []
-      }
       inspections: {
         Row: {
           building_code: string | null
