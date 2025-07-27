@@ -61,7 +61,7 @@ export const useSupabaseStore = create<SupabaseStore>((set, get) => ({
     set({ loading: true });
     
     try {
-      // Load buildings
+      // Load buildings with real-time refresh
       const { data: buildingsData } = await supabase
         .from('buildings')
         .select('*')
