@@ -111,18 +111,18 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     const typeLabel = inspection.type === 'entry' ? 'État d\'entrée' : 'État de sortie';
     
     // Récupérer l'inspection d'entrée si c'est un état de sortie
-    const entryInspection = inspection.type === 'exit' && inspection.entryInspectionId 
-      ? inspections.find(i => i.id === inspection.entryInspectionId)
+    const entryInspection = inspection.type === 'exit' && inspection.entry_inspection_id 
+      ? inspections.find(i => i.id === inspection.entry_inspection_id)
       : null;
 
     // Récupérer les informations du bâtiment
-    const building = buildings.find(b => b.id === inspection.buildingId);
+    const building = buildings.find(b => b.id === inspection.building_id);
     
     let html = `
       <html>
         <head>
           <meta charset="utf-8">
-          <title>État des Lieux - ${inspection.clientName}</title>
+          <title>État des Lieux - ${inspection.client_name}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 20px; }
             .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
@@ -185,8 +185,8 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
           
           <div class="client-info">
             <h3>Informations Client</h3>
-            <p><strong>Nom:</strong> ${inspection.clientName}</p>
-            <p><strong>Email:</strong> ${inspection.clientEmail}</p>
+            <p><strong>Nom:</strong> ${inspection.client_name}</p>
+            <p><strong>Email:</strong> ${inspection.client_email}</p>
             ${building ? `<p><strong>Bâtiment:</strong> ${building.nom} (${building.code})</p>` : ''}
           </div>
           
@@ -236,7 +236,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     });
     
     // Signatures section
-    if (inspection.signature || inspection.siteManagerSignature) {
+    if (inspection.signature || inspection.site_manager_signature) {
       html += `<div class="signatures">`;
       
       if (inspection.signature) {
@@ -247,11 +247,11 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
           </div>`;
       }
       
-      if (inspection.siteManagerSignature) {
+      if (inspection.site_manager_signature) {
         html += `
           <div class="signature">
-            <h3>Responsable de site${inspection.siteManagerName ? ' - ' + inspection.siteManagerName : ''}</h3>
-            <img src="${inspection.siteManagerSignature}" alt="Signature du responsable de site" class="signature-img">
+            <h3>Responsable de site${inspection.site_manager_name ? ' - ' + inspection.site_manager_name : ''}</h3>
+            <img src="${inspection.site_manager_signature}" alt="Signature du responsable de site" class="signature-img">
           </div>`;
       }
       
@@ -263,7 +263,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
           <div class="footer">
             <div class="footer-content">
               <div>
-                <strong>Client :</strong> ${inspection.clientName}
+                <strong>Client :</strong> ${inspection.client_name}
               </div>
               <div>
                 ${building ? `<strong>Bâtiment :</strong> ${building.nom} (${building.code})` : ''}
@@ -292,7 +292,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
       
       const link = document.createElement('a');
       link.href = url;
-      link.download = `etat-des-lieux-${inspection.clientName.replace(/\s+/g, '-')}-${format(new Date(inspection.date), 'yyyy-MM-dd')}.html`;
+      link.download = `etat-des-lieux-${inspection.client_name.replace(/\s+/g, '-')}-${format(new Date(inspection.date), 'yyyy-MM-dd')}.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -326,20 +326,20 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
   // Fonction pour envoyer par email
   const handleSendEmail = () => {
     try {
-      const subject = `État des lieux - ${inspection.clientName}`;
+      const subject = `État des lieux - ${inspection.client_name}`;
       const inspectionDate = format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr });
       const typeLabel = inspection.type === 'entry' ? 'État d\'entrée' : 'État de sortie';
       
       let body = `Bonjour,\n\nVeuillez trouver ci-joint l'état des lieux suivant :\n\n`;
-      body += `Client: ${inspection.clientName}\n`;
+      body += `Client: ${inspection.client_name}\n`;
       body += `Type: ${typeLabel}\n`;
       body += `Date: ${inspectionDate}\n`;
-      if (inspection.buildingCode) {
-        body += `Bâtiment: ${inspection.buildingCode}\n`;
+      if (inspection.building_code) {
+        body += `Bâtiment: ${inspection.building_code}\n`;
       }
       body += `\nCordialement`;
       
-      const mailtoLink = `mailto:${inspection.clientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const mailtoLink = `mailto:${inspection.client_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.location.href = mailtoLink;
       
       toast.success('Client email ouvert');
@@ -355,9 +355,9 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     
     // Créer un nouvel état de sortie avec les mêmes informations client et référence à l'entrée
     createInspection(
-      inspection.clientId,
-      inspection.clientName,
-      inspection.clientEmail,
+      inspection.client_id,
+      inspection.client_name,
+      inspection.client_email,
       'exit',
       inspection.building_id,
       inspection.id // Référence à l'inspection d'entrée
@@ -386,7 +386,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Détail de l'État des Lieux</h1>
-              <p className="text-muted-foreground">{inspection.clientName}</p>
+              <p className="text-muted-foreground">{inspection.client_name}</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -416,7 +416,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Lien vers l'état d'entrée originel (si c'est un état de sortie) */}
-            {inspection.type === 'exit' && inspection.entryInspectionId && (
+            {inspection.type === 'exit' && inspection.entry_inspection_id && (
               <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
@@ -428,7 +428,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onNavigate(`inspection-detail/${inspection.entryInspectionId}`)}
+                    onClick={() => onNavigate(`inspection-detail/${inspection.entry_inspection_id}`)}
                     className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
@@ -467,16 +467,16 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Client</p>
-                <p className="text-lg">{inspection.clientName}</p>
+                <p className="text-lg">{inspection.client_name}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Email</p>
-                <p className="text-lg">{inspection.clientEmail}</p>
+                <p className="text-lg">{inspection.client_email}</p>
               </div>
-              {inspection.buildingCode && (
+              {inspection.building_code && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Bâtiment</p>
-                  <p className="text-lg">{inspection.buildingCode}</p>
+                  <p className="text-lg">{inspection.building_code}</p>
                 </div>
               )}
               <div>
@@ -587,7 +587,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
 
         {/* Signature */}
         {/* Signatures Section */}
-        {(inspection.signature || inspection.siteManagerSignature) && (
+        {(inspection.signature || inspection.site_manager_signature) && (
           <Card>
             <CardHeader>
               <CardTitle>Signatures</CardTitle>
@@ -606,17 +606,17 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                 </div>
               )}
               
-              {inspection.siteManagerSignature && (
+              {inspection.site_manager_signature && (
                 <div>
                   <h4 className="font-medium mb-3">
                     Responsable de site
-                    {inspection.siteManagerName && (
-                      <span className="text-muted-foreground font-normal"> - {inspection.siteManagerName}</span>
+                    {inspection.site_manager_name && (
+                      <span className="text-muted-foreground font-normal"> - {inspection.site_manager_name}</span>
                     )}
                   </h4>
                   <div className="border rounded p-4 bg-white">
                     <img 
-                      src={inspection.siteManagerSignature} 
+                      src={inspection.site_manager_signature} 
                       alt="Signature du responsable de site"
                       className="max-w-full h-auto"
                     />
@@ -682,7 +682,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
                     Supprimer l'état d'entrée n'affectera pas l'état de sortie, mais la référence sera perdue.
                   </div>
                 )}
-                {inspection.type === 'exit' && inspection.entryInspectionId && (
+                {inspection.type === 'exit' && inspection.entry_inspection_id && (
                   <div className="mt-2 p-2 bg-info/10 border border-info/20 rounded text-sm">
                     <strong>ℹ️ Info :</strong> L'état d'entrée de référence sera conservé.
                   </div>

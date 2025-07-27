@@ -21,10 +21,10 @@ interface BuildingManagementProps {
 
 export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: BuildingManagementProps) => {
   const { 
-    buildings: inspectionBuildings, 
-    addBuilding: addInspectionBuilding, 
-    updateBuilding: updateInspectionBuilding, 
-    deleteBuilding: deleteInspectionBuilding 
+    buildings, 
+    addBuilding, 
+    updateBuilding, 
+    deleteBuilding 
   } = useSupabaseStore();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -44,7 +44,7 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
       return;
     }
 
-    addInspectionBuilding({
+    addBuilding({
       nom: buildingForm.nom,
       code: buildingForm.code,
       description: buildingForm.description
@@ -68,7 +68,7 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
   const handleSaveEdit = () => {
     if (!editingBuilding) return;
 
-    updateInspectionBuilding(editingBuilding.id, {
+    updateBuilding(editingBuilding.id, {
       nom: buildingForm.nom,
       code: buildingForm.code,
       description: buildingForm.description
@@ -81,7 +81,7 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
   };
 
   const handleDeleteBuilding = (buildingId: string) => {
-    deleteInspectionBuilding(buildingId);
+    deleteBuilding(buildingId);
     setBuildingToDelete(null);
     toast.success('Bâtiment supprimé avec succès');
   };
@@ -165,7 +165,7 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
 
         {/* Buildings List */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {inspectionBuildings.map((building) => (
+          {buildings.map((building) => (
             <Card key={building.id}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
@@ -210,7 +210,7 @@ export const BuildingManagement = ({ onNavigate, onBack, onSwitchApp }: Building
           ))}
         </div>
 
-        {inspectionBuildings.length === 0 && (
+        {buildings.length === 0 && (
           <Card>
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">Aucun bâtiment enregistré</p>
