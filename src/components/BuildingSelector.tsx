@@ -1,7 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useSupabaseStore } from '@/hooks/useSupabaseStore';
+import { useStore } from '@/store/useStore';
 import { Building, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 export const BuildingSelector = () => {
-  const { buildings, currentBuildingId, setCurrentBuildingId, addBuilding } = useSupabaseStore();
+  const { buildings, currentBuildingId, setCurrentBuilding, addBuilding } = useStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     nom: '',
@@ -51,7 +51,7 @@ export const BuildingSelector = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2">
-          <Select value={currentBuildingId || 'all'} onValueChange={(value) => setCurrentBuildingId(value === 'all' ? '' : value)}>
+          <Select value={currentBuildingId || 'all'} onValueChange={(value) => setCurrentBuilding(value === 'all' ? null : value)}>
             <SelectTrigger className="flex-1">
               <SelectValue placeholder="Sélectionner un bâtiment" />
             </SelectTrigger>
