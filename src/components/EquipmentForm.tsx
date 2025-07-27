@@ -56,7 +56,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
       .filter(item => 
         item.quantiteDisponible > 0 && 
         (!formData.equipmentType || item.type === formData.equipmentType) &&
-        (!formData.batimentId || item.batimentId === formData.batimentId)
+        (!formData.batimentId || item.batiment_id === formData.batimentId)
       );
   };
   
@@ -89,7 +89,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
       equipmentType: formData.equipmentType,
       numero: selectedItem.numero,
       description: selectedItem.description,
-      batimentId: selectedItem.batimentId,
+      batimentId: selectedItem.batiment_id,
     });
 
     const client = clients.find(c => c.id === formData.clientId);
