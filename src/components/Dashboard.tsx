@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useSupabaseStore } from '@/hooks/useSupabaseStore';
+import { useStore } from '@/store/useStore';
 import { Users, Key, CreditCard, Radio, AlertTriangle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BuildingSelector } from '@/components/BuildingSelector';
 
 export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { getFilteredClients, getEquipmentStats, buildings, currentBuildingId } = useSupabaseStore();
+  const { getFilteredClients, getEquipmentStats, buildings, currentBuildingId } = useStore();
   const navigate = useNavigate();
   const stats = getEquipmentStats();
   const filteredClients = getFilteredClients();

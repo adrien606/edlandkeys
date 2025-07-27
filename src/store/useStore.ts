@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Client, Equipment, ClientFormData, EquipmentFormData, Building, BuildingFormData } from '@/types';
+import { Inspection, InspectionItem, INSPECTION_AREAS } from '@/types/inspection';
 
 export interface StockItem {
   id: string;
@@ -18,6 +19,8 @@ interface Store {
   clients: Client[];
   buildings: Building[];
   stockItems: StockItem[];
+  inspections: Inspection[];
+  currentInspection: Inspection | null;
   currentBuildingId: string | null;
   searchTerm: string;
   
@@ -54,6 +57,17 @@ interface Store {
     perdu: number;
     nonRendu: number;
   };
+
+  // Inspection Actions
+  createInspection: (clientId: string, clientName: string, clientEmail: string, type: 'entry' | 'exit', buildingId?: string, entryInspectionId?: string) => void;
+  updateInspectionItem: (areaKey: string, updates: Partial<InspectionItem>) => void;
+  addPhotoToItem: (areaKey: string, photo: string) => void;
+  removePhotoFromItem: (areaKey: string, photoIndex: number) => void;
+  setSignature: (signature: string) => void;
+  setSiteManagerInfo: (name: string, signature: string) => void;
+  setCurrentInspection: (inspection: Inspection | null) => void;
+  deleteInspection: (id: string) => void;
+  completeInspection: () => void;
 }
 
 const generateId = () => crypto.randomUUID();
@@ -71,11 +85,13 @@ export const useStore = create<Store>()(
         { id: generateId(), type: 'telecommande', numero: 'T002', description: 'Télécommande portail', statut: 'perdu', batimentId: '', quantite: 1, quantiteDisponible: 0 },
       ],
       buildings: [
-        { id: generateId(), nom: 'Bâtiment AI', code: 'BAI', dateCreation: new Date().toISOString() },
-        { id: generateId(), nom: 'Bâtiment AS', code: 'BAS', dateCreation: new Date().toISOString() },
-        { id: generateId(), nom: 'Bâtiment AB', code: 'BAB', dateCreation: new Date().toISOString() },
-        { id: generateId(), nom: 'Bâtiment AT', code: 'BAT', dateCreation: new Date().toISOString() },
+        { id: generateId(), nom: 'BEL AIR BUSINESS', code: 'BEL-BUS', dateCreation: new Date().toISOString(), description: 'Bâtiment dédié aux bureaux et espaces de travail' },
+        { id: generateId(), nom: 'BEL AIR INDUSTRY', code: 'BEL-IND', dateCreation: new Date().toISOString(), description: 'Bâtiment industriel et de production' },
+        { id: generateId(), nom: 'BEL AIR TEXTILE', code: 'BEL-TEX', dateCreation: new Date().toISOString(), description: 'Bâtiment spécialisé dans l\'industrie textile' },
+        { id: generateId(), nom: 'BEL AIR SCHOOL', code: 'BEL-EDU', dateCreation: new Date().toISOString(), description: 'Bâtiment scolaire et de formation' },
       ],
+      inspections: [],
+      currentInspection: null,
       currentBuildingId: null,
       searchTerm: '',
       
@@ -306,6 +322,150 @@ export const useStore = create<Store>()(
           nonRendu: filteredEquipments.filter((eq) => eq.statut === 'non_rendu').length,
         };
       },
+
+      // Inspection Actions
+      createInspection: (clientId, clientName, clientEmail, type, buildingId, entryInspectionId) => {
+        const building = get().buildings.find(b => b.id === buildingId);
+        
+        const createEmptyInspectionItem = (name: string): InspectionItem => ({
+          id: generateId(),
+          name,
+          comment: '',
+          photos: [],
+          status: 'good'
+        });
+
+        const newInspection: Inspection = {
+          id: generateId(),
+          clientId,
+          clientName,
+          clientEmail,
+          buildingId,
+          buildingCode: building?.code,
+          type,
+          entryInspectionId,
+          date: new Date().toISOString(),
+          items: {
+            prises: createEmptyInspectionItem('Prises électriques'),
+            murs: createEmptyInspectionItem('Murs'),
+            sol: createEmptyInspectionItem('Sol'),
+            plafond: createEmptyInspectionItem('Plafond'),
+            fenetres: createEmptyInspectionItem('Fenêtres'),
+            portes: createEmptyInspectionItem('Portes')
+          },
+          signature: '',
+          completed: false
+        };
+        
+        set({ currentInspection: newInspection });
+      },
+
+      updateInspectionItem: (areaKey, updates) => {
+        set(state => {
+          if (!state.currentInspection) return state;
+          
+          return {
+            currentInspection: {
+              ...state.currentInspection,
+              items: {
+                ...state.currentInspection.items,
+                [areaKey]: {
+                  ...state.currentInspection.items[areaKey as keyof typeof state.currentInspection.items],
+                  ...updates
+                }
+              }
+            }
+          };
+        });
+      },
+
+      addPhotoToItem: (areaKey, photo) => {
+        set(state => {
+          if (!state.currentInspection) return state;
+          
+          const currentItem = state.currentInspection.items[areaKey as keyof typeof state.currentInspection.items];
+          
+          return {
+            currentInspection: {
+              ...state.currentInspection,
+              items: {
+                ...state.currentInspection.items,
+                [areaKey]: {
+                  ...currentItem,
+                  photos: [...currentItem.photos, photo]
+                }
+              }
+            }
+          };
+        });
+      },
+
+      removePhotoFromItem: (areaKey, photoIndex) => {
+        set(state => {
+          if (!state.currentInspection) return state;
+          
+          const currentItem = state.currentInspection.items[areaKey as keyof typeof state.currentInspection.items];
+          const updatedPhotos = currentItem.photos.filter((_, index) => index !== photoIndex);
+          
+          return {
+            currentInspection: {
+              ...state.currentInspection,
+              items: {
+                ...state.currentInspection.items,
+                [areaKey]: {
+                  ...currentItem,
+                  photos: updatedPhotos
+                }
+              }
+            }
+          };
+        });
+      },
+
+      setSignature: (signature) => {
+        set(state => ({
+          currentInspection: state.currentInspection ? {
+            ...state.currentInspection,
+            signature
+          } : null
+        }));
+      },
+
+      setSiteManagerInfo: (name, signature) => {
+        set(state => ({
+          currentInspection: state.currentInspection ? {
+            ...state.currentInspection,
+            siteManagerName: name,
+            siteManagerSignature: signature
+          } : null
+        }));
+      },
+
+      setCurrentInspection: (inspection) => {
+        set({ currentInspection: inspection });
+      },
+
+      deleteInspection: (id) => {
+        set(state => ({
+          inspections: state.inspections.filter(i => i.id !== id),
+          currentInspection: state.currentInspection?.id === id ? null : state.currentInspection
+        }));
+      },
+
+      completeInspection: () => {
+        const { currentInspection } = get();
+        if (!currentInspection) return;
+
+        const completedInspection = {
+          ...currentInspection,
+          completed: true
+        };
+
+        set(state => ({
+          inspections: [completedInspection, ...state.inspections],
+          currentInspection: null
+        }));
+      }
     }),
     {
       name: 'coworking-equipment-store',

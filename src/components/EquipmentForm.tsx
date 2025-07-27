@@ -6,20 +6,15 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useSupabaseStore } from '@/hooks/useSupabaseStore';
+import { useStore } from '@/store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { clients, addEquipment, buildings, stockItems, loadData } = useSupabaseStore();
+  const { clients, addEquipment, buildings, stockItems } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // Forcer le rechargement des données quand le composant se charge
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
   
   const [formData, setFormData] = useState({
     clientId: '',

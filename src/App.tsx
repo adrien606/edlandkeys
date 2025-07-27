@@ -5,8 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useSupabaseStore } from "./hooks/useSupabaseStore";
-import { useSupabaseInspectionStore } from "./hooks/useSupabaseInspectionStore";
+import { useStore } from "./store/useStore";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { Dashboard } from "./components/Dashboard";
@@ -30,26 +29,6 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection'>('equipment');
-  const loadSupabaseData = useSupabaseStore(state => state.loadData);
-  const loadInspectionData = useSupabaseInspectionStore(state => state.loadData);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      loadSupabaseData();
-      loadInspectionData();
-    }
-  }, [isLoggedIn, loadSupabaseData, loadInspectionData]);
-
-  // Recharger les données quand on change d'app
-  useEffect(() => {
-    if (isLoggedIn) {
-      if (currentApp === 'equipment') {
-        loadSupabaseData();
-      } else {
-        loadInspectionData();
-      }
-    }
-  }, [currentApp, isLoggedIn, loadSupabaseData, loadInspectionData]);
 
   if (!isLoggedIn) {
     return (

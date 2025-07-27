@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useSupabaseInspectionStore } from "@/hooks/useSupabaseInspectionStore";
+import { useStore } from "@/store/useStore";
 import { ArrowLeft, Search, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -16,7 +16,7 @@ interface InspectionHistoryProps {
 }
 
 export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: InspectionHistoryProps) => {
-  const { inspections } = useSupabaseInspectionStore();
+  const { inspections } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
