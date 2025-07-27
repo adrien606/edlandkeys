@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,9 +12,14 @@ import { ArrowLeft, Package, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { clients, addEquipment, buildings, stockItems } = useSupabaseStore();
+  const { clients, addEquipment, buildings, stockItems, loadData } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Forcer le rechargement des données quand le composant se charge
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
   
   const [formData, setFormData] = useState({
     clientId: '',
