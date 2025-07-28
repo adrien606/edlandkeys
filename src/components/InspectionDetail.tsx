@@ -273,7 +273,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
               Lu et approuvé
             </div>
             <div class="company-info">
-              Fait par BEL AIR CAMP
+              Fait par BEL AIR CAMP - SIREN : 821797073
             </div>
           </div>
           </div>
