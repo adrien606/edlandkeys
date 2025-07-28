@@ -12,7 +12,7 @@ export const LoginScreen = ({
   const handleAppSelect = (appType: 'equipment' | 'inspection') => {
     onLogin(appType);
   };
-  return <div className="min-h-screen bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center p-4 bg-amber-300">
+  return <div className="min-h-screen bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center p-4 bg-blue-100">
       <Card className="w-full max-w-md mx-auto shadow-xl bg-indigo-950">
         
         
