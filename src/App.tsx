@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useSupabaseStore } from "./hooks/useSupabaseStore";
+import { useAuth } from "./hooks/useAuth";
+import { AuthPage } from "./pages/AuthPage";
+import { UserManagement } from "./components/UserManagement";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { Dashboard } from "./components/Dashboard";
@@ -27,24 +29,71 @@ import { InspectionSignature } from "./components/InspectionSignature";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection'>('equipment');
+  const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection' | 'users'>('equipment');
+  const { isAuthenticated, loading } = useAuth();
   const initialize = useSupabaseStore(state => state.initialize);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  if (!isLoggedIn) {
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p>Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth page if not authenticated
+  if (!isAuthenticated) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <LoginScreen onLogin={(appType) => {
-            setCurrentApp(appType);
-            setIsLoggedIn(true);
-          }} />
+          <AuthPage onAuthSuccess={() => {}} />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // Show app selection screen if authenticated
+  if (currentApp === 'users') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <UserManagement />
+          <div className="fixed bottom-4 left-4">
+            <button
+              onClick={() => setCurrentApp('equipment')}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              Retour aux applications
+            </button>
+          </div>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // Show login screen (app selection) if authenticated but no app selected
+  if (currentApp !== 'equipment' && currentApp !== 'inspection') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <LoginScreen 
+            onLogin={(appType) => setCurrentApp(appType)}
+            onUserManagement={() => setCurrentApp('users')}
+          />
         </TooltipProvider>
       </QueryClientProvider>
     );
@@ -80,7 +129,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <InspectionApp onBackToApps={() => setIsLoggedIn(false)} onSwitchApp={() => setCurrentApp('equipment')} />
+        <InspectionApp onBackToApps={() => setCurrentApp('equipment')} onSwitchApp={() => setCurrentApp('equipment')} />
       </TooltipProvider>
     </QueryClientProvider>
   );
