@@ -105,8 +105,8 @@ export const LoginScreen = ({
           {/* Sign out button */}
           <div className="pt-2">
             <Button 
-              variant="ghost" 
-              className="w-full flex items-center gap-2 text-muted-foreground"
+              variant="outline" 
+              className="w-full flex items-center gap-2 text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
               onClick={handleSignOut}
             >
               <LogOut className="w-4 h-4" />
