@@ -29,6 +29,19 @@ export const LoginScreen = ({
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center p-4">
       <Card className="w-full max-w-md mx-auto shadow-xl">
         <CardHeader className="text-center pb-4">
+          {/* Sign out button at the top */}
+          <div className="flex justify-end mb-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-2 text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
+              onClick={handleSignOut}
+            >
+              <LogOut className="w-4 h-4" />
+              Déconnexion
+            </Button>
+          </div>
+
           <div className="flex justify-center mb-4">
             <img 
               src={logoBelair} 
@@ -102,17 +115,6 @@ export const LoginScreen = ({
             </div>
           )}
 
-          {/* Sign out button */}
-          <div className="pt-2">
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center gap-2 text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
-              onClick={handleSignOut}
-            >
-              <LogOut className="w-4 h-4" />
-              Se déconnecter
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>
