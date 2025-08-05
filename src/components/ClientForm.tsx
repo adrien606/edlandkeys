@@ -83,23 +83,23 @@ export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <Label htmlFor="nom">Nom *</Label>
+                <Label htmlFor="nom">Nom de l'entreprise *</Label>
                 <Input
                   id="nom"
                   value={formData.nom}
                   onChange={(e) => handleChange('nom', e.target.value)}
-                  placeholder="Nom du client"
+                  placeholder="Nom de l'entreprise"
                   className="h-12"
                 />
               </div>
 
               <div>
-                <Label htmlFor="prenom">Prénom *</Label>
+                <Label htmlFor="prenom">Contact *</Label>
                 <Input
                   id="prenom"
                   value={formData.prenom}
                   onChange={(e) => handleChange('prenom', e.target.value)}
-                  placeholder="Prénom du client"
+                  placeholder="Nom du contact"
                   className="h-12"
                 />
               </div>

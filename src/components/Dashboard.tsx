@@ -128,7 +128,7 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
               {recentClients.map((client) => (
                 <div key={client.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                   <div>
-                    <div className="font-medium">{client.prenom} {client.nom}</div>
+                    <div className="font-medium">{client.nom}</div>
                     <div className="text-sm text-muted-foreground">
                       {client.equipements.length} équipement(s)
                     </div>
