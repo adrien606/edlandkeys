@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Key, CreditCard, Radio, User, Mail, Phone, Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, Edit3, Trash2, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Key, CreditCard, Radio, User, Mail, Phone, Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, Edit3, Trash2, MoreVertical, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditClientDialog, DeleteClientDialog } from '@/components/EditClientDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -112,6 +112,172 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       stockItem.type === equipment.type && 
       stockItem.numero === equipment.numero
     );
+  };
+
+  // Génération du contenu PDF pour les équipements du client
+  const generateEquipmentPDFContent = () => {
+    const building = client.equipements.length > 0 
+      ? buildings.find(b => b.id === client.equipements[0]?.batimentId)
+      : null;
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Fiche Équipements - ${client.nom}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .client-info { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+          .equipment-list { margin-bottom: 30px; }
+          .equipment-item { border: 1px solid #ddd; margin-bottom: 15px; padding: 15px; border-radius: 5px; }
+          .equipment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+          .status-badge { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
+          .status-remis { background: #d4edda; color: #155724; }
+          .status-restitue { background: #f8f9fa; color: #6c757d; }
+          .status-perdu { background: #f8d7da; color: #721c24; }
+          .status-non_rendu { background: #fff3cd; color: #856404; }
+          .validation { background: #d4edda; padding: 10px; margin-top: 10px; border-left: 4px solid #28a745; }
+          .signature-section { margin-top: 40px; page-break-inside: avoid; }
+          .signature-box { border: 1px solid #ddd; height: 100px; margin: 10px 0; }
+          .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+          @media print { 
+            body { margin: 0; } 
+            .header { page-break-after: avoid; }
+            .equipment-item { page-break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>FICHE ÉQUIPEMENTS</h1>
+          <h2>${client.nom}</h2>
+          <p>Date de génération : ${new Date().toLocaleDateString('fr-FR', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</p>
+        </div>
+
+        <div class="client-info">
+          <h3>Informations Client</h3>
+          <p><strong>Entreprise :</strong> ${client.nom}</p>
+          <p><strong>Contact :</strong> ${client.prenom}</p>
+          <p><strong>Email :</strong> ${client.email}</p>
+          <p><strong>Téléphone :</strong> ${client.telephone}</p>
+          <p><strong>Date d'inscription :</strong> ${new Date(client.dateInscription).toLocaleDateString('fr-FR')}</p>
+          ${building ? `<p><strong>Bâtiment principal :</strong> ${building.code} - ${building.nom}</p>` : ''}
+        </div>
+
+        <div class="equipment-list">
+          <h3>Liste des Équipements (${client.equipements.length})</h3>
+          ${client.equipements.map(equipment => {
+            const equipmentBuilding = buildings.find(b => b.id === equipment.batimentId);
+            return `
+              <div class="equipment-item">
+                <div class="equipment-header">
+                  <div>
+                    <h4>${getEquipmentLabel(equipment.type)} ${equipment.numero ? `#${equipment.numero}` : ''}</h4>
+                    ${equipment.description ? `<p style="color: #666; margin: 5px 0;">${equipment.description}</p>` : ''}
+                    <p style="font-size: 14px; color: #666;">Bâtiment: ${equipmentBuilding?.code || 'N/A'}</p>
+                  </div>
+                  <span class="status-badge status-${equipment.statut}">
+                    ${getStatusLabel(equipment.statut)}
+                  </span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                  <div>
+                    <p><strong>Date de remise :</strong><br>
+                    ${new Date(equipment.dateRemise!).toLocaleDateString('fr-FR', {
+                      day: '2-digit',
+                      month: '2-digit', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</p>
+                  </div>
+                  ${equipment.dateRestitution ? `
+                    <div>
+                      <p><strong>Date de restitution :</strong><br>
+                      ${new Date(equipment.dateRestitution).toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric', 
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}</p>
+                    </div>
+                  ` : ''}
+                </div>
+
+                ${equipment.validationClient ? `
+                  <div class="validation">
+                    <p><strong>✓ Validé par :</strong> ${equipment.validationClient.nomClient}</p>
+                    <p><strong>Date de validation :</strong> ${new Date(equipment.validationClient.dateValidation).toLocaleDateString('fr-FR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit', 
+                      minute: '2-digit'
+                    })}</p>
+                    ${equipment.validationClient.signature ? `
+                      <div style="margin-top: 10px;">
+                        <p><strong>Signature client :</strong></p>
+                        <img src="${equipment.validationClient.signature}" style="max-width: 200px; max-height: 100px; border: 1px solid #ddd;" />
+                      </div>
+                    ` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <div class="signature-section">
+          <h3>Signatures</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+            <div>
+              <p><strong>Signature du client</strong></p>
+              <div class="signature-box"></div>
+              <p>Nom : ________________________</p>
+              <p>Date : ________________________</p>
+            </div>
+            <div>
+              <p><strong>Signature du responsable</strong></p>
+              <div class="signature-box"></div>
+              <p>Nom : ________________________</p>
+              <p>Date : ________________________</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>Document généré automatiquement le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+          <p>Système de gestion des équipements</p>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
+  // Télécharger le PDF des équipements
+  const handleDownloadEquipmentPDF = () => {
+    const content = generateEquipmentPDFContent();
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `fiche-equipements-${client.nom.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast.success('Fiche équipements téléchargée avec succès');
   };
 
   if (!client) {
@@ -347,6 +513,17 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
           <Key className="mr-2 h-4 w-4" />
           Attribuer un nouvel équipement
         </Button>
+        
+        {client.equipements.length > 0 && (
+          <Button 
+            variant="outline"
+            onClick={handleDownloadEquipmentPDF}
+            className="h-12"
+          >
+            <FileDown className="mr-2 h-4 w-4" />
+            Télécharger la fiche équipements (PDF)
+          </Button>
+        )}
       </div>
 
       {/* Edit Client Dialog */}
