@@ -210,8 +210,7 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
                       )}
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
-                      <p className="font-normal">📧 {client.email}</p>
-                      <p className="font-normal">📞 {client.telephone}</p>
+                      <p className="font-normal">📧 {client.email} - 📞 {client.telephone}</p>
                     </div>
                   </div>
                   
