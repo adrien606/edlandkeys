@@ -81,21 +81,31 @@ export const LoginScreen = ({
                 <Button 
                   type="button" 
                   variant="default" 
-                  className="w-full p-4 h-auto flex flex-col items-center gap-2" 
+                  className="w-full p-6 h-auto flex flex-col items-start gap-3 text-left" 
                   onClick={() => handleAppSelect('equipment')}
                 >
                   <div className="text-lg font-semibold">Gestion Équipements</div>
-                  <div className="text-sm opacity-80">Clés, badges, télécommandes</div>
+                  <div className="text-sm opacity-90 leading-relaxed">
+                    • Enregistrer les entreprises et contacts<br/>
+                    • Distribuer clés, badges, télécommandes<br/>
+                    • Valider avec photos et signature<br/>
+                    • Suivi en temps réel des équipements
+                  </div>
                 </Button>
                 
                 <Button 
                   type="button" 
                   variant="default" 
-                  className="w-full p-4 h-auto flex flex-col items-center gap-2" 
+                  className="w-full p-6 h-auto flex flex-col items-start gap-3 text-left" 
                   onClick={() => handleAppSelect('inspection')}
                 >
                   <div className="text-lg font-semibold">États des Lieux</div>
-                  <div className="text-sm opacity-80">Entrée et sortie</div>
+                  <div className="text-sm opacity-90 leading-relaxed">
+                    • Créer des états des lieux détaillés<br/>
+                    • Photos avec commentaires par zone<br/>
+                    • Signature électronique des documents<br/>
+                    • Historique et comparaison des inspections
+                  </div>
                 </Button>
               </div>
             </div>
