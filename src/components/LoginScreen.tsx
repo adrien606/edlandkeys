@@ -7,7 +7,7 @@ import logoBelair from "@/assets/logo-belaircamp.png";
 import { useAuth } from "@/hooks/useAuth";
 
 interface LoginScreenProps {
-  onLogin: (appType: 'equipment' | 'inspection') => void;
+  onLogin: (appType: 'equipment' | 'inspection' | 'notifications') => void;
   onUserManagement: () => void;
 }
 
@@ -17,7 +17,7 @@ export const LoginScreen = ({
 }: LoginScreenProps) => {
   const { user, profile, userRole, isAdmin, signOut } = useAuth();
 
-  const handleAppSelect = (appType: 'equipment' | 'inspection') => {
+  const handleAppSelect = (appType: 'equipment' | 'inspection' | 'notifications') => {
     onLogin(appType);
   };
 
@@ -105,6 +105,21 @@ export const LoginScreen = ({
                     • Photos avec commentaires par zone<br/>
                     • Signature électronique des documents<br/>
                     • Historique et comparaison des inspections
+                  </div>
+                </Button>
+
+                <Button 
+                  type="button" 
+                  variant="default" 
+                  className="w-full p-6 h-auto flex flex-col items-start gap-3 text-left" 
+                  onClick={() => handleAppSelect('notifications')}
+                >
+                  <div className="text-lg font-semibold">Notifications Colis</div>
+                  <div className="text-sm opacity-90 leading-relaxed">
+                    • Envoyer des notifications SMS et WhatsApp<br/>
+                    • Recherche et filtrage par bâtiment<br/>
+                    • Messages personnalisables avec templates<br/>
+                    • Historique complet des notifications
                   </div>
                 </Button>
               </div>

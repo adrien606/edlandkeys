@@ -25,11 +25,12 @@ import { BuildingManagement } from "./components/BuildingManagement";
 import { NewInspection } from "./components/NewInspection";
 import { InspectionForm } from "./components/InspectionForm";
 import { InspectionSignature } from "./components/InspectionSignature";
+import { NotificationsApp } from "./components/NotificationsApp";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection' | 'users' | null>(null);
+  const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection' | 'notifications' | 'users' | null>(null);
   const { isAuthenticated, loading } = useAuth();
   const initialize = useSupabaseStore(state => state.initialize);
 
@@ -84,7 +85,7 @@ const App = () => {
   }
 
   // Show login screen (app selection) if authenticated but no app selected
-  if (currentApp !== 'equipment' && currentApp !== 'inspection') {
+  if (currentApp !== 'equipment' && currentApp !== 'inspection' && currentApp !== 'notifications') {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -118,6 +119,19 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // Notifications App
+  if (currentApp === 'notifications') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <NotificationsApp onSwitchApp={() => setCurrentApp(null)} />
         </TooltipProvider>
       </QueryClientProvider>
     );
