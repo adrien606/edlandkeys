@@ -202,17 +202,15 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
                 <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="font-semibold">
-                        {client.prenom} {client.nom} - 
-                        <span className="font-normal"> 📧 {client.email}</span>
-                      </h3>
+                      <h3 className="font-bold text-foreground">{client.prenom} {client.nom}</h3>
                       {client.building && (
                         <Badge variant="outline">
                           {client.building.nom} ({client.building.code})
                         </Badge>
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p className="font-normal">📧 {client.email}</p>
                       <p className="font-normal">📞 {client.telephone}</p>
                     </div>
                   </div>
