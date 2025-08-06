@@ -32,7 +32,7 @@ export const useClients = () => {
     try {
       setLoading(true);
       
-      // Récupérer les clients avec leurs équipements pour déterminer le bâtiment
+      // Récupérer les clients avec leurs bâtiments via les inspections
       const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
         .select('*')
@@ -40,19 +40,37 @@ export const useClients = () => {
 
       if (clientsError) throw clientsError;
 
-      // Récupérer les équipements pour chaque client pour déterminer le bâtiment
+      // Récupérer le bâtiment le plus récent pour chaque client via les inspections
       const clientsWithBuildings = await Promise.all(
         (clientsData || []).map(async (client) => {
-          const { data: equipmentData } = await supabase
-            .from('equipment')
+          // D'abord essayer via les inspections (plus récent)
+          const { data: inspectionData } = await supabase
+            .from('inspections')
             .select(`
-              batiment_id,
-              buildings:buildings(id, nom, code)
+              building_id,
+              buildings:buildings!building_id(id, nom, code)
             `)
             .eq('client_id', client.id)
+            .not('building_id', 'is', null)
+            .order('created_at', { ascending: false })
             .limit(1);
 
-          const building = equipmentData?.[0]?.buildings;
+          let building = inspectionData?.[0]?.buildings;
+
+          // Si pas de bâtiment via inspection, essayer via équipement
+          if (!building) {
+            const { data: equipmentData } = await supabase
+              .from('equipment')
+              .select(`
+                batiment_id,
+                buildings:buildings(id, nom, code)
+              `)
+              .eq('client_id', client.id)
+              .not('batiment_id', 'is', null)
+              .limit(1);
+
+            building = equipmentData?.[0]?.buildings;
+          }
           
           return {
             ...client,
