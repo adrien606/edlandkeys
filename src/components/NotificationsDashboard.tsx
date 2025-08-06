@@ -155,12 +155,12 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
               />
             </div>
             
-            <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
+            <Select value={selectedBuilding || "all"} onValueChange={(value) => setSelectedBuilding(value === "all" ? "" : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Filtrer par bâtiment" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les bâtiments</SelectItem>
+                <SelectItem value="all">Tous les bâtiments</SelectItem>
                 {buildings.map((building) => (
                   <SelectItem key={building.id} value={building.id}>
                     {building.nom} ({building.code}) - {building.clientCount} clients
