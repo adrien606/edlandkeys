@@ -29,7 +29,7 @@ import { InspectionSignature } from "./components/InspectionSignature";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection' | 'users'>('equipment');
+  const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection' | 'users' | null>(null);
   const { isAuthenticated, loading } = useAuth();
   const initialize = useSupabaseStore(state => state.initialize);
 
@@ -72,7 +72,7 @@ const App = () => {
           <UserManagement />
           <div className="fixed bottom-4 left-4">
             <button
-              onClick={() => setCurrentApp('equipment')}
+              onClick={() => setCurrentApp(null)}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
             >
               Retour aux applications
@@ -129,7 +129,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <InspectionApp onBackToApps={() => setCurrentApp('equipment')} onSwitchApp={() => setCurrentApp('equipment')} />
+        <InspectionApp onBackToApps={() => setCurrentApp(null)} onSwitchApp={() => setCurrentApp('equipment')} />
       </TooltipProvider>
     </QueryClientProvider>
   );
