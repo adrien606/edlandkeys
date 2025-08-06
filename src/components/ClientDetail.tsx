@@ -138,10 +138,10 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
           .status-restitue { background: #f8f9fa; color: #6c757d; }
           .status-perdu { background: #f8d7da; color: #721c24; }
           .status-non_rendu { background: #fff3cd; color: #856404; }
-          .validation { background: #d4edda; padding: 10px; margin-top: 10px; border-left: 4px solid #28a745; }
-          .signature-section { margin-top: 40px; page-break-inside: avoid; }
-          .signature-box { border: 1px solid #ddd; height: 100px; margin: 10px 0; }
-          .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+          .validation { background: #d4edda; padding: 15px; margin-top: 10px; border-left: 4px solid #28a745; }
+          .signature-client { margin-top: 15px; text-align: center; }
+          .signature-client img { max-width: 300px; max-height: 150px; border: 2px solid #28a745; border-radius: 5px; }
+          .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
           @media print { 
             body { margin: 0; } 
             .header { page-break-after: avoid; }
@@ -225,9 +225,10 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
                       minute: '2-digit'
                     })}</p>
                     ${equipment.validationClient.signature ? `
-                      <div style="margin-top: 10px;">
-                        <p><strong>Signature client :</strong></p>
-                        <img src="${equipment.validationClient.signature}" style="max-width: 200px; max-height: 100px; border: 1px solid #ddd;" />
+                      <div class="signature-client">
+                        <p><strong>Signature du client :</strong></p>
+                        <img src="${equipment.validationClient.signature}" alt="Signature client" />
+                        <p style="margin-top: 10px; font-style: italic;">Signé par : ${equipment.validationClient.nomClient}</p>
                       </div>
                     ` : ''}
                   </div>
@@ -237,25 +238,10 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
           }).join('')}
         </div>
 
-        <div class="signature-section">
-          <h3>Signatures</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
-            <div>
-              <p><strong>Signature du client</strong></p>
-              <div class="signature-box"></div>
-              <p>Nom : ________________________</p>
-              <p>Date : ________________________</p>
-            </div>
-            <div>
-              <p><strong>Signature du responsable</strong></p>
-              <div class="signature-box"></div>
-              <p>Nom : ________________________</p>
-              <p>Date : ________________________</p>
-            </div>
-          </div>
-        </div>
-
         <div class="footer">
+          <p><strong>BEL AIR CAMP</strong></p>
+          <p>SIREN : [À REMPLIR]</p>
+          <br>
           <p>Document généré automatiquement le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
           <p>Système de gestion des équipements</p>
         </div>
