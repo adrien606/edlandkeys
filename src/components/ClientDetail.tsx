@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Key, CreditCard, Radio, User, Mail, Phone, Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, Edit3, Trash2, MoreVertical, FileDown } from 'lucide-react';
+import { ArrowLeft, Key, CreditCard, Radio, User, Mail, Phone, Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, Edit3, Trash2, MoreVertical, FileDown, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EditClientDialog, DeleteClientDialog } from '@/components/EditClientDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -240,7 +240,7 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
 
         <div class="footer">
           <p><strong>BEL AIR CAMP</strong></p>
-          <p>SIREN : [À REMPLIR]</p>
+          <p>SIREN : 821797073</p>
           <br>
           <p>Document généré automatiquement le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
           <p>Système de gestion des équipements</p>
@@ -248,6 +248,45 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       </body>
       </html>
     `;
+  };
+
+  // Envoyer la fiche équipements par email
+  const handleSendEquipmentEmail = async () => {
+    if (!client.email) {
+      toast.error('Aucune adresse email renseignée pour ce client');
+      return;
+    }
+
+    try {
+      // Générer le contenu HTML du PDF
+      const htmlContent = generateEquipmentPDFContent();
+      
+      // Appeler l'edge function pour envoyer l'email
+      const response = await fetch('https://mahjfnprbxykxwoxzdav.supabase.co/functions/v1/send-equipment-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          to: client.email,
+          clientName: client.nom,
+          contactName: client.prenom,
+          htmlContent: htmlContent,
+          fileName: `fiche-equipements-${client.nom.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.html`
+        }),
+      });
+
+      if (response.ok) {
+        toast.success(`Fiche équipements envoyée par email à ${client.email}`);
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Erreur lors de l\'envoi de l\'email');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'email:', error);
+      toast.error('Erreur lors de l\'envoi de l\'email. Vérifiez la configuration.');
+    }
   };
 
   // Télécharger le PDF des équipements
@@ -501,14 +540,25 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
         </Button>
         
         {client.equipements.length > 0 && (
-          <Button 
-            variant="outline"
-            onClick={handleDownloadEquipmentPDF}
-            className="h-12"
-          >
-            <FileDown className="mr-2 h-4 w-4" />
-            Télécharger la fiche équipements (PDF)
-          </Button>
+          <>
+            <Button 
+              variant="outline"
+              onClick={handleDownloadEquipmentPDF}
+              className="h-12"
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              Télécharger la fiche équipements (PDF)
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={handleSendEquipmentEmail}
+              className="h-12"
+            >
+              <Send className="mr-2 h-4 w-4" />
+              Envoyer par email à {client.email}
+            </Button>
+          </>
         )}
       </div>
 
