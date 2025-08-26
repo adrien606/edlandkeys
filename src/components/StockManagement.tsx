@@ -111,6 +111,30 @@ export const StockManagement = ({
     };
   };
 
+  // Fonction pour détecter les références dupliquées dans le même bâtiment
+  const getDuplicateReferences = () => {
+    const references = new Map<string, StockItem[]>();
+    
+    stockItems.forEach(item => {
+      const key = `${item.numero.toLowerCase()}-${item.batiment_id}`;
+      if (!references.has(key)) {
+        references.set(key, []);
+      }
+      references.get(key)!.push(item);
+    });
+    
+    const duplicates = new Set<string>();
+    references.forEach((items, key) => {
+      if (items.length > 1) {
+        items.forEach(item => duplicates.add(item.id));
+      }
+    });
+    
+    return duplicates;
+  };
+
+  const duplicateIds = getDuplicateReferences();
+
   // Mettre à jour tous les items du stock avec les données réelles
   const updatedStockItems = stockItems.map(item => getUpdatedStockItem(item));
   const filteredItems = updatedStockItems.filter(item => {
@@ -147,6 +171,19 @@ export const StockManagement = ({
   };
   const handleSaveEdit = () => {
     if (!editingItem) return;
+
+    // Vérifier qu'il n'y a pas de référence identique dans le même bâtiment (sauf l'item actuel)
+    const duplicateInSameBuilding = stockItems.find(item => 
+      item.id !== editingItem.id &&
+      item.numero.toLowerCase() === editForm.numero.toLowerCase() && 
+      item.batiment_id === editForm.batimentId
+    );
+
+    if (duplicateInSameBuilding) {
+      toast.error('Cette référence existe déjà dans ce bâtiment. Chaque référence doit être unique par bâtiment.');
+      return;
+    }
+
     updateStockItem(editingItem.id, {
       numero: editForm.numero,
       description: editForm.description,
@@ -164,15 +201,16 @@ export const StockManagement = ({
       return;
     }
 
-    // Vérifier l'unicité seulement pour les télécommandes et badges
-    if (addForm.type === 'telecommande' || addForm.type === 'badge') {
-      if (stockItems.some(item => item.type === addForm.type && item.numero.toLowerCase() === addForm.numero.toLowerCase())) {
-        const typeLabel = addForm.type === 'telecommande' ? 'télécommande' : 'badge';
-        toast.error(`Cette référence de ${typeLabel} existe déjà. Les ${typeLabel}s doivent être uniques.`);
-        return;
-      }
+    // Vérifier qu'il n'y a pas de référence identique dans le même bâtiment
+    const duplicateInSameBuilding = stockItems.find(item => 
+      item.numero.toLowerCase() === addForm.numero.toLowerCase() && 
+      item.batiment_id === addForm.batimentId
+    );
+
+    if (duplicateInSameBuilding) {
+      toast.error('Cette référence existe déjà dans ce bâtiment. Chaque référence doit être unique par bâtiment.');
+      return;
     }
-    // Pour les clés, on permet les doublons (pas de vérification d'unicité)
 
     addStockItem({
       type: addForm.type,
@@ -422,7 +460,10 @@ export const StockManagement = ({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium">{getTypeLabel(item.type)}</span>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${duplicateIds.has(item.id) ? 'text-destructive border-destructive bg-destructive/10' : ''}`}
+                        >
                           {item.numero}
                         </Badge>
                         <Badge variant="secondary" className="text-xs">
