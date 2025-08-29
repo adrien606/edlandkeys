@@ -3,13 +3,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useClients } from '@/hooks/useClients';
+import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail } from 'lucide-react';
 
 export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { clients, loading, searchTerm, setSearchTerm } = useClients();
+  const { clients } = useSupabaseStore();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter clients based on search term
+  const filteredClients = clients.filter(client => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      client.nom.toLowerCase().includes(searchLower) ||
+      client.prenom.toLowerCase().includes(searchLower) ||
+      client.email.toLowerCase().includes(searchLower) ||
+      client.telephone.includes(searchTerm) ||
+      client.equipements.some(eq => 
+        eq.numero?.toLowerCase().includes(searchLower) ||
+        eq.description?.toLowerCase().includes(searchLower) ||
+        eq.type.toLowerCase().includes(searchLower)
+      )
+    );
+  });
 
   const getEquipmentIcon = (type: string) => {
     switch (type) {
@@ -49,7 +66,7 @@ export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
         </Button>
         <div>
           <h1 className="text-xl font-bold">Liste des clients</h1>
-          <p className="text-sm text-muted-foreground">{clients.length} client(s)</p>
+          <p className="text-sm text-muted-foreground">{filteredClients.length} client(s)</p>
         </div>
       </div>
 
@@ -70,7 +87,7 @@ export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
 
       {/* Client List */}
       <div className="space-y-4">
-        {clients.length === 0 ? (
+        {filteredClients.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <p className="text-muted-foreground">Aucun client trouvé</p>
@@ -86,7 +103,7 @@ export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
             </CardContent>
           </Card>
         ) : (
-          clients.map((client) => (
+          filteredClients.map((client) => (
             <Card key={client.id} className="overflow-hidden">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -120,9 +137,32 @@ export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
               </CardHeader>
               
               <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Client enregistré
-                </p>
+                {client.equipements && client.equipements.length > 0 ? (
+                  <div className="space-y-2">
+                    {client.equipements.map((equipment, index) => (
+                      <div key={equipment.id || index} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {getEquipmentIcon(equipment.type)}
+                          <span className="text-sm">
+                            {equipment.numero || `${equipment.type} ${index + 1}`}
+                          </span>
+                          {equipment.description && (
+                            <span className="text-xs text-muted-foreground">
+                              - {equipment.description}
+                            </span>
+                          )}
+                        </div>
+                        <Badge className={getStatusColor(equipment.statut)}>
+                          {getStatusLabel(equipment.statut)}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Aucun équipement
+                  </p>
+                )}
               </CardContent>
             </Card>
           ))
