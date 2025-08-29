@@ -15,6 +15,12 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
   const { clients, addEquipment, buildings, stockItems } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Debug logs
+  console.log('[EquipmentForm] Component mounted');
+  console.log('[EquipmentForm] Clients:', clients?.length || 0);
+  console.log('[EquipmentForm] StockItems:', stockItems?.length || 0);
+  console.log('[EquipmentForm] Buildings:', buildings?.length || 0);
   
   const [formData, setFormData] = useState({
     clientId: '',

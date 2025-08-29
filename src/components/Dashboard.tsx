@@ -159,7 +159,10 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
         <Button 
           variant="outline" 
           size="lg" 
-          onClick={() => navigate('/remettre-equipement')}
+          onClick={() => {
+            console.log('[Dashboard] Navigating to /remettre-equipement');
+            navigate('/remettre-equipement');
+          }}
           className="h-12 sm:h-14 text-sm sm:text-base"
         >
           <Key className="mr-2 h-5 w-5" />
