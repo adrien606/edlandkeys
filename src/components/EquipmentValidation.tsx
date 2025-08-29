@@ -12,16 +12,25 @@ import { useToast } from '@/hooks/use-toast';
 
 export const EquipmentValidation = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clientId, equipmentIndex } = useParams();
-  const { getClientById, validateEquipment } = useSupabaseStore();
+  const { getClientById, validateEquipment, syncFromSupabase } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const [nomClient, setNomClient] = useState('');
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [signature, setSignature] = useState<string | null>(null);
+  const [isResolving, setIsResolving] = useState(false);
   
   const client = clientId ? getClientById(clientId) : null;
-  const equipment = client?.equipements[parseInt(equipmentIndex || '0')];
+  const parsedIndex = parseInt(equipmentIndex || '', 10);
+  const hasEquipments = !!client && client.equipements.length > 0;
+  const safeIndex = hasEquipments
+    ? Math.min(
+        Math.max(isNaN(parsedIndex) ? client!.equipements.length - 1 : parsedIndex, 0),
+        client!.equipements.length - 1
+      )
+    : undefined;
+  const equipment = hasEquipments && safeIndex !== undefined ? client!.equipements[safeIndex] : undefined;
 
   useEffect(() => {
     if (client) {
@@ -29,6 +38,16 @@ export const EquipmentValidation = ({ onSwitchApp }: { onSwitchApp?: () => void 
     }
   }, [client]);
 
+  useEffect(() => {
+    // If data isn't ready yet (especially on mobile), try a quick refresh from Supabase
+    if (!clientId) return;
+    if (!client || (!equipment && !isResolving)) {
+      setIsResolving(true);
+      Promise.resolve(syncFromSupabase?.())
+        .catch(() => {})
+        .finally(() => setIsResolving(false));
+    }
+  }, [clientId, client, equipment, syncFromSupabase]);
   const handleValidation = () => {
     if (!clientId || !equipment || !nomClient.trim() || !isConfirmed || !signature) {
       toast({
@@ -66,6 +85,18 @@ export const EquipmentValidation = ({ onSwitchApp }: { onSwitchApp?: () => void 
       default: return type;
     }
   };
+
+  if (isResolving) {
+    return (
+      <div className="p-4">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p>Chargement...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!client || !equipment) {
     return (
