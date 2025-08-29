@@ -15,7 +15,7 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
     : clients;
   const currentBuilding = buildings.find(b => b.id === currentBuildingId);
 
-  const recentClients = clientsInBuilding.slice(-5).reverse();
+  
 
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
@@ -117,35 +117,6 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
         </CardContent>
       </Card>
 
-      {/* Recent Clients */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Clients récents</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentClients.length === 0 ? (
-            <p className="text-muted-foreground text-center py-4">Aucun client encore</p>
-          ) : (
-            <div className="space-y-3">
-              {recentClients.map((client) => (
-                <div key={client.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <div className="font-medium">{client.nom}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {client.equipements.length} équipement(s)
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    {client.equipements.map((eq) => (
-                      <div key={eq.id} className="w-2 h-2 rounded-full bg-primary"></div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 gap-3 sm:gap-4">
