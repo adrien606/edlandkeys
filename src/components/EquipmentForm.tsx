@@ -140,7 +140,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Sélectionner un client" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[200px] z-[100]" position="popper">
                   {clients.map((client) => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.prenom} {client.nom}
@@ -169,7 +169,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Sélectionner le type d'équipement" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100]" position="popper">
                   <SelectItem value="cle">
                     <div className="flex items-center gap-2">
                       <Key className="h-4 w-4" />
@@ -201,7 +201,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Filtrer par bâtiment (optionnel)" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[200px] z-[100]" position="popper">
                   <SelectItem value="all">Tous les bâtiments</SelectItem>
                   {buildings.map((building) => (
                     <SelectItem key={building.id} value={building.id}>
@@ -228,7 +228,7 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
                         : "Sélectionner un équipement du stock"
                   } />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[200px] z-[100]" position="popper">
                   {availableItems.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
                       <div className="flex items-center justify-between w-full">
