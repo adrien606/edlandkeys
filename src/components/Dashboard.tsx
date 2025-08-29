@@ -7,13 +7,15 @@ import { useNavigate } from 'react-router-dom';
 import { BuildingSelector } from '@/components/BuildingSelector';
 
 export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { getFilteredClients, getEquipmentStats, buildings, currentBuildingId, isOnline, syncPending } = useSupabaseStore();
+  const { clients, getEquipmentStats, buildings, currentBuildingId, isOnline, syncPending } = useSupabaseStore();
   const navigate = useNavigate();
   const stats = getEquipmentStats();
-  const filteredClients = getFilteredClients();
+  const clientsInBuilding = currentBuildingId 
+    ? clients.filter(c => c.equipements.some(eq => eq.batimentId === currentBuildingId))
+    : clients;
   const currentBuilding = buildings.find(b => b.id === currentBuildingId);
 
-  const recentClients = filteredClients.slice(-5).reverse();
+  const recentClients = clientsInBuilding.slice(-5).reverse();
 
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
@@ -54,7 +56,7 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filteredClients.length}</div>
+            <div className="text-2xl font-bold">{clientsInBuilding.length}</div>
             <p className="text-xs text-muted-foreground">Total actifs</p>
           </CardContent>
         </Card>
