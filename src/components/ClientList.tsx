@@ -3,14 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useSupabaseStore } from '@/hooks/useSupabaseStore';
+import { useClients } from '@/hooks/useClients';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail } from 'lucide-react';
 
 export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
-  const { getFilteredClients, setSearchTerm, searchTerm } = useSupabaseStore();
+  const { clients, loading, searchTerm, setSearchTerm } = useClients();
   const navigate = useNavigate();
-  const clients = getFilteredClients();
 
   const getEquipmentIcon = (type: string) => {
     switch (type) {
@@ -121,32 +120,9 @@ export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
               </CardHeader>
               
               <CardContent>
-                {client.equipements.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">
-                    Aucun équipement attribué
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Équipements ({client.equipements.length})
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {client.equipements.map((equipment) => (
-                        <Badge
-                          key={equipment.id}
-                          className={`flex items-center gap-1 ${getStatusColor(equipment.statut)}`}
-                        >
-                          {getEquipmentIcon(equipment.type)}
-                          <span className="capitalize">{equipment.type}</span>
-                          {equipment.numero && (
-                            <span>#{equipment.numero}</span>
-                          )}
-                          <span className="text-xs">({getStatusLabel(equipment.statut)})</span>
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <p className="text-sm text-muted-foreground">
+                  Client enregistré
+                </p>
               </CardContent>
             </Card>
           ))
