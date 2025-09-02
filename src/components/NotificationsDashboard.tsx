@@ -41,48 +41,51 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-3 sm:p-6 max-w-7xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center space-x-4">
           <Button
             variant="outline"
             size="icon"
             onClick={onSwitchApp}
-            className="h-10 w-10"
+            className="h-10 w-10 shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Notifications Colis</h1>
-            <p className="text-muted-foreground">Envoyez des notifications SMS et WhatsApp aux clients</p>
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Notifications Colis</h1>
+            <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">Envoyez des notifications SMS et WhatsApp aux clients</p>
           </div>
         </div>
         
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2 sm:space-x-2 sm:flex-nowrap">
           <Button
             variant="outline"
             onClick={() => onNavigate('guide')}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 text-xs sm:text-sm"
+            size="sm"
           >
             <HelpCircle className="h-4 w-4" />
-            <span>Guide</span>
+            <span className="hidden sm:inline">Guide</span>
           </Button>
           <Button
             variant="outline"
             onClick={() => onNavigate('templates')}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 text-xs sm:text-sm"
+            size="sm"
           >
             <Settings className="h-4 w-4" />
-            <span>Templates</span>
+            <span className="hidden sm:inline">Templates</span>
           </Button>
           <Button
             variant="outline"
             onClick={() => onNavigate('history')}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 text-xs sm:text-sm"
+            size="sm"
           >
             <History className="h-4 w-4" />
-            <span>Historique</span>
+            <span className="hidden sm:inline">Historique</span>
           </Button>
         </div>
       </div>
@@ -199,38 +202,39 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
           ) : (
             <div className="space-y-4">
               {clients.map((client) => (
-                <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="font-bold text-foreground">{client.prenom} {client.nom}</h3>
+                <div key={client.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg hover:bg-accent transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                      <h3 className="font-bold text-foreground text-sm sm:text-base">{client.prenom} {client.nom}</h3>
                       {client.building && (
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="text-xs self-start">
                           {client.building.nom} ({client.building.code})
                         </Badge>
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p className="font-normal">📧 {client.email} - 📞 {client.telephone}</p>
+                    <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
+                      <p className="font-normal break-all">📧 {client.email}</p>
+                      <p className="font-normal">📞 {client.telephone}</p>
                     </div>
                   </div>
                   
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2 self-start sm:self-center">
                     <Button
                       onClick={() => handleSendSMS(client)}
                       size="sm"
                       variant="outline"
-                      className="flex items-center space-x-1"
+                      className="flex items-center space-x-1 text-xs"
                     >
-                      <MessageSquare className="h-4 w-4" />
+                      <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>SMS</span>
                     </Button>
                     
                     <Button
                       onClick={() => handleSendWhatsApp(client)}
                       size="sm"
-                      className="flex items-center space-x-1 bg-green-600 hover:bg-green-700"
+                      className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-xs"
                     >
-                      <Phone className="h-4 w-4" />
+                      <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>WhatsApp</span>
                     </Button>
                   </div>
