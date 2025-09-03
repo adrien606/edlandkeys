@@ -110,6 +110,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Dashboard onSwitchApp={() => setCurrentApp('inspection')} />} />
+              <Route path="/dashboard" element={<Dashboard onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/ajouter-client" element={<ClientForm onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/clients" element={<ClientList onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/client/:clientId" element={<ClientDetail onSwitchApp={() => setCurrentApp('inspection')} />} />
