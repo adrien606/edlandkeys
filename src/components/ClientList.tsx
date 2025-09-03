@@ -87,15 +87,17 @@ export const ClientList = ({ onSwitchApp, onBack }: { onSwitchApp?: () => void; 
           </div>
         </div>
         
-        {navigate && (
-          <Button 
-            onClick={() => navigate('/ajouter-client')}
-            className="flex items-center gap-2"
-          >
-            <UserPlus className="h-4 w-4" />
-            Ajouter client
-          </Button>
-        )}
+        <Button 
+          onClick={() => {
+            if (navigate) {
+              navigate('/ajouter-client');
+            }
+          }}
+          className="flex items-center gap-2"
+        >
+          <UserPlus className="h-4 w-4" />
+          Ajouter client
+        </Button>
       </div>
 
       {/* Search */}
