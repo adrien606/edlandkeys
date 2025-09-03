@@ -8,6 +8,7 @@ export interface Client {
   prenom: string;
   email: string;
   telephone: string;
+  telephone_secondaire?: string;
   date_inscription: string;
   created_at: string;
   updated_at: string;

@@ -1,9 +1,10 @@
-import { ArrowLeft, Search, MessageSquare, Phone, Settings, History, HelpCircle, Building2 } from 'lucide-react';
+import { ArrowLeft, Search, MessageSquare, Phone, Settings, History, HelpCircle, Building2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useClients } from '@/hooks/useClients';
 import { useBuildings } from '@/hooks/useBuildings';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -20,21 +21,23 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
   const { buildings, loading: buildingsLoading } = useBuildings();
   const { addNotification } = useNotifications();
 
-  const handleSendSMS = async (client: any) => {
+  const handleSendSMS = async (client: any, phoneNumber?: string) => {
     const templates = MessageTemplateService.getTemplates();
     const message = MessageTemplateService.formatMessage(templates.sms, `${client.prenom} ${client.nom}`);
+    const phone = phoneNumber || client.telephone;
     
-    const success = SMSService.sendSMS(client.telephone, message);
+    const success = SMSService.sendSMS(phone, message);
     if (success) {
       await addNotification(client.id, message, 'sms');
     }
   };
 
-  const handleSendWhatsApp = async (client: any) => {
+  const handleSendWhatsApp = async (client: any, phoneNumber?: string) => {
     const templates = MessageTemplateService.getTemplates();
     const message = MessageTemplateService.formatMessage(templates.whatsapp, `${client.prenom} ${client.nom}`);
+    const phone = phoneNumber || client.telephone;
     
-    const success = WhatsAppService.sendWhatsApp(client.telephone, message);
+    const success = WhatsAppService.sendWhatsApp(phone, message);
     if (success) {
       await addNotification(client.id, message, 'whatsapp');
     }
@@ -215,28 +218,84 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
                     <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
                       <p className="font-normal break-all">📧 {client.email}</p>
                       <p className="font-normal">📞 {client.telephone}</p>
+                      {client.telephone_secondaire && (
+                        <p className="font-normal">📞 {client.telephone_secondaire} <span className="text-muted-foreground">(secondaire)</span></p>
+                      )}
                     </div>
                   </div>
                   
                   <div className="flex gap-2 self-start sm:self-center">
-                    <Button
-                      onClick={() => handleSendSMS(client)}
-                      size="sm"
-                      variant="outline"
-                      className="flex items-center space-x-1 text-xs"
-                    >
-                      <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span>SMS</span>
-                    </Button>
+                    {/* SMS Button */}
+                    {client.telephone_secondaire ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex items-center space-x-1 text-xs"
+                          >
+                            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span>SMS</span>
+                            <ChevronDown className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleSendSMS(client, client.telephone)}>
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Principal: {client.telephone}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleSendSMS(client, client.telephone_secondaire)}>
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Secondaire: {client.telephone_secondaire}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Button
+                        onClick={() => handleSendSMS(client)}
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center space-x-1 text-xs"
+                      >
+                        <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span>SMS</span>
+                      </Button>
+                    )}
                     
-                    <Button
-                      onClick={() => handleSendWhatsApp(client)}
-                      size="sm"
-                      className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-xs"
-                    >
-                      <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span>WhatsApp</span>
-                    </Button>
+                    {/* WhatsApp Button */}
+                    {client.telephone_secondaire ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="sm"
+                            className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-xs"
+                          >
+                            <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span>WhatsApp</span>
+                            <ChevronDown className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleSendWhatsApp(client, client.telephone)}>
+                            <Phone className="h-4 w-4 mr-2" />
+                            Principal: {client.telephone}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleSendWhatsApp(client, client.telephone_secondaire)}>
+                            <Phone className="h-4 w-4 mr-2" />
+                            Secondaire: {client.telephone_secondaire}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Button
+                        onClick={() => handleSendWhatsApp(client)}
+                        size="sm"
+                        className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-xs"
+                      >
+                        <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span>WhatsApp</span>
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}

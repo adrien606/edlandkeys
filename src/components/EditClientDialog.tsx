@@ -25,6 +25,7 @@ export const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogPr
     prenom: client?.prenom || '',
     email: client?.email || '',
     telephone: client?.telephone || '',
+    telephone_secondaire: client?.telephone_secondaire || '',
   });
 
   const handleChange = (field: string, value: string) => {
@@ -89,7 +90,7 @@ export const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogPr
           </div>
 
           <div>
-            <Label htmlFor="telephone">Téléphone</Label>
+            <Label htmlFor="telephone">Téléphone principal</Label>
             <Input
               id="telephone"
               type="tel"
@@ -97,6 +98,20 @@ export const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogPr
               onChange={(e) => handleChange('telephone', e.target.value)}
               placeholder="06 12 34 56 78"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="telephone_secondaire">Téléphone secondaire (optionnel)</Label>
+            <Input
+              id="telephone_secondaire"
+              type="tel"
+              value={formData.telephone_secondaire}
+              onChange={(e) => handleChange('telephone_secondaire', e.target.value)}
+              placeholder="06 12 34 56 78"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Pour un collaborateur récupérant les colis
+            </p>
           </div>
 
 

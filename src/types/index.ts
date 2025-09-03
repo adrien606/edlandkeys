@@ -12,6 +12,7 @@ export interface Client {
   prenom: string;
   email: string;
   telephone: string;
+  telephone_secondaire?: string;
   dateInscription: string;
   equipements: Equipment[];
 }
@@ -46,6 +47,7 @@ export interface ClientFormData {
   prenom: string;
   email: string;
   telephone: string;
+  telephone_secondaire?: string;
 }
 
 export interface BuildingFormData {
