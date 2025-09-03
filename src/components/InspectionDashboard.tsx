@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSupabaseStore } from "@/hooks/useSupabaseStore";
-import { ClipboardList, UserPlus, History, ArrowLeft, Users } from "lucide-react";
+import { ClipboardList, UserPlus, History, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -76,7 +76,7 @@ export const InspectionDashboard = ({ onNavigate, onBackToApps, onSwitchApp }: I
         </div>
 
         {/* Actions rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Button 
             onClick={() => onNavigate('new-inspection')}
             className="h-20 text-lg"
@@ -94,16 +94,6 @@ export const InspectionDashboard = ({ onNavigate, onBackToApps, onSwitchApp }: I
           >
             <History className="w-6 h-6 mr-3" />
             Historique
-          </Button>
-
-          <Button 
-            onClick={() => onNavigate('clients')}
-            variant="outline"
-            className="h-20 text-lg"
-            size="lg"
-          >
-            <Users className="w-6 h-6 mr-3" />
-            Gestion Clients
           </Button>
         </div>
 

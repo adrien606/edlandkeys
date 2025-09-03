@@ -110,7 +110,6 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Dashboard onSwitchApp={() => setCurrentApp('inspection')} />} />
-              <Route path="/dashboard" element={<Dashboard onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/ajouter-client" element={<ClientForm onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/clients" element={<ClientList onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/client/:clientId" element={<ClientDetail onSwitchApp={() => setCurrentApp('inspection')} />} />
@@ -171,8 +170,6 @@ const InspectionApp = ({ onBackToApps, onSwitchApp }: { onBackToApps: () => void
         return <InspectionHistory onNavigate={handleNavigate} onBack={() => setCurrentRoute('dashboard')} onSwitchApp={onSwitchApp} />;
       case 'building-management':
         return <BuildingManagement onNavigate={handleNavigate} onBack={() => setCurrentRoute('new-inspection')} onSwitchApp={onSwitchApp} />;
-      case 'clients':
-        return <ClientList onSwitchApp={onSwitchApp} onBack={() => setCurrentRoute('dashboard')} />;
       default:
         // Handle inspection-detail routes
         if (currentRoute.startsWith('inspection-detail/')) {

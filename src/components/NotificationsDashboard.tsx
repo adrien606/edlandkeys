@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, MessageSquare, Phone, Settings, History, HelpCircle, Building2, ChevronDown, Users } from 'lucide-react';
+import { ArrowLeft, Search, MessageSquare, Phone, Settings, History, HelpCircle, Building2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface NotificationsDashboardProps {
   onSwitchApp: () => void;
-  onNavigate: (route: 'templates' | 'history' | 'guide' | 'clients') => void;
+  onNavigate: (route: 'templates' | 'history' | 'guide') => void;
 }
 
 export function NotificationsDashboard({ onSwitchApp, onNavigate }: NotificationsDashboardProps) {
@@ -63,15 +63,6 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
         </div>
         
         <div className="flex flex-wrap gap-2 sm:space-x-2 sm:flex-nowrap">
-          <Button
-            variant="outline"
-            onClick={() => onNavigate('clients')}
-            className="flex items-center space-x-2 text-xs sm:text-sm"
-            size="sm"
-          >
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Clients</span>
-          </Button>
           <Button
             variant="outline"
             onClick={() => onNavigate('guide')}
