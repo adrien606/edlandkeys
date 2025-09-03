@@ -4,18 +4,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useSupabaseStore } from '@/hooks/useSupabaseStore';
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail } from 'lucide-react';
+
+// Conditional import for useNavigate
+let useNavigate: (() => any) | null = null;
+try {
+  const routerDom = require('react-router-dom');
+  useNavigate = routerDom.useNavigate;
+} catch {
+  // Router not available, will use onBack instead
+}
 
 export const ClientList = ({ onSwitchApp, onBack }: { onSwitchApp?: () => void; onBack?: () => void }) => {
   const { clients } = useSupabaseStore();
-  const navigate = useNavigate();
+  const navigate = useNavigate?.();
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleBack = () => {
     if (onBack) {
       onBack();
-    } else {
+    } else if (navigate) {
       navigate('/');
     }
   };
@@ -137,7 +145,12 @@ export const ClientList = ({ onSwitchApp, onBack }: { onSwitchApp?: () => void; 
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(`/client/${client.id}`)}
+                    onClick={() => {
+                      if (navigate) {
+                        navigate(`/client/${client.id}`);
+                      }
+                    }}
+                    disabled={!navigate}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
