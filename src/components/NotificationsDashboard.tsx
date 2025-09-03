@@ -65,6 +65,15 @@ export function NotificationsDashboard({ onSwitchApp, onNavigate }: Notification
         <div className="flex flex-wrap gap-2 sm:space-x-2 sm:flex-nowrap">
           <Button
             variant="outline"
+            onClick={onSwitchApp}
+            className="flex items-center space-x-2 text-xs sm:text-sm"
+            size="sm"
+          >
+            <Building2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Gérer Clients</span>
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => onNavigate('guide')}
             className="flex items-center space-x-2 text-xs sm:text-sm"
             size="sm"
