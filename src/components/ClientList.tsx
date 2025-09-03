@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useSupabaseStore } from '@/hooks/useSupabaseStore';
-import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail, Plus } from 'lucide-react';
 
 // Conditional import for useNavigate
 let useNavigate: (() => any) | null = null;
@@ -80,10 +80,19 @@ export const ClientList = ({ onSwitchApp, onBack }: { onSwitchApp?: () => void; 
         <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-bold">Liste des clients</h1>
           <p className="text-sm text-muted-foreground">{filteredClients.length} client(s)</p>
         </div>
+        {navigate && (
+          <Button
+            onClick={() => navigate('/ajouter-client')}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Ajouter client
+          </Button>
+        )}
       </div>
 
       {/* Search */}
