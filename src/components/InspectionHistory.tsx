@@ -16,7 +16,7 @@ interface InspectionHistoryProps {
 }
 
 export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: InspectionHistoryProps) => {
-  const { inspections, buildings } = useSupabaseStore();
+  const { inspections, buildings, syncFromSupabase } = useSupabaseStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -48,11 +48,16 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
               <p className="text-sm text-muted-foreground">Tous les états des lieux enregistrés</p>
             </div>
           </div>
-          {onSwitchApp && (
-            <Button variant="outline" onClick={onSwitchApp} className="w-full sm:w-auto">
-              Gestion Équipements
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={syncFromSupabase} className="w-full sm:w-auto">
+              Actualiser
             </Button>
-          )}
+            {onSwitchApp && (
+              <Button variant="outline" onClick={onSwitchApp} className="w-full sm:w-auto">
+                Gestion Équipements
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Filters */}
