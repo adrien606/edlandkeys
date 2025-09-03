@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useSupabaseStore } from "@/hooks/useSupabaseStore";
-import { ArrowLeft, Home, LogOut, Building, Settings } from "lucide-react";
+import { ArrowLeft, Home, LogOut, Building, Settings, Check, ChevronsUpDown } from "lucide-react";
 
 interface NewInspectionProps {
   onNavigate: (route: string) => void;
@@ -17,6 +19,7 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [selectedBuildingId, setSelectedBuildingId] = useState<string>("");
   const [inspectionType, setInspectionType] = useState<'entry' | 'exit'>('entry');
+  const [openClientPopover, setOpenClientPopover] = useState(false);
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
   const selectedBuilding = buildings.find(b => b.id === selectedBuildingId);
@@ -80,20 +83,49 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
             <CardTitle>Sélectionner un Client</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choisir un client..." />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{client.prenom} {client.nom}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={openClientPopover} onOpenChange={setOpenClientPopover}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openClientPopover}
+                  className="w-full justify-between"
+                >
+                  {selectedClient ? `${selectedClient.prenom} ${selectedClient.nom}` : "Choisir un client..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Rechercher un client..." />
+                  <CommandList>
+                    <CommandEmpty>Aucun client trouvé.</CommandEmpty>
+                    <CommandGroup>
+                      {clients.map((client) => (
+                        <CommandItem
+                          key={client.id}
+                          value={`${client.prenom} ${client.nom} ${client.email}`}
+                          onSelect={() => {
+                            setSelectedClientId(client.id);
+                            setOpenClientPopover(false);
+                          }}
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${
+                              selectedClientId === client.id ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                          <div className="flex flex-col">
+                            <span>{client.prenom} {client.nom}</span>
+                            <span className="text-sm text-muted-foreground">{client.email}</span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
             {selectedClient && (
               <div className="p-4 bg-muted rounded-lg space-y-2">
