@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useSupabaseStore } from '@/hooks/useSupabaseStore';
-import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail, UserPlus } from 'lucide-react';
 
 // Conditional import for useNavigate
 let useNavigate: (() => any) | null = null;
@@ -76,14 +76,26 @@ export const ClientList = ({ onSwitchApp, onBack }: { onSwitchApp?: () => void; 
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={handleBack}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-xl font-bold">Liste des clients</h1>
-          <p className="text-sm text-muted-foreground">{filteredClients.length} client(s)</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={handleBack}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-xl font-bold">Liste des clients</h1>
+            <p className="text-sm text-muted-foreground">{filteredClients.length} client(s)</p>
+          </div>
         </div>
+        
+        {navigate && (
+          <Button 
+            onClick={() => navigate('/ajouter-client')}
+            className="flex items-center gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Ajouter client
+          </Button>
+        )}
       </div>
 
       {/* Search */}
