@@ -3,12 +3,13 @@ import { NotificationsDashboard } from './NotificationsDashboard';
 import { NotificationTemplates } from './NotificationTemplates';
 import { NotificationHistory } from './NotificationHistory';
 import { NotificationGuide } from './NotificationGuide';
+import { ClientList } from './ClientList';
 
 interface NotificationsAppProps {
   onSwitchApp: () => void;
 }
 
-type NotificationsRoute = 'dashboard' | 'templates' | 'history' | 'guide';
+type NotificationsRoute = 'dashboard' | 'templates' | 'history' | 'guide' | 'clients';
 
 export function NotificationsApp({ onSwitchApp }: NotificationsAppProps) {
   const [currentRoute, setCurrentRoute] = useState<NotificationsRoute>('dashboard');
@@ -37,6 +38,13 @@ export function NotificationsApp({ onSwitchApp }: NotificationsAppProps) {
       case 'guide':
         return (
           <NotificationGuide 
+            onBack={() => setCurrentRoute('dashboard')}
+          />
+        );
+      case 'clients':
+        return (
+          <ClientList 
+            onSwitchApp={onSwitchApp}
             onBack={() => setCurrentRoute('dashboard')}
           />
         );

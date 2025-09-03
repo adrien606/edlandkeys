@@ -7,10 +7,18 @@ import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Key, CreditCard, Radio, Eye, Phone, Mail } from 'lucide-react';
 
-export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
+export const ClientList = ({ onSwitchApp, onBack }: { onSwitchApp?: () => void; onBack?: () => void }) => {
   const { clients } = useSupabaseStore();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/');
+    }
+  };
 
   // Filter clients based on search term
   const filteredClients = clients.filter(client => {
@@ -61,7 +69,7 @@ export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
     <div className="p-4 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+        <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>

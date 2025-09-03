@@ -170,6 +170,8 @@ const InspectionApp = ({ onBackToApps, onSwitchApp }: { onBackToApps: () => void
         return <InspectionHistory onNavigate={handleNavigate} onBack={() => setCurrentRoute('dashboard')} onSwitchApp={onSwitchApp} />;
       case 'building-management':
         return <BuildingManagement onNavigate={handleNavigate} onBack={() => setCurrentRoute('new-inspection')} onSwitchApp={onSwitchApp} />;
+      case 'clients':
+        return <ClientList onSwitchApp={onSwitchApp} onBack={() => setCurrentRoute('dashboard')} />;
       default:
         // Handle inspection-detail routes
         if (currentRoute.startsWith('inspection-detail/')) {
