@@ -91,6 +91,8 @@ export const ClientList = ({ onSwitchApp, onBack }: { onSwitchApp?: () => void; 
           onClick={() => {
             if (navigate) {
               navigate('/ajouter-client');
+            } else {
+              window.location.href = '/ajouter-client';
             }
           }}
           className="flex items-center gap-2"
