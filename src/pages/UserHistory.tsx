@@ -3,12 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Calendar, Activity } from "lucide-react";
+import { ArrowLeft, User, Calendar, Activity, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+
+interface UserProfile {
+  id: string;
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string;
+  created_at: string;
+  roles: string[];
+}
 
 interface UserActivity {
   id: string;
@@ -22,56 +32,100 @@ interface UserActivity {
 
 const UserHistory = () => {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserActivities();
+    fetchUsers();
   }, []);
 
-  const fetchUserActivities = async () => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
       
+      // Récupérer tous les profils utilisateurs
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (profilesError) throw profilesError;
+
+      // Récupérer les rôles pour chaque utilisateur
+      const usersWithRoles = await Promise.all(
+        (profiles || []).map(async (profile) => {
+          const { data: roles } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profile.user_id);
+
+          return {
+            ...profile,
+            roles: roles?.map(r => r.role) || []
+          };
+        })
+      );
+
+      setUsers(usersWithRoles);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des utilisateurs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserActivities = async (selectedUserId: string) => {
+    try {
+      const selectedUserProfile = users.find(u => u.user_id === selectedUserId);
+      
       // Simuler des données d'activité utilisateur pour démonstration
-      // Dans une vraie app, cela viendrait d'une table d'audit/logs
       const mockActivities: UserActivity[] = [
         {
           id: "1",
-          user_id: user?.id || "",
+          user_id: selectedUserId,
           action: "Connexion",
           details: "Connexion réussie à l'application",
           created_at: new Date().toISOString(),
-          user_email: user?.email,
-          user_name: `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Utilisateur"
+          user_email: selectedUserProfile?.email,
+          user_name: `${selectedUserProfile?.first_name || ""} ${selectedUserProfile?.last_name || ""}`.trim() || "Utilisateur"
         },
         {
           id: "2", 
-          user_id: user?.id || "",
+          user_id: selectedUserId,
           action: "Navigation",
-          details: "Accès à la page gestion des utilisateurs",
+          details: "Accès à la page gestion des équipements",
           created_at: new Date(Date.now() - 3600000).toISOString(),
-          user_email: user?.email,
-          user_name: `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Utilisateur"
+          user_email: selectedUserProfile?.email,
+          user_name: `${selectedUserProfile?.first_name || ""} ${selectedUserProfile?.last_name || ""}`.trim() || "Utilisateur"
         },
         {
           id: "3",
-          user_id: user?.id || "",
-          action: "Consultation",
-          details: "Consultation de l'historique des activités",
+          user_id: selectedUserId,
+          action: "Ajout",
+          details: "Ajout d'un nouveau client",
           created_at: new Date(Date.now() - 7200000).toISOString(),
-          user_email: user?.email,
-          user_name: `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Utilisateur"
+          user_email: selectedUserProfile?.email,
+          user_name: `${selectedUserProfile?.first_name || ""} ${selectedUserProfile?.last_name || ""}`.trim() || "Utilisateur"
         }
       ];
 
       setActivities(mockActivities);
     } catch (error) {
       console.error("Erreur lors de la récupération des activités:", error);
-    } finally {
-      setLoading(false);
     }
+  };
+
+  const handleUserSelect = (user: UserProfile) => {
+    setSelectedUser(user);
+    fetchUserActivities(user.user_id);
+  };
+
+  const handleBackToUsers = () => {
+    setSelectedUser(null);
+    setActivities([]);
   };
 
   const getActionColor = (action: string) => {
@@ -80,10 +134,21 @@ const UserHistory = () => {
         return 'default';
       case 'navigation':
         return 'secondary';
-      case 'consultation':
+      case 'ajout':
         return 'outline';
       default:
         return 'default';
+    }
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'destructive';
+      case 'moderator':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
@@ -92,12 +157,123 @@ const UserHistory = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
-          <p>Chargement de l'historique...</p>
+          <p>Chargement des utilisateurs...</p>
         </div>
       </div>
     );
   }
 
+  // Vue détail d'un utilisateur spécifique
+  if (selectedUser) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4 mb-6">
+            <Button variant="outline" onClick={handleBackToUsers}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour aux utilisateurs
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Historique Utilisateur</h1>
+              <p className="text-muted-foreground">
+                {`${selectedUser.first_name || ""} ${selectedUser.last_name || ""}`.trim() || "Utilisateur"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-6 mb-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Informations Utilisateur
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Nom</p>
+                    <p className="text-lg">
+                      {`${selectedUser.first_name || ""} ${selectedUser.last_name || ""}`.trim() || "Non défini"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Email</p>
+                    <p className="text-lg">{selectedUser.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Rôles</p>
+                    <div className="flex gap-1 mt-1">
+                      {selectedUser.roles.length > 0 ? (
+                        selectedUser.roles.map((role) => (
+                          <Badge key={role} variant={getRoleBadgeColor(role)}>
+                            {role}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant="outline">user</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Historique des Activités
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activities.length === 0 ? (
+                <div className="text-center py-8">
+                  <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-lg font-medium">Aucune activité trouvée</p>
+                  <p className="text-muted-foreground">Les activités récentes apparaîtront ici</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date & Heure</TableHead>
+                      <TableHead>Action</TableHead>
+                      <TableHead>Détails</TableHead>
+                      <TableHead>Statut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {activities.map((activity) => (
+                      <TableRow key={activity.id}>
+                        <TableCell>
+                          {format(new Date(activity.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {activity.action}
+                        </TableCell>
+                        <TableCell>
+                          {activity.details}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getActionColor(activity.action)}>
+                            Réalisée
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Vue liste des utilisateurs
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-6xl mx-auto">
@@ -107,78 +283,68 @@ const UserHistory = () => {
             Retour
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Historique Utilisateur</h1>
-            <p className="text-muted-foreground">Consultez vos activités récentes</p>
+            <h1 className="text-3xl font-bold">Gestion des Utilisateurs</h1>
+            <p className="text-muted-foreground">Consultez la liste des utilisateurs et leur historique</p>
           </div>
-        </div>
-
-        <div className="grid gap-6 mb-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Informations Utilisateur
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Nom</p>
-                  <p className="text-lg">{`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Non défini"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Email</p>
-                  <p className="text-lg">{user?.email}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Dernière connexion</p>
-                  <p className="text-lg">{format(new Date(), "dd/MM/yyyy HH:mm", { locale: fr })}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5" />
-              Historique des Activités
+              <Users className="w-5 h-5" />
+              Liste des Utilisateurs
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {activities.length === 0 ? (
+            {users.length === 0 ? (
               <div className="text-center py-8">
-                <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-lg font-medium">Aucune activité trouvée</p>
-                <p className="text-muted-foreground">Vos activités récentes apparaîtront ici</p>
+                <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-lg font-medium">Aucun utilisateur trouvé</p>
+                <p className="text-muted-foreground">Les utilisateurs apparaîtront ici</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date & Heure</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Détails</TableHead>
-                    <TableHead>Statut</TableHead>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Rôles</TableHead>
+                    <TableHead>Date d'inscription</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {activities.map((activity) => (
-                    <TableRow key={activity.id}>
-                      <TableCell>
-                        {format(new Date(activity.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
-                      </TableCell>
+                  {users.map((user) => (
+                    <TableRow key={user.id}>
                       <TableCell className="font-medium">
-                        {activity.action}
+                        {`${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur"}
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {user.roles.length > 0 ? (
+                            user.roles.map((role) => (
+                              <Badge key={role} variant={getRoleBadgeColor(role)}>
+                                {role}
+                              </Badge>
+                            ))
+                          ) : (
+                            <Badge variant="outline">user</Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
-                        {activity.details}
+                        {format(new Date(user.created_at), "dd/MM/yyyy", { locale: fr })}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getActionColor(activity.action)}>
-                          Réalisée
-                        </Badge>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleUserSelect(user)}
+                        >
+                          <Activity className="w-4 h-4 mr-2" />
+                          Voir historique
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
