@@ -32,7 +32,7 @@ interface UserActivity {
 
 const UserHistory = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [activities, setActivities] = useState<UserActivity[]>([]);
@@ -46,13 +46,23 @@ const UserHistory = () => {
     try {
       setLoading(true);
       
+      // Vérifier si l'utilisateur est admin
+      if (!isAdmin) {
+        console.error("Accès refusé: seuls les administrateurs peuvent voir tous les utilisateurs");
+        setLoading(false);
+        return;
+      }
+      
       // Récupérer tous les profils utilisateurs
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error("Erreur profiles:", profilesError);
+        throw profilesError;
+      }
 
       // Récupérer les rôles pour chaque utilisateur
       const usersWithRoles = await Promise.all(
@@ -72,7 +82,6 @@ const UserHistory = () => {
       setUsers(usersWithRoles);
     } catch (error) {
       console.error("Erreur lors de la récupération des utilisateurs:", error);
-    } finally {
       setLoading(false);
     }
   };
@@ -158,6 +167,27 @@ const UserHistory = () => {
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
           <p>Chargement des utilisateurs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Vérifier si l'utilisateur est admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4 mb-6">
+            <Button variant="outline" onClick={() => navigate("/")}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour
+            </Button>
+          </div>
+          <div className="text-center py-8">
+            <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-lg font-medium">Accès refusé</p>
+            <p className="text-muted-foreground">Seuls les administrateurs peuvent accéder à cette page</p>
+          </div>
         </div>
       </div>
     );
