@@ -44,12 +44,13 @@ export const useAuth = () => {
               setProfile(profileData);
 
               // Fetch user role
-              const { data: roleData } = await supabase
+              const { data: roleData, error: roleError } = await supabase
                 .from('user_roles')
                 .select('role')
                 .eq('user_id', session.user.id)
-                .single();
+                .maybeSingle();
               
+              console.log('Role data:', roleData, 'Role error:', roleError);
               setUserRole(roleData?.role || 'user');
             } catch (error) {
               console.error('Error fetching user data:', error);
@@ -82,12 +83,13 @@ export const useAuth = () => {
             
             setProfile(profileData);
 
-            const { data: roleData } = await supabase
+            const { data: roleData, error: roleError } = await supabase
               .from('user_roles')
               .select('role')
               .eq('user_id', session.user.id)
-              .single();
+              .maybeSingle();
             
+            console.log('Role data (session):', roleData, 'Role error:', roleError);
             setUserRole(roleData?.role || 'user');
           } catch (error) {
             console.error('Error fetching user data:', error);

@@ -39,12 +39,21 @@ const UserHistory = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    // Attendre que le statut admin soit déterminé avant de charger les utilisateurs
+    if (isAdmin !== undefined) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    console.log('isAdmin status:', isAdmin, 'user:', user?.id);
+  }, [isAdmin, user]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      
+      console.log('fetchUsers called, isAdmin:', isAdmin);
       
       // Vérifier si l'utilisateur est admin
       if (!isAdmin) {
@@ -52,6 +61,8 @@ const UserHistory = () => {
         setLoading(false);
         return;
       }
+      
+      console.log('Admin check passed, fetching profiles...');
       
       // Récupérer tous les profils utilisateurs
       const { data: profiles, error: profilesError } = await supabase
@@ -63,6 +74,8 @@ const UserHistory = () => {
         console.error("Erreur profiles:", profilesError);
         throw profilesError;
       }
+
+      console.log('Profiles fetched:', profiles?.length);
 
       // Récupérer les rôles pour chaque utilisateur
       const usersWithRoles = await Promise.all(
@@ -79,7 +92,9 @@ const UserHistory = () => {
         })
       );
 
+      console.log('Users with roles:', usersWithRoles);
       setUsers(usersWithRoles);
+      setLoading(false);
     } catch (error) {
       console.error("Erreur lors de la récupération des utilisateurs:", error);
       setLoading(false);
@@ -307,16 +322,21 @@ const UserHistory = () => {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => navigate("/")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Gestion des Utilisateurs</h1>
-            <p className="text-muted-foreground">Consultez la liste des utilisateurs et leur historique</p>
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={() => navigate("/")}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Retour
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold">Gestion des Utilisateurs</h1>
+                <p className="text-muted-foreground">Consultez la liste des utilisateurs et leur historique</p>
+              </div>
+            </div>
+            <Button onClick={fetchUsers} variant="outline">
+              Actualiser
+            </Button>
           </div>
-        </div>
 
         <Card>
           <CardHeader>
