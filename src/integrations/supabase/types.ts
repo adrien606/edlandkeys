@@ -324,6 +324,33 @@ export type Database = {
           },
         ]
       }
+      user_activities: {
+        Row: {
+          action: string
+          created_at: string
+          details: string | null
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -356,6 +383,15 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_user_activity: {
+        Args: {
+          p_action: string
+          p_details?: string
+          p_metadata?: Json
+          p_user_id: string
+        }
+        Returns: string
       }
     }
     Enums: {

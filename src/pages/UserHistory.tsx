@@ -103,42 +103,29 @@ const UserHistory = () => {
 
   const fetchUserActivities = async (selectedUserId: string) => {
     try {
-      const selectedUserProfile = users.find(u => u.user_id === selectedUserId);
-      
-      // Simuler des données d'activité utilisateur pour démonstration
-      const mockActivities: UserActivity[] = [
-        {
-          id: "1",
-          user_id: selectedUserId,
-          action: "Connexion",
-          details: "Connexion réussie à l'application",
-          created_at: new Date().toISOString(),
-          user_email: selectedUserProfile?.email,
-          user_name: `${selectedUserProfile?.first_name || ""} ${selectedUserProfile?.last_name || ""}`.trim() || "Utilisateur"
-        },
-        {
-          id: "2", 
-          user_id: selectedUserId,
-          action: "Navigation",
-          details: "Accès à la page gestion des équipements",
-          created_at: new Date(Date.now() - 3600000).toISOString(),
-          user_email: selectedUserProfile?.email,
-          user_name: `${selectedUserProfile?.first_name || ""} ${selectedUserProfile?.last_name || ""}`.trim() || "Utilisateur"
-        },
-        {
-          id: "3",
-          user_id: selectedUserId,
-          action: "Ajout",
-          details: "Ajout d'un nouveau client",
-          created_at: new Date(Date.now() - 7200000).toISOString(),
-          user_email: selectedUserProfile?.email,
-          user_name: `${selectedUserProfile?.first_name || ""} ${selectedUserProfile?.last_name || ""}`.trim() || "Utilisateur"
-        }
-      ];
+      const { data, error } = await supabase
+        .from('user_activities')
+        .select('*')
+        .eq('user_id', selectedUserId)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      setActivities(mockActivities);
+      if (error) {
+        console.error('Erreur lors de la récupération des activités:', error);
+        setActivities([]);
+        return;
+      }
+
+      // Transformer les données pour correspondre à l'interface UserActivity
+      const transformedActivities: UserActivity[] = (data || []).map(activity => ({
+        ...activity,
+        details: activity.details || activity.action
+      }));
+      
+      setActivities(transformedActivities);
     } catch (error) {
-      console.error("Erreur lors de la récupération des activités:", error);
+      console.error('Erreur lors de la récupération des activités:', error);
+      setActivities([]);
     }
   };
 

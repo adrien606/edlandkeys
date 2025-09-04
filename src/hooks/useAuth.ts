@@ -50,8 +50,19 @@ export const useAuth = () => {
                 .eq('user_id', session.user.id)
                 .maybeSingle();
               
-              console.log('Role data:', roleData, 'Role error:', roleError);
-              setUserRole(roleData?.role || 'user');
+            console.log('Role data:', roleData, 'Role error:', roleError);
+            setUserRole(roleData?.role || 'user');
+            
+            // Logger l'activité de connexion
+            try {
+              await supabase.rpc('log_user_activity', {
+                p_user_id: session.user.id,
+                p_action: 'connexion',
+                p_details: 'Connexion à l\'application'
+              });
+            } catch (error) {
+              console.error('Erreur lors du logging de la connexion:', error);
+            }
             } catch (error) {
               console.error('Error fetching user data:', error);
               setUserRole('user'); // Default to user role
@@ -106,6 +117,19 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
+    // Logger l'activité de déconnexion avant de se déconnecter
+    if (user) {
+      try {
+        await supabase.rpc('log_user_activity', {
+          p_user_id: user.id,
+          p_action: 'deconnexion',
+          p_details: 'Déconnexion de l\'application'
+        });
+      } catch (error) {
+        console.error('Erreur lors du logging de la déconnexion:', error);
+      }
+    }
+    
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error('Error signing out:', error);
