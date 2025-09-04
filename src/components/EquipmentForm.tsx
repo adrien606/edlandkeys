@@ -5,6 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +34,9 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
     stockItemId: '', // ID de l'élément sélectionné dans le stock
     batimentId: '',
   });
+  
+  const [clientOpen, setClientOpen] = useState(false);
+  const [equipmentOpen, setEquipmentOpen] = useState(false);
   
   // Fonction pour calculer les quantités réelles basées sur les distributions aux clients
   const getUpdatedStockItem = (stockItem: any) => {
@@ -153,18 +160,49 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="client">Client *</Label>
-              <Select value={formData.clientId} onValueChange={(value) => setFormData(prev => ({ ...prev, clientId: value }))}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Sélectionner un client" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[200px] z-[100]" position="popper">
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.prenom} {client.nom}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={clientOpen} onOpenChange={setClientOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={clientOpen}
+                    className="h-12 justify-between"
+                  >
+                    {formData.clientId
+                      ? clients.find((client) => client.id === formData.clientId)?.prenom + " " + clients.find((client) => client.id === formData.clientId)?.nom
+                      : "Sélectionner un client"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Rechercher un client..." />
+                    <CommandList>
+                      <CommandEmpty>Aucun client trouvé.</CommandEmpty>
+                      <CommandGroup>
+                        {clients.map((client) => (
+                          <CommandItem
+                            key={client.id}
+                            value={`${client.prenom} ${client.nom}`}
+                            onSelect={() => {
+                              setFormData(prev => ({ ...prev, clientId: client.id }));
+                              setClientOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                formData.clientId === client.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {client.prenom} {client.nom}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {clients.length === 0 && (
                 <p className="text-sm text-muted-foreground mt-1">
                   Aucun client disponible. 
@@ -231,33 +269,59 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
 
             <div>
               <Label htmlFor="equipment">Équipement disponible *</Label>
-              <Select 
-                value={formData.stockItemId} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, stockItemId: value }))}
-                disabled={!formData.equipmentType}
-              >
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder={
-                    !formData.equipmentType 
-                      ? "Sélectionnez d'abord un type d'équipement" 
-                      : availableItems.length === 0 
-                        ? "Aucun équipement disponible"
-                        : "Sélectionner un équipement du stock"
-                  } />
-                </SelectTrigger>
-                <SelectContent className="max-h-[200px] z-[100]" position="popper">
-                  {availableItems.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      <div className="flex items-center justify-between w-full">
-                        <span>{item.numero} - {item.description || 'Sans description'}</span>
-                        <Badge variant="secondary" className="ml-2 text-xs">
-                          {item.quantiteDisponible} dispo
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={equipmentOpen} onOpenChange={setEquipmentOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={equipmentOpen}
+                    className="h-12 justify-between"
+                    disabled={!formData.equipmentType}
+                  >
+                    {formData.stockItemId
+                      ? availableItems.find((item) => item.id === formData.stockItemId)?.numero + " - " + (availableItems.find((item) => item.id === formData.stockItemId)?.description || 'Sans description')
+                      : !formData.equipmentType 
+                        ? "Sélectionnez d'abord un type d'équipement" 
+                        : availableItems.length === 0 
+                          ? "Aucun équipement disponible"
+                          : "Sélectionner un équipement du stock"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Rechercher un équipement..." />
+                    <CommandList>
+                      <CommandEmpty>Aucun équipement trouvé.</CommandEmpty>
+                      <CommandGroup>
+                        {availableItems.map((item) => (
+                          <CommandItem
+                            key={item.id}
+                            value={`${item.numero} ${item.description || ''}`}
+                            onSelect={() => {
+                              setFormData(prev => ({ ...prev, stockItemId: item.id }));
+                              setEquipmentOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                formData.stockItemId === item.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <div className="flex items-center justify-between w-full">
+                              <span>{item.numero} - {item.description || 'Sans description'}</span>
+                              <Badge variant="secondary" className="ml-2 text-xs">
+                                {item.quantiteDisponible} dispo
+                              </Badge>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {formData.equipmentType && availableItems.length === 0 && (
                 <p className="text-sm text-destructive mt-1">
                   Aucun équipement de ce type disponible en stock
