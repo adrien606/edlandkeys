@@ -142,7 +142,7 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
           Remettre équipement
         </Button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Button 
             variant="outline" 
             size="lg" 
@@ -161,6 +161,16 @@ export const Dashboard = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
           >
             <Radio className="mr-2 h-5 w-5" />
             Gérer stock
+          </Button>
+
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={() => navigate('/utilisateurs')}
+            className="h-12 sm:h-14 text-sm sm:text-base"
+          >
+            <Users className="mr-2 h-5 w-5" />
+            Gestion des Utilisateurs
           </Button>
         </div>
       </div>
