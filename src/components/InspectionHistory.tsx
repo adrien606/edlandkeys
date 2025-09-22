@@ -7,7 +7,7 @@ import { useSupabaseStore } from "@/hooks/useSupabaseStore";
 import { ArrowLeft, Search, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface InspectionHistoryProps {
   onNavigate: (route: string) => void;
@@ -21,6 +21,11 @@ export const InspectionHistory = ({ onNavigate, onBack, onSwitchApp }: Inspectio
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterBuilding, setFilterBuilding] = useState<string>('all');
+
+  // Synchroniser les données au chargement du composant
+  useEffect(() => {
+    syncFromSupabase();
+  }, [syncFromSupabase]);
 
   const filteredInspections = inspections
     .filter(inspection => {
