@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ export const StockManagement = ({
   onSwitchApp?: () => void;
 }) => {
   const [currentView, setCurrentView] = useState<'stock' | 'buildings'>('stock');
+  const isMobile = useIsMobile();
   const {
     clients,
     buildings,
@@ -312,10 +314,26 @@ export const StockManagement = ({
               
               <div>
                 <Label htmlFor="add-quantite">Quantité *</Label>
-                <Input id="add-quantite" type="number" min="1" value={addForm.quantite} onChange={e => setAddForm(prev => ({
-                ...prev,
-                quantite: parseInt(e.target.value) || 1
-              }))} />
+                {isMobile ? (
+                  <Select value={addForm.quantite.toString()} onValueChange={value => setAddForm(prev => ({
+                    ...prev,
+                    quantite: parseInt(value)
+                  }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input id="add-quantite" type="number" min="1" value={addForm.quantite} onChange={e => setAddForm(prev => ({
+                    ...prev,
+                    quantite: parseInt(e.target.value) || 1
+                  }))} />
+                )}
               </div>
               
               <div>
@@ -564,16 +582,32 @@ export const StockManagement = ({
                               
                               <div>
                                 <Label htmlFor="edit-quantite">Quantité</Label>
-                                <Input 
-                                  id="edit-quantite" 
-                                  type="number" 
-                                  min="1" 
-                                  value={editForm.quantite} 
-                                  onChange={e => setEditForm(prev => ({
+                                {isMobile ? (
+                                  <Select value={editForm.quantite.toString()} onValueChange={value => setEditForm(prev => ({
                                     ...prev,
-                                    quantite: parseInt(e.target.value) || 1
-                                  }))} 
-                                />
+                                    quantite: parseInt(value)
+                                  }))}>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  <Input 
+                                    id="edit-quantite" 
+                                    type="number" 
+                                    min="1" 
+                                    value={editForm.quantite} 
+                                    onChange={e => setEditForm(prev => ({
+                                      ...prev,
+                                      quantite: parseInt(e.target.value) || 1
+                                    }))} 
+                                  />
+                                )}
                               </div>
                               
                               <div>
