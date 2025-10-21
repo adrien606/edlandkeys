@@ -936,7 +936,16 @@ export const useSupabaseStore = create<SupabaseStore>()(
     }),
     {
       name: 'edlandkeys-store',
-      version: 1,
+      version: 2,
+      // Ne persister que les données essentielles pour éviter de dépasser le quota localStorage
+      partialize: (state) => ({
+        clients: state.clients,
+        buildings: state.buildings,
+        stockItems: state.stockItems,
+        currentBuildingId: state.currentBuildingId,
+        // Ne PAS persister inspections (contient des photos volumineuses)
+        // Ne PAS persister currentInspection
+      }),
     }
   )
 );
