@@ -458,6 +458,8 @@ export const useSupabaseStore = create<SupabaseStore>()(
 
       // Client Actions
       addClient: async (clientData) => {
+        console.log('addClient appelé avec:', clientData);
+        
         const newClient: Client = {
           id: generateId(),
           ...clientData,
@@ -465,13 +467,18 @@ export const useSupabaseStore = create<SupabaseStore>()(
           equipements: [],
         };
 
+        console.log('Nouveau client créé:', newClient);
+
         set((state) => ({
           clients: [...state.clients, newClient],
         }));
 
+        console.log('État local mis à jour, isOnline:', get().isOnline);
+
         if (get().isOnline) {
           try {
-            const { error } = await supabase
+            console.log('Tentative d\'insertion dans Supabase...');
+            const { data, error } = await supabase
               .from('clients')
               .insert({
                 id: newClient.id,
@@ -481,18 +488,26 @@ export const useSupabaseStore = create<SupabaseStore>()(
                 telephone: newClient.telephone,
                 telephone_secondaire: clientData.telephone_secondaire,
                 date_inscription: newClient.dateInscription
-              });
+              })
+              .select();
 
             if (error) {
-              console.error('Failed to sync client to Supabase:', error);
+              console.error('Erreur Supabase détaillée:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+              });
               // Rollback local state
               set((state) => ({
                 clients: state.clients.filter(c => c.id !== newClient.id),
               }));
-              throw error;
+              throw new Error(`Erreur de base de données: ${error.message}`);
             }
+            
+            console.log('Client inséré avec succès dans Supabase:', data);
           } catch (error) {
-            console.error('Failed to sync client to Supabase:', error);
+            console.error('Exception lors de l\'insertion:', error);
             throw error;
           }
         }

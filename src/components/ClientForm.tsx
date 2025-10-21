@@ -34,7 +34,10 @@ export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Tentative d\'ajout de client:', formData);
+    
     if (!formData.nom || !formData.prenom) {
+      console.log('Validation échouée: nom ou prénom manquant');
       toast({
         title: "Erreur",
         description: "Le nom et prénom sont obligatoires",
@@ -44,7 +47,9 @@ export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
     }
 
     try {
+      console.log('Appel à addClient...');
       await addClient(formData);
+      console.log('Client ajouté avec succès');
       
       // Logger l'activité d'ajout de client
       await logActivity('ajout_client', `Ajout du client: ${formData.prenom} ${formData.nom}`, {
@@ -60,9 +65,10 @@ export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       
       navigate('/');
     } catch (error) {
+      console.error('Erreur lors de l\'ajout du client:', error);
       toast({
         title: "Erreur",
-        description: "Impossible d'ajouter le client",
+        description: error instanceof Error ? error.message : "Impossible d'ajouter le client",
         variant: "destructive",
       });
     }
