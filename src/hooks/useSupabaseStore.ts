@@ -479,12 +479,21 @@ export const useSupabaseStore = create<SupabaseStore>()(
                 prenom: newClient.prenom,
                 email: newClient.email,
                 telephone: newClient.telephone,
+                telephone_secondaire: clientData.telephone_secondaire,
                 date_inscription: newClient.dateInscription
               });
 
-            if (error) throw error;
+            if (error) {
+              console.error('Failed to sync client to Supabase:', error);
+              // Rollback local state
+              set((state) => ({
+                clients: state.clients.filter(c => c.id !== newClient.id),
+              }));
+              throw error;
+            }
           } catch (error) {
             console.error('Failed to sync client to Supabase:', error);
+            throw error;
           }
         }
       },
