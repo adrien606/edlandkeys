@@ -936,7 +936,7 @@ export const useSupabaseStore = create<SupabaseStore>()(
     }),
     {
       name: 'edlandkeys-store',
-      version: 2,
+      version: 3,
       // Ne persister que les données essentielles pour éviter de dépasser le quota localStorage
       partialize: (state) => ({
         clients: state.clients,
