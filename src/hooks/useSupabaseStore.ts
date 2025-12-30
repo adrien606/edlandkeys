@@ -936,7 +936,22 @@ export const useSupabaseStore = create<SupabaseStore>()(
     }),
     {
       name: 'edlandkeys-store',
-      version: 3,
+      version: 4,
+      // Migration pour forcer le rechargement des données depuis Supabase
+      migrate: (persistedState: any, version: number) => {
+        console.log('[Store] Migration from version', version, 'to 4');
+        // Si la version est inférieure à 4, on efface le cache pour forcer le rechargement
+        if (version < 4) {
+          console.log('[Store] Clearing old cache, will reload from Supabase');
+          return {
+            clients: [],
+            buildings: [],
+            stockItems: [],
+            currentBuildingId: null,
+          };
+        }
+        return persistedState;
+      },
       // Ne persister que les données essentielles pour éviter de dépasser le quota localStorage
       partialize: (state) => ({
         clients: state.clients,
