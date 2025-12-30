@@ -34,18 +34,22 @@ const App = () => {
   const [currentApp, setCurrentApp] = useState<'equipment' | 'inspection' | 'notifications' | 'users' | null>(null);
   const { isAuthenticated, loading } = useAuth();
   const initialize = useSupabaseStore(state => state.initialize);
+  const isLoading = useSupabaseStore(state => state.isLoading);
+  const isInitialized = useSupabaseStore(state => state.isInitialized);
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    if (isAuthenticated && !isInitialized) {
+      initialize();
+    }
+  }, [initialize, isAuthenticated, isInitialized]);
 
-  // Show loading while checking authentication
-  if (loading) {
+  // Show loading while checking authentication or loading data
+  if (loading || (isAuthenticated && isLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
-          <p>Chargement...</p>
+          <p>{loading ? 'Vérification...' : 'Chargement des données...'}</p>
         </div>
       </div>
     );

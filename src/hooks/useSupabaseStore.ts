@@ -62,6 +62,8 @@ interface SupabaseStore {
   searchTerm: string;
   isOnline: boolean;
   syncPending: boolean;
+  isLoading: boolean;
+  isInitialized: boolean;
   
   // Network status
   setOnlineStatus: (status: boolean) => void;
@@ -131,6 +133,8 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
   searchTerm: '',
   isOnline: navigator.onLine,
   syncPending: false,
+  isLoading: true,
+  isInitialized: false,
 
       setOnlineStatus: (status) => {
         set({ isOnline: status });
@@ -141,6 +145,14 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
       },
 
       initialize: async () => {
+        if (get().isInitialized) {
+          console.log('Store already initialized, skipping');
+          return;
+        }
+        
+        console.log('Initializing store...');
+        set({ isLoading: true });
+        
         const store = get();
         
         // Listen for online/offline events
@@ -151,14 +163,20 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
         if (store.isOnline) {
           await store.syncFromSupabase();
         }
+        
+        set({ isInitialized: true, isLoading: false });
+        console.log('Store initialized successfully');
       },
 
       syncFromSupabase: async () => {
         console.log('syncFromSupabase called, isOnline:', get().isOnline);
         if (!get().isOnline) {
           console.log('Not online, skipping sync');
+          set({ isLoading: false });
           return;
         }
+        
+        set({ isLoading: true });
         
         try {
           set({ syncPending: true });
@@ -275,14 +293,15 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             buildings: transformedBuildings,
             stockItems: transformedStockItems,
             inspections: transformedInspections,
-            syncPending: false
+            syncPending: false,
+            isLoading: false
           });
 
           console.log('Store data set successfully');
 
         } catch (error) {
           console.error('Sync from Supabase failed:', error);
-          set({ syncPending: false });
+          set({ syncPending: false, isLoading: false });
         }
       },
 
