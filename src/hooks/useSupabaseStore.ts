@@ -154,10 +154,15 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
       },
 
       syncFromSupabase: async () => {
-        if (!get().isOnline) return;
+        console.log('syncFromSupabase called, isOnline:', get().isOnline);
+        if (!get().isOnline) {
+          console.log('Not online, skipping sync');
+          return;
+        }
         
         try {
           set({ syncPending: true });
+          console.log('Starting data fetch from Supabase...');
           
           // Fetch all data in parallel for better performance
           const [
@@ -173,6 +178,21 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             supabase.from('stock_items').select('*'),
             supabase.from('inspections').select('id, client_id, client_name, client_email, building_id, building_code, type, entry_inspection_id, date, items, completed, pdf_generated, email_sent, signature, site_manager_name, site_manager_signature, created_at, updated_at').order('created_at', { ascending: false })
           ]);
+
+          console.log('Fetch results:', {
+            buildings: buildingsResult.data?.length,
+            clients: clientsResult.data?.length,
+            equipment: equipmentResult.data?.length,
+            stock: stockResult.data?.length,
+            inspections: inspectionsResult.data?.length,
+            errors: {
+              buildings: buildingsResult.error,
+              clients: clientsResult.error,
+              equipment: equipmentResult.error,
+              stock: stockResult.error,
+              inspections: inspectionsResult.error
+            }
+          });
 
           if (buildingsResult.error) throw buildingsResult.error;
           if (clientsResult.error) throw clientsResult.error;
@@ -250,6 +270,13 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             updated_at: inspection.updated_at
           })) || [];
 
+          console.log('Setting store data:', {
+            clients: transformedClients.length,
+            buildings: transformedBuildings.length,
+            stockItems: transformedStockItems.length,
+            inspections: transformedInspections.length
+          });
+
           set({
             clients: transformedClients,
             buildings: transformedBuildings,
@@ -257,6 +284,8 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             inspections: transformedInspections,
             syncPending: false
           });
+
+          console.log('Store data set successfully');
 
         } catch (error) {
           console.error('Sync from Supabase failed:', error);
