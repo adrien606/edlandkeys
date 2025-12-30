@@ -10,7 +10,6 @@ import { AuthPage } from "./pages/AuthPage";
 import { UserManagement } from "./components/UserManagement";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import UserHistory from "./pages/UserHistory";
 import { Dashboard } from "./components/Dashboard";
 import { ClientForm } from "./components/ClientForm";
 import { ClientList } from "./components/ClientList";
@@ -111,7 +110,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Dashboard onSwitchApp={() => setCurrentApp('inspection')} />} />
-              <Route path="/utilisateurs" element={<UserHistory />} />
+              <Route path="/utilisateurs" element={<UserManagement />} />
               <Route path="/ajouter-client" element={<ClientForm onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/clients" element={<ClientList onSwitchApp={() => setCurrentApp('inspection')} />} />
               <Route path="/client/:clientId" element={<ClientDetail onSwitchApp={() => setCurrentApp('inspection')} />} />

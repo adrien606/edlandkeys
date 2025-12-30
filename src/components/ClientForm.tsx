@@ -8,13 +8,11 @@ import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { addClient, buildings } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { logActivity } = useActivityLogger();
   
   const [formData, setFormData] = useState({
     nom: '',
@@ -50,13 +48,6 @@ export const ClientForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
       console.log('Appel à addClient...');
       await addClient(formData);
       console.log('Client ajouté avec succès');
-      
-      // Logger l'activité d'ajout de client
-      await logActivity('ajout_client', `Ajout du client: ${formData.prenom} ${formData.nom}`, {
-        client_name: `${formData.prenom} ${formData.nom}`,
-        client_email: formData.email,
-        client_phone: formData.telephone
-      });
       
       toast({
         title: "Client ajouté",
