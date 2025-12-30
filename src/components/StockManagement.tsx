@@ -31,6 +31,8 @@ export const StockManagement = ({
     updateStockItem,
     deleteStockItem
   } = useSupabaseStore();
+
+  console.log('StockManagement render - stockItems count:', stockItems.length, 'buildings count:', buildings.length);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('tous');
