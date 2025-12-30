@@ -12,7 +12,7 @@ export const ClientList = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
-  console.log('ClientList render - clients count:', clients.length, clients.slice(0, 2));
+  
 
   // Filter clients based on search term
   const filteredClients = clients.filter(client => {
