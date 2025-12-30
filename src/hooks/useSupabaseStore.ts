@@ -164,35 +164,28 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
           set({ syncPending: true });
           console.log('Starting data fetch from Supabase...');
           
-          // Fetch all data in parallel for better performance
-          const [
-            buildingsResult,
-            clientsResult,
-            equipmentResult,
-            stockResult,
-            inspectionsResult
-          ] = await Promise.all([
-            supabase.from('buildings').select('*').order('nom', { ascending: true }),
-            supabase.from('clients').select('*').order('nom', { ascending: true }),
-            supabase.from('equipment').select('*'),
-            supabase.from('stock_items').select('*'),
-            supabase.from('inspections').select('id, client_id, client_name, client_email, building_id, building_code, type, entry_inspection_id, date, items, completed, pdf_generated, email_sent, signature, site_manager_name, site_manager_signature, created_at, updated_at').order('created_at', { ascending: false })
-          ]);
+          // Fetch all data separately for better debugging
+          console.log('Fetching buildings...');
+          const buildingsResult = await supabase.from('buildings').select('*').order('nom', { ascending: true });
+          console.log('Buildings fetched:', buildingsResult.data?.length, buildingsResult.error);
+          
+          console.log('Fetching clients...');
+          const clientsResult = await supabase.from('clients').select('*').order('nom', { ascending: true });
+          console.log('Clients fetched:', clientsResult.data?.length, clientsResult.error);
+          
+          console.log('Fetching equipment...');
+          const equipmentResult = await supabase.from('equipment').select('*');
+          console.log('Equipment fetched:', equipmentResult.data?.length, equipmentResult.error);
+          
+          console.log('Fetching stock_items...');
+          const stockResult = await supabase.from('stock_items').select('*');
+          console.log('Stock fetched:', stockResult.data?.length, stockResult.error);
+          
+          console.log('Fetching inspections...');
+          const inspectionsResult = await supabase.from('inspections').select('*').order('created_at', { ascending: false });
+          console.log('Inspections fetched:', inspectionsResult.data?.length, inspectionsResult.error);
 
-          console.log('Fetch results:', {
-            buildings: buildingsResult.data?.length,
-            clients: clientsResult.data?.length,
-            equipment: equipmentResult.data?.length,
-            stock: stockResult.data?.length,
-            inspections: inspectionsResult.data?.length,
-            errors: {
-              buildings: buildingsResult.error,
-              clients: clientsResult.error,
-              equipment: equipmentResult.error,
-              stock: stockResult.error,
-              inspections: inspectionsResult.error
-            }
-          });
+          console.log('All data fetched successfully');
 
           if (buildingsResult.error) throw buildingsResult.error;
           if (clientsResult.error) throw clientsResult.error;
