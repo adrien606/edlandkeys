@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { supabase } from '@/integrations/supabase/client';
 import { Client, Equipment, ClientFormData, EquipmentFormData, Building, BuildingFormData } from '@/types';
 
@@ -122,9 +121,7 @@ interface SupabaseStore {
 
 const generateId = () => crypto.randomUUID();
 
-export const useSupabaseStore = create<SupabaseStore>()(
-  persist(
-    (set, get) => ({
+export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
       clients: [],
       buildings: [],
       stockItems: [],
@@ -933,19 +930,6 @@ export const useSupabaseStore = create<SupabaseStore>()(
           }
         }
       }
-    }),
-    {
-      name: 'edlandkeys-store',
-      version: 2,
-      // Ne persister que les données essentielles pour éviter de dépasser le quota localStorage
-      partialize: (state) => ({
-        clients: state.clients,
-        buildings: state.buildings,
-        stockItems: state.stockItems,
-        currentBuildingId: state.currentBuildingId,
-        // Ne PAS persister inspections (contient des photos volumineuses)
-        // Ne PAS persister currentInspection
-      }),
     }
-  )
-);
+  }
+}));
