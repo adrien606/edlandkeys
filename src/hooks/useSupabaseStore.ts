@@ -122,15 +122,15 @@ interface SupabaseStore {
 const generateId = () => crypto.randomUUID();
 
 export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
-      clients: [],
-      buildings: [],
-      stockItems: [],
-      inspections: [],
-      currentInspection: null,
-      currentBuildingId: null,
-      searchTerm: '',
-      isOnline: navigator.onLine,
-      syncPending: false,
+  clients: [],
+  buildings: [],
+  stockItems: [],
+  inspections: [],
+  currentInspection: null,
+  currentBuildingId: null,
+  searchTerm: '',
+  isOnline: navigator.onLine,
+  syncPending: false,
 
       setOnlineStatus: (status) => {
         set({ isOnline: status });
@@ -929,7 +929,5 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             console.error('Failed to save inspection to Supabase:', error);
           }
         }
-      }
-    }
   }
 }));
