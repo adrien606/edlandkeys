@@ -159,45 +159,32 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
         try {
           set({ syncPending: true });
           
-          // Sync buildings
-          const { data: buildings, error: buildingsError } = await supabase
-            .from('buildings')
-            .select('*')
-            .order('created_at', { ascending: false });
-            
-          if (buildingsError) throw buildingsError;
+          // Fetch all data in parallel for better performance
+          const [
+            buildingsResult,
+            clientsResult,
+            equipmentResult,
+            stockResult,
+            inspectionsResult
+          ] = await Promise.all([
+            supabase.from('buildings').select('*').order('nom', { ascending: true }),
+            supabase.from('clients').select('*').order('nom', { ascending: true }),
+            supabase.from('equipment').select('*'),
+            supabase.from('stock_items').select('*'),
+            supabase.from('inspections').select('id, client_id, client_name, client_email, building_id, building_code, type, entry_inspection_id, date, items, completed, pdf_generated, email_sent, signature, site_manager_name, site_manager_signature, created_at, updated_at').order('created_at', { ascending: false })
+          ]);
 
-          // Sync clients
-          const { data: clients, error: clientsError } = await supabase
-            .from('clients')
-            .select('*')
-            .order('created_at', { ascending: false });
-            
-          if (clientsError) throw clientsError;
+          if (buildingsResult.error) throw buildingsResult.error;
+          if (clientsResult.error) throw clientsResult.error;
+          if (equipmentResult.error) throw equipmentResult.error;
+          if (stockResult.error) throw stockResult.error;
+          if (inspectionsResult.error) throw inspectionsResult.error;
 
-          // Sync equipment
-          const { data: equipment, error: equipmentError } = await supabase
-            .from('equipment')
-            .select('*')
-            .order('created_at', { ascending: false });
-            
-          if (equipmentError) throw equipmentError;
-
-          // Sync stock items
-          const { data: stockItems, error: stockError } = await supabase
-            .from('stock_items')
-            .select('*')
-            .order('created_at', { ascending: false });
-            
-          if (stockError) throw stockError;
-
-          // Sync inspections
-          const { data: inspections, error: inspectionsError } = await supabase
-            .from('inspections')
-            .select('*')
-            .order('created_at', { ascending: false });
-            
-          if (inspectionsError) throw inspectionsError;
+          const buildings = buildingsResult.data;
+          const clients = clientsResult.data;
+          const equipment = equipmentResult.data;
+          const stockItems = stockResult.data;
+          const inspections = inspectionsResult.data;
 
           // Transform and merge data
           const transformedClients: Client[] = clients?.map(client => ({
