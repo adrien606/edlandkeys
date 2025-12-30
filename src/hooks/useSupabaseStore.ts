@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { supabase } from '@/integrations/supabase/client';
 import { Client, Equipment, ClientFormData, EquipmentFormData, Building, BuildingFormData } from '@/types';
 
@@ -121,16 +122,18 @@ interface SupabaseStore {
 
 const generateId = () => crypto.randomUUID();
 
-export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
-  clients: [],
-  buildings: [],
-  stockItems: [],
-  inspections: [],
-  currentInspection: null,
-  currentBuildingId: null,
-  searchTerm: '',
-  isOnline: navigator.onLine,
-  syncPending: false,
+export const useSupabaseStore = create<SupabaseStore>()(
+  persist(
+    (set, get) => ({
+      clients: [],
+      buildings: [],
+      stockItems: [],
+      inspections: [],
+      currentInspection: null,
+      currentBuildingId: null,
+      searchTerm: '',
+      isOnline: navigator.onLine,
+      syncPending: false,
 
       setOnlineStatus: (status) => {
         set({ isOnline: status });
@@ -159,43 +162,45 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
         try {
           set({ syncPending: true });
           
-          console.log('[Store] Starting sync from Supabase...');
-          
-          // Execute all queries in parallel to avoid timeout
-          const [
-            buildingsResult,
-            clientsResult,
-            equipmentResult,
-            stockItemsResult,
-            inspectionsResult
-          ] = await Promise.all([
-            supabase.from('buildings').select('*').order('created_at', { ascending: false }),
-            supabase.from('clients').select('*').order('created_at', { ascending: false }),
-            supabase.from('equipment').select('*').order('created_at', { ascending: false }),
-            supabase.from('stock_items').select('*').order('created_at', { ascending: false }),
-            supabase.from('inspections').select('*').order('created_at', { ascending: false })
-          ]);
+          // Sync buildings
+          const { data: buildings, error: buildingsError } = await supabase
+            .from('buildings')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+          if (buildingsError) throw buildingsError;
 
-          // Check for errors
-          if (buildingsResult.error) throw buildingsResult.error;
-          if (clientsResult.error) throw clientsResult.error;
-          if (equipmentResult.error) throw equipmentResult.error;
-          if (stockItemsResult.error) throw stockItemsResult.error;
-          if (inspectionsResult.error) throw inspectionsResult.error;
+          // Sync clients
+          const { data: clients, error: clientsError } = await supabase
+            .from('clients')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+          if (clientsError) throw clientsError;
 
-          const buildings = buildingsResult.data;
-          const clients = clientsResult.data;
-          const equipment = equipmentResult.data;
-          const stockItems = stockItemsResult.data;
-          const inspections = inspectionsResult.data;
+          // Sync equipment
+          const { data: equipment, error: equipmentError } = await supabase
+            .from('equipment')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+          if (equipmentError) throw equipmentError;
 
-          console.log('[Store] Sync results:', {
-            buildings: buildings?.length || 0,
-            clients: clients?.length || 0,
-            equipment: equipment?.length || 0,
-            stockItems: stockItems?.length || 0,
-            inspections: inspections?.length || 0
-          });
+          // Sync stock items
+          const { data: stockItems, error: stockError } = await supabase
+            .from('stock_items')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+          if (stockError) throw stockError;
+
+          // Sync inspections
+          const { data: inspections, error: inspectionsError } = await supabase
+            .from('inspections')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+          if (inspectionsError) throw inspectionsError;
 
           // Transform and merge data
           const transformedClients: Client[] = clients?.map(client => ({
@@ -268,8 +273,6 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             inspections: transformedInspections,
             syncPending: false
           });
-
-          console.log('[Store] Sync complete!');
 
         } catch (error) {
           console.error('Sync from Supabase failed:', error);
@@ -930,4 +933,19 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
           }
         }
       }
-}));
+    }),
+    {
+      name: 'edlandkeys-store',
+      version: 2,
+      // Ne persister que les données essentielles pour éviter de dépasser le quota localStorage
+      partialize: (state) => ({
+        clients: state.clients,
+        buildings: state.buildings,
+        stockItems: state.stockItems,
+        currentBuildingId: state.currentBuildingId,
+        // Ne PAS persister inspections (contient des photos volumineuses)
+        // Ne PAS persister currentInspection
+      }),
+    }
+  )
+);

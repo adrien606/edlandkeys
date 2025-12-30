@@ -14,11 +14,13 @@ import { useSupabaseStore } from '@/hooks/useSupabaseStore';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Key, CreditCard, Radio } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clients, addEquipment, buildings, stockItems } = useSupabaseStore();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { logActivity } = useActivityLogger();
 
   // Debug logs
   console.log('[EquipmentForm] Component mounted');
@@ -106,6 +108,15 @@ export const EquipmentForm = ({ onSwitchApp }: { onSwitchApp?: () => void }) => 
     });
 
     const client = clients.find(c => c.id === formData.clientId);
+    
+    // Logger l'activité de remise d'équipement
+    await logActivity('remise_equipement', `Remise d'équipement: ${selectedItem.numero} à ${client?.prenom} ${client?.nom}`, {
+      equipment_type: formData.equipmentType,
+      equipment_number: selectedItem.numero,
+      equipment_description: selectedItem.description,
+      client_name: `${client?.prenom} ${client?.nom}`,
+      client_id: formData.clientId
+    });
     
     toast({
       title: "Équipement remis",

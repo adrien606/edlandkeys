@@ -33,27 +33,20 @@ export const UserManagement = () => {
     try {
       setLoading(true);
       
-      // Fetch all profiles
+      // Fetch all profiles with their roles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('*');
+        .select(`
+          *,
+          user_roles (role)
+        `);
 
       if (profilesError) throw profilesError;
-
-      // Fetch all roles separately
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-
-      if (rolesError) throw rolesError;
-
-      // Create a map of user_id to role
-      const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
 
       // Transform the data to include role information
       const usersWithRoles = profiles?.map(profile => ({
         ...profile,
-        role: roleMap.get(profile.user_id) || 'user'
+        role: profile.user_roles?.[0]?.role || 'user'
       })) || [];
 
       setUsers(usersWithRoles);
