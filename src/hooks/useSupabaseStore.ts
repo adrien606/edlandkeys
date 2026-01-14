@@ -172,42 +172,59 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
         set({ isLoading: true, syncPending: true });
         
         try {
-          // Fetch all data in parallel for better performance
-          const [
-            buildingsResult,
-            clientsResult,
-            equipmentResult,
-            stockResult,
-            inspectionsResult
-          ] = await Promise.all([
+          // Fetch data in smaller batches to avoid timeout
+          // First fetch buildings and stock (smaller tables)
+          const [buildingsResult, stockResult] = await Promise.all([
             supabase.from('buildings').select('*').order('nom', { ascending: true }),
-            supabase.from('clients').select('*').order('nom', { ascending: true }),
-            supabase.from('equipment').select('*'),
-            supabase.from('stock_items').select('*'),
-            supabase.from('inspections').select('*').order('created_at', { ascending: false })
+            supabase.from('stock_items').select('*')
           ]);
 
           if (buildingsResult.error) throw buildingsResult.error;
+          if (stockResult.error) throw stockResult.error;
+
+          // Then fetch clients and equipment (can be larger)
+          const [clientsResult, equipmentResult] = await Promise.all([
+            supabase.from('clients').select('*').order('nom', { ascending: true }),
+            supabase.from('equipment').select('*')
+          ]);
+
           if (clientsResult.error) throw clientsResult.error;
           if (equipmentResult.error) throw equipmentResult.error;
-          if (stockResult.error) throw stockResult.error;
+
+          // Finally fetch inspections (limit to recent ones to avoid timeout)
+          const inspectionsResult = await supabase
+            .from('inspections')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(500);
+
           if (inspectionsResult.error) throw inspectionsResult.error;
 
-          const buildings = buildingsResult.data;
-          const clients = clientsResult.data;
-          const equipment = equipmentResult.data;
-          const stockItems = stockResult.data;
-          const inspections = inspectionsResult.data;
+          const buildings = buildingsResult.data || [];
+          const clients = clientsResult.data || [];
+          const equipment = equipmentResult.data || [];
+          const stockItems = stockResult.data || [];
+          const inspections = inspectionsResult.data || [];
+
+          // Create equipment lookup map for faster client-equipment matching
+          const equipmentByClient = new Map<string, typeof equipment>();
+          equipment.forEach(eq => {
+            if (eq.client_id) {
+              const existing = equipmentByClient.get(eq.client_id) || [];
+              existing.push(eq);
+              equipmentByClient.set(eq.client_id, existing);
+            }
+          });
 
           // Transform and merge data
-          const transformedClients: Client[] = clients?.map(client => ({
+          const transformedClients: Client[] = clients.map(client => ({
             id: client.id,
             nom: client.nom,
             prenom: client.prenom,
             email: client.email,
             telephone: client.telephone,
             dateInscription: client.date_inscription || client.created_at,
-            equipements: equipment?.filter(eq => eq.client_id === client.id).map(eq => ({
+            equipements: (equipmentByClient.get(client.id) || []).map(eq => ({
               id: eq.id,
               type: eq.type as 'cle' | 'badge' | 'telecommande',
               numero: eq.numero,
@@ -217,18 +234,18 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
               dateRemise: eq.date_remise,
               dateRestitution: eq.date_restitution,
               validationClient: eq.validation_client
-            })) || []
-          })) || [];
+            }))
+          }));
 
-          const transformedBuildings: Building[] = buildings?.map(building => ({
+          const transformedBuildings: Building[] = buildings.map(building => ({
             id: building.id,
             nom: building.nom,
             code: building.code,
             description: building.description,
             dateCreation: building.date_creation || building.created_at
-          })) || [];
+          }));
 
-          const transformedStockItems: StockItem[] = stockItems?.map(item => ({
+          const transformedStockItems: StockItem[] = stockItems.map(item => ({
             id: item.id,
             type: item.type as 'cle' | 'badge' | 'telecommande',
             numero: item.numero,
@@ -240,9 +257,9 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             quantite_disponible: item.quantite_disponible,
             created_at: item.created_at,
             updated_at: item.updated_at
-          })) || [];
+          }));
 
-          const transformedInspections: Inspection[] = inspections?.map(inspection => ({
+          const transformedInspections: Inspection[] = inspections.map(inspection => ({
             id: inspection.id,
             client_id: inspection.client_id,
             client_name: inspection.client_name,
@@ -261,7 +278,7 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             email_sent: inspection.email_sent || false,
             created_at: inspection.created_at,
             updated_at: inspection.updated_at
-          })) || [];
+          }));
 
           set({
             clients: transformedClients,
@@ -271,7 +288,6 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             syncPending: false,
             isLoading: false
           });
-
 
         } catch (error) {
           console.error('Sync from Supabase failed:', error);
