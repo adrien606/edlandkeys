@@ -172,39 +172,25 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
         set({ isLoading: true, syncPending: true });
         
         try {
-          // Fetch data in smaller batches to avoid timeout
-          // First fetch buildings and stock (smaller tables)
-          const [buildingsResult, stockResult] = await Promise.all([
-            supabase.from('buildings').select('*').order('nom', { ascending: true }),
-            supabase.from('stock_items').select('*')
-          ]);
-
-          if (buildingsResult.error) throw buildingsResult.error;
-          if (stockResult.error) throw stockResult.error;
-
-          // Then fetch clients and equipment (can be larger)
-          const [clientsResult, equipmentResult] = await Promise.all([
-            supabase.from('clients').select('*').order('nom', { ascending: true }),
-            supabase.from('equipment').select('*')
-          ]);
-
-          if (clientsResult.error) throw clientsResult.error;
-          if (equipmentResult.error) throw equipmentResult.error;
-
-          // Finally fetch inspections (limit to recent ones to avoid timeout)
-          const inspectionsResult = await supabase
-            .from('inspections')
+          // Fetch clients first (most important for the client list)
+          const clientsResult = await supabase
+            .from('clients')
             .select('*')
-            .order('created_at', { ascending: false })
-            .limit(500);
+            .order('nom', { ascending: true });
 
-          if (inspectionsResult.error) throw inspectionsResult.error;
+          if (clientsResult.error) {
+            console.error('Error fetching clients:', clientsResult.error);
+            throw clientsResult.error;
+          }
 
-          const buildings = buildingsResult.data || [];
           const clients = clientsResult.data || [];
-          const equipment = equipmentResult.data || [];
-          const stockItems = stockResult.data || [];
-          const inspections = inspectionsResult.data || [];
+
+          // Fetch equipment separately
+          const equipmentResult = await supabase
+            .from('equipment')
+            .select('*');
+
+          const equipment = equipmentResult.error ? [] : (equipmentResult.data || []);
 
           // Create equipment lookup map for faster client-equipment matching
           const equipmentByClient = new Map<string, typeof equipment>();
@@ -216,7 +202,7 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             }
           });
 
-          // Transform and merge data
+          // Transform clients with their equipment
           const transformedClients: Client[] = clients.map(client => ({
             id: client.id,
             nom: client.nom,
@@ -236,6 +222,18 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
               validationClient: eq.validation_client
             }))
           }));
+
+          // Update state with clients immediately
+          set({ clients: transformedClients });
+
+          // Fetch other data in background
+          const [buildingsResult, stockResult] = await Promise.all([
+            supabase.from('buildings').select('*').order('nom', { ascending: true }),
+            supabase.from('stock_items').select('*')
+          ]);
+
+          const buildings = buildingsResult.error ? [] : (buildingsResult.data || []);
+          const stockItems = stockResult.error ? [] : (stockResult.data || []);
 
           const transformedBuildings: Building[] = buildings.map(building => ({
             id: building.id,
@@ -259,6 +257,15 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             updated_at: item.updated_at
           }));
 
+          // Fetch inspections (limit to reduce load)
+          const inspectionsResult = await supabase
+            .from('inspections')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(200);
+
+          const inspections = inspectionsResult.error ? [] : (inspectionsResult.data || []);
+
           const transformedInspections: Inspection[] = inspections.map(inspection => ({
             id: inspection.id,
             client_id: inspection.client_id,
@@ -281,7 +288,6 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
           }));
 
           set({
-            clients: transformedClients,
             buildings: transformedBuildings,
             stockItems: transformedStockItems,
             inspections: transformedInspections,
@@ -291,6 +297,7 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
 
         } catch (error) {
           console.error('Sync from Supabase failed:', error);
+          // Even on error, set loading to false so the UI isn't stuck
           set({ syncPending: false, isLoading: false });
         }
       },
