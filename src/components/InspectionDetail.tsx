@@ -429,32 +429,47 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     }
   };
 
-  // Fonction pour envoyer par email avec PDF en pièce jointe
-  const handleSendEmail = async () => {
+  // Fonction pour envoyer par email : télécharge le PDF puis ouvre le client mail
+  const handleSendEmail = () => {
     try {
       const htmlContent = generatePDFContent();
       const inspectionDate = format(new Date(inspection.date), 'yyyy-MM-dd');
       const typeLabel = inspection.type === 'entry' ? 'État d\'entrée' : 'État de sortie';
       const fileName = `etat-des-lieux-${inspection.client_name.replace(/\s+/g, '-')}-${inspectionDate}.html`;
 
-      const { data, error } = await supabase.functions.invoke('send-inspection-email', {
-        body: {
-          to: inspection.client_email,
-          clientName: inspection.client_name,
-          typeLabel,
-          inspectionDate: format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr }),
-          buildingCode: inspection.building_code || '',
-          htmlContent,
-          fileName,
-        },
-      });
+      // 1. Télécharger le fichier PDF/HTML automatiquement
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      if (error) throw error;
+      // 2. Ouvrir le client mail avec message pré-rempli
+      const subject = `${typeLabel} - ${inspection.client_name}`;
+      const formattedDate = format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr });
+      let body = `Bonjour,\n\nVeuillez trouver ci-joint l'état des lieux suivant :\n\n`;
+      body += `Client : ${inspection.client_name}\n`;
+      body += `Type : ${typeLabel}\n`;
+      body += `Date : ${formattedDate}\n`;
+      if (inspection.building_code) {
+        body += `Bâtiment : ${inspection.building_code}\n`;
+      }
+      body += `\nCordialement,\nBEL AIR CAMP`;
 
-      toast.success('Email envoyé avec succès avec le PDF en pièce jointe');
+      const mailtoLink = `mailto:${inspection.client_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      
+      setTimeout(() => {
+        window.location.href = mailtoLink;
+      }, 500);
+
+      toast.success('Le document a été téléchargé. Ajoutez-le en pièce jointe dans le mail qui s\'ouvre.');
     } catch (error) {
       console.error('Erreur lors de l\'envoi email:', error);
-      toast.error('Erreur lors de l\'envoi de l\'email');
+      toast.error('Erreur lors de la préparation de l\'email');
     }
   };
 
