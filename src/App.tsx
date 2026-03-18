@@ -44,7 +44,7 @@ const App = () => {
   }, [initialize, isAuthenticated, isInitialized]);
 
   // Show loading while checking authentication or loading data
-  if (loading || (isAuthenticated && isLoading)) {
+  if (loading || (isAuthenticated && isLoading && !isInitialized)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
