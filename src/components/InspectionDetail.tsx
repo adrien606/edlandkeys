@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,7 @@ import { useSupabaseStore } from "@/hooks/useSupabaseStore";
 import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut, ExternalLink, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
 
 const INSPECTION_AREAS = [
   { key: 'prises', label: 'Prises électriques' },
@@ -28,20 +29,125 @@ interface InspectionDetailProps {
 }
 
 export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp }: InspectionDetailProps) => {
-  const { inspections, createInspection, setCurrentInspection, deleteInspection, buildings } = useSupabaseStore();
+  const { inspections, createInspection, deleteInspection, buildings } = useSupabaseStore();
+  type StoreInspection = (typeof inspections)[number];
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  
-  const inspection = inspections.find(i => i.id === inspectionId);
-  
+  const [inspection, setInspection] = useState<StoreInspection | null>(
+    inspections.find((i) => i.id === inspectionId) ?? null
+  );
+  const [entryInspectionDetails, setEntryInspectionDetails] = useState<StoreInspection | null>(null);
+  const [isLoadingInspection, setIsLoadingInspection] = useState(true);
+
+  const mapInspection = (dbInspection: any): StoreInspection => ({
+    id: dbInspection.id,
+    client_id: dbInspection.client_id,
+    client_name: dbInspection.client_name,
+    client_email: dbInspection.client_email,
+    building_id: dbInspection.building_id,
+    building_code: dbInspection.building_code,
+    type: dbInspection.type,
+    entry_inspection_id: dbInspection.entry_inspection_id,
+    date: dbInspection.date || dbInspection.created_at || new Date().toISOString(),
+    items: dbInspection.items,
+    signature: dbInspection.signature || '',
+    site_manager_name: dbInspection.site_manager_name,
+    site_manager_signature: dbInspection.site_manager_signature,
+    completed: dbInspection.completed || false,
+    pdf_generated: dbInspection.pdf_generated || false,
+    email_sent: dbInspection.email_sent || false,
+    created_at: dbInspection.created_at,
+    updated_at: dbInspection.updated_at,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchInspectionDetails = async () => {
+      setIsLoadingInspection(true);
+
+      const { data, error } = await supabase
+        .from('inspections')
+        .select('*')
+        .eq('id', inspectionId)
+        .single();
+
+      if (!isMounted) return;
+
+      if (error) {
+        console.error("Erreur lors du chargement du détail d'état des lieux:", error);
+        setInspection(inspections.find((i) => i.id === inspectionId) ?? null);
+        setIsLoadingInspection(false);
+        return;
+      }
+
+      setInspection(mapInspection(data));
+      setIsLoadingInspection(false);
+    };
+
+    fetchInspectionDetails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [inspectionId]);
+
+  useEffect(() => {
+    if (inspection?.type !== 'exit' || !inspection.entry_inspection_id) {
+      setEntryInspectionDetails(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchEntryInspectionDetails = async () => {
+      const { data, error } = await supabase
+        .from('inspections')
+        .select('*')
+        .eq('id', inspection.entry_inspection_id)
+        .single();
+
+      if (!isMounted) return;
+
+      if (error || !data) {
+        setEntryInspectionDetails(inspections.find((i) => i.id === inspection.entry_inspection_id) ?? null);
+        return;
+      }
+
+      setEntryInspectionDetails(mapInspection(data));
+    };
+
+    fetchEntryInspectionDetails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [inspection?.entry_inspection_id, inspection?.type]);
+
   // Trouver l'état de sortie associé si c'est un état d'entrée
-  const exitInspection = inspection?.type === 'entry' 
+  const exitInspection = inspection?.type === 'entry'
     ? inspections.find(i => i.type === 'exit' && i.entry_inspection_id === inspection.id)
     : null;
-     
+
   // Trouver l'état d'entrée associé si c'est un état de sortie
   const entryInspection = inspection?.type === 'exit' && inspection.entry_inspection_id
-    ? inspections.find(i => i.id === inspection.entry_inspection_id)
+    ? (entryInspectionDetails || inspections.find(i => i.id === inspection.entry_inspection_id) || null)
     : null;
+
+  if (isLoadingInspection) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-4xl mx-auto">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Chargement du détail de l'état des lieux...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (!inspection) {
     return (
