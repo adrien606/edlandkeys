@@ -430,7 +430,7 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
   };
 
   // Fonction pour envoyer par email avec PDF en pièce jointe
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const handleSendEmail = async () => {
   
   const handleSendEmail = async () => {
     setIsSendingEmail(true);
