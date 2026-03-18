@@ -18,7 +18,6 @@ const INSPECTION_AREAS = [
   { key: 'portes', label: 'Portes' }
 ] as const;
 
-import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 
