@@ -429,29 +429,37 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     }
   };
 
-  // Fonction pour envoyer par email
-  const handleSendEmail = () => {
+  // Fonction pour envoyer par email avec PDF en pièce jointe
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  
+  const handleSendEmail = async () => {
+    setIsSendingEmail(true);
     try {
-      const subject = `État des lieux - ${inspection.client_name}`;
-      const inspectionDate = format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr });
+      const htmlContent = generatePDFContent();
+      const inspectionDate = format(new Date(inspection.date), 'yyyy-MM-dd');
       const typeLabel = inspection.type === 'entry' ? 'État d\'entrée' : 'État de sortie';
-      
-      let body = `Bonjour,\n\nVeuillez trouver ci-joint l'état des lieux suivant :\n\n`;
-      body += `Client: ${inspection.client_name}\n`;
-      body += `Type: ${typeLabel}\n`;
-      body += `Date: ${inspectionDate}\n`;
-      if (inspection.building_code) {
-        body += `Bâtiment: ${inspection.building_code}\n`;
-      }
-      body += `\nCordialement`;
-      
-      const mailtoLink = `mailto:${inspection.client_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailtoLink;
-      
-      toast.success('Client email ouvert');
+      const fileName = `etat-des-lieux-${inspection.client_name.replace(/\s+/g, '-')}-${inspectionDate}.html`;
+
+      const { data, error } = await supabase.functions.invoke('send-inspection-email', {
+        body: {
+          to: inspection.client_email,
+          clientName: inspection.client_name,
+          typeLabel,
+          inspectionDate: format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr }),
+          buildingCode: inspection.building_code || '',
+          htmlContent,
+          fileName,
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success('Email envoyé avec succès avec le PDF en pièce jointe');
     } catch (error) {
       console.error('Erreur lors de l\'envoi email:', error);
-      toast.error('Erreur lors de l\'ouverture du client email');
+      toast.error('Erreur lors de l\'envoi de l\'email');
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
