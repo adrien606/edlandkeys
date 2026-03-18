@@ -431,9 +431,6 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
 
   // Fonction pour envoyer par email avec PDF en pièce jointe
   const handleSendEmail = async () => {
-  
-  const handleSendEmail = async () => {
-    setIsSendingEmail(true);
     try {
       const htmlContent = generatePDFContent();
       const inspectionDate = format(new Date(inspection.date), 'yyyy-MM-dd');
@@ -458,8 +455,6 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     } catch (error) {
       console.error('Erreur lors de l\'envoi email:', error);
       toast.error('Erreur lors de l\'envoi de l\'email');
-    } finally {
-      setIsSendingEmail(false);
     }
   };
 
