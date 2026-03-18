@@ -257,14 +257,35 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             updated_at: item.updated_at
           }));
 
-          // Fetch inspections (limit to reduce load)
+          const createEmptyInspectionItem = (name: string): InspectionItem => ({
+            id: generateId(),
+            name,
+            comment: '',
+            photos: [],
+            status: 'good'
+          });
+
+          const createEmptyInspectionItems = () => ({
+            prises: createEmptyInspectionItem('Prises électriques'),
+            murs: createEmptyInspectionItem('Murs'),
+            sol: createEmptyInspectionItem('Sol'),
+            plafond: createEmptyInspectionItem('Plafond'),
+            fenetres: createEmptyInspectionItem('Fenêtres'),
+            portes: createEmptyInspectionItem('Portes')
+          });
+
+          // Fetch inspection summaries only (items/signatures are very heavy payloads)
           const inspectionsResult = await supabase
             .from('inspections')
-            .select('*')
+            .select('id, client_id, client_name, client_email, building_id, building_code, type, entry_inspection_id, date, completed, pdf_generated, email_sent, created_at, updated_at')
             .order('created_at', { ascending: false })
             .limit(200);
 
-          const inspections = inspectionsResult.error ? [] : (inspectionsResult.data || []);
+          if (inspectionsResult.error) {
+            console.error('Error fetching inspections summaries:', inspectionsResult.error);
+          }
+
+          const inspections = inspectionsResult.data || [];
 
           const transformedInspections: Inspection[] = inspections.map(inspection => ({
             id: inspection.id,
@@ -276,10 +297,10 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             type: inspection.type as 'entry' | 'exit',
             entry_inspection_id: inspection.entry_inspection_id,
             date: inspection.date,
-            items: inspection.items,
-            signature: inspection.signature || '',
-            site_manager_name: inspection.site_manager_name,
-            site_manager_signature: inspection.site_manager_signature,
+            items: createEmptyInspectionItems(),
+            signature: '',
+            site_manager_name: undefined,
+            site_manager_signature: undefined,
             completed: inspection.completed || false,
             pdf_generated: inspection.pdf_generated || false,
             email_sent: inspection.email_sent || false,
