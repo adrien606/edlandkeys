@@ -567,6 +567,76 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
         )}
       </div>
 
+      {/* États des lieux du client */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileDown className="h-5 w-5" />
+            États des lieux ({clientInspections.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {clientInspections.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              Aucun état des lieux pour ce client
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {clientInspections.map((insp) => {
+                const building = buildings.find((b) => b.id === insp.building_id);
+                return (
+                  <div
+                    key={insp.id}
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg border bg-muted/30"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant={insp.type === 'entry' ? 'default' : 'secondary'} className="text-xs">
+                          {insp.type === 'entry' ? 'Entrée' : 'Sortie'}
+                        </Badge>
+                        {building && (
+                          <span className="text-xs text-muted-foreground">
+                            {building.code}
+                          </span>
+                        )}
+                        {insp.completed ? (
+                          <Badge variant="outline" className="text-xs">Terminé</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs text-warning">En cours</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(insp.date).toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (onSwitchApp) onSwitchApp();
+                        setTimeout(() => {
+                          window.dispatchEvent(
+                            new CustomEvent('navigate-inspection', { detail: insp.id })
+                          );
+                        }, 50);
+                      }}
+                    >
+                      Voir
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Edit Client Dialog */}
       <EditClientDialog 
         isOpen={isEditDialogOpen} 
