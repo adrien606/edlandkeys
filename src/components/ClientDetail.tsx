@@ -619,12 +619,10 @@ export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
+                        try {
+                          sessionStorage.setItem('pendingInspectionRoute', `inspection-detail/${insp.id}`);
+                        } catch {}
                         if (onSwitchApp) onSwitchApp();
-                        setTimeout(() => {
-                          window.dispatchEvent(
-                            new CustomEvent('navigate-inspection', { detail: insp.id })
-                          );
-                        }, 50);
                       }}
                     >
                       Voir
