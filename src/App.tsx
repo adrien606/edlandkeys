@@ -156,7 +156,17 @@ const App = () => {
 };
 
 const InspectionApp = ({ onBackToApps, onSwitchApp }: { onBackToApps: () => void; onSwitchApp: () => void }) => {
-  const [currentRoute, setCurrentRoute] = useState('dashboard');
+  const initialRoute = (() => {
+    try {
+      const pending = sessionStorage.getItem('pendingInspectionRoute');
+      if (pending) {
+        sessionStorage.removeItem('pendingInspectionRoute');
+        return pending;
+      }
+    } catch {}
+    return 'dashboard';
+  })();
+  const [currentRoute, setCurrentRoute] = useState(initialRoute);
 
   const handleNavigate = (route: string) => {
     setCurrentRoute(route);
