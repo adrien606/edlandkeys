@@ -15,7 +15,12 @@ import { toast } from 'sonner';
 
 export const ClientDetail = ({ onSwitchApp }: { onSwitchApp?: () => void }) => {
   const { clientId } = useParams();
-  const { getClientById, updateEquipmentStatus, deleteClient, deleteEquipment, buildings, stockItems } = useSupabaseStore();
+  const { getClientById, updateEquipmentStatus, deleteClient, deleteEquipment, buildings, stockItems, inspections } = useSupabaseStore();
+  const clientInspections = clientId
+    ? inspections
+        .filter((i) => i.client_id === clientId)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    : [];
   const navigate = useNavigate();
   const { toast: useToastHook } = useToast();
   
