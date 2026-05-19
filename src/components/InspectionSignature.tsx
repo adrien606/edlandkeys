@@ -79,21 +79,19 @@ export const InspectionSignature = ({ onNavigate, onBack, onSwitchApp }: Inspect
     setIsProcessing(true);
     
     try {
-      // Simulate PDF generation and email sending
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      completeInspection();
+      await completeInspection();
       
       toast({
         title: "État des lieux terminé",
-        description: "Le document PDF a été généré et les emails ont été envoyés"
+        description: "L'état des lieux a été enregistré avec succès"
       });
       
       onNavigate('dashboard');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erreur lors de la finalisation:', error);
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la finalisation",
+        title: "Erreur d'enregistrement",
+        description: error?.message || "L'état des lieux n'a pas pu être enregistré. Réessayez.",
         variant: "destructive"
       });
     } finally {
