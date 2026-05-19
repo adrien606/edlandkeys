@@ -944,36 +944,35 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
           completed: true
         };
 
-        set(state => ({
-          inspections: [completedInspection, ...state.inspections],
-          currentInspection: null
-        }));
-
         if (get().isOnline) {
-          try {
-            const { error } = await supabase
-              .from('inspections')
-              .insert({
-                id: completedInspection.id,
-                client_id: completedInspection.client_id,
-                client_name: completedInspection.client_name,
-                client_email: completedInspection.client_email,
-                building_id: completedInspection.building_id,
-                building_code: completedInspection.building_code,
-                type: completedInspection.type,
-                entry_inspection_id: completedInspection.entry_inspection_id,
-                date: completedInspection.date,
-                items: completedInspection.items,
-                signature: completedInspection.signature,
-                site_manager_name: completedInspection.site_manager_name,
-                site_manager_signature: completedInspection.site_manager_signature,
-                completed: completedInspection.completed
-              });
+          const { error } = await supabase
+            .from('inspections')
+            .insert({
+              id: completedInspection.id,
+              client_id: completedInspection.client_id,
+              client_name: completedInspection.client_name,
+              client_email: completedInspection.client_email,
+              building_id: completedInspection.building_id,
+              building_code: completedInspection.building_code,
+              type: completedInspection.type,
+              entry_inspection_id: completedInspection.entry_inspection_id,
+              date: completedInspection.date,
+              items: completedInspection.items,
+              signature: completedInspection.signature,
+              site_manager_name: completedInspection.site_manager_name,
+              site_manager_signature: completedInspection.site_manager_signature,
+              completed: completedInspection.completed
+            });
 
-            if (error) throw error;
-          } catch (error) {
+          if (error) {
             console.error('Failed to save inspection to Supabase:', error);
+            throw new Error(error.message || "Échec de l'enregistrement de l'état des lieux");
           }
         }
+
+        set(state => ({
+          inspections: [completedInspection, ...state.inspections.filter(i => i.id !== completedInspection.id)],
+          currentInspection: null
+        }));
   }
 }));
