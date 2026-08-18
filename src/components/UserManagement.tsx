@@ -32,27 +32,32 @@ export const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
-      // Fetch all profiles with their roles
+      setError(null);
+
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          user_roles (role)
-        `);
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
 
-      // Transform the data to include role information
-      const usersWithRoles = profiles?.map(profile => ({
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
+
+      const roleMap = new Map((roles || []).map(r => [r.user_id, r.role]));
+
+      const usersWithRoles = (profiles || []).map(profile => ({
         ...profile,
-        role: profile.user_roles?.[0]?.role || 'user'
-      })) || [];
+        role: (roleMap.get(profile.user_id) as 'admin' | 'user') || 'user'
+      }));
 
       setUsers(usersWithRoles);
     } catch (error: any) {
       console.error('Error fetching users:', error);
-      setError('Erreur lors du chargement des utilisateurs');
+      setError(`Erreur lors du chargement des utilisateurs: ${error?.message || 'inconnue'}`);
     } finally {
       setLoading(false);
     }
