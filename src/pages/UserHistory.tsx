@@ -32,18 +32,18 @@ interface UserActivity {
 
 const UserHistory = () => {
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, roleLoading } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Attendre que le statut admin soit déterminé avant de charger les utilisateurs
-    if (isAdmin !== undefined) {
+    // Attendre que le rôle soit chargé avant de charger les utilisateurs
+    if (!roleLoading) {
       fetchUsers();
     }
-  }, [isAdmin]);
+  }, [isAdmin, roleLoading]);
 
   useEffect(() => {
     console.log('isAdmin status:', isAdmin, 'user:', user?.id);
@@ -163,7 +163,7 @@ const UserHistory = () => {
     }
   };
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

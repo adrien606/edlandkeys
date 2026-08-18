@@ -22,6 +22,7 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
   const [loading, setLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
 
   useEffect(() => {
     // Set up auth state listener
@@ -31,6 +32,7 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          setRoleLoading(true);
           // Fetch user profile and role after authentication
           setTimeout(async () => {
             try {
@@ -66,11 +68,14 @@ export const useAuth = () => {
             } catch (error) {
               console.error('Error fetching user data:', error);
               setUserRole('user'); // Default to user role
+            } finally {
+              setRoleLoading(false);
             }
           }, 0);
         } else {
           setProfile(null);
           setUserRole(null);
+          setRoleLoading(false);
         }
         
         setLoading(false);
@@ -106,9 +111,11 @@ export const useAuth = () => {
             console.error('Error fetching user data:', error);
             setUserRole('user');
           }
+          setRoleLoading(false);
           setLoading(false);
         }, 0);
       } else {
+        setRoleLoading(false);
         setLoading(false);
       }
     });
@@ -145,6 +152,7 @@ export const useAuth = () => {
     profile,
     userRole,
     loading,
+    roleLoading,
     isAdmin,
     isAuthenticated,
     signOut,
