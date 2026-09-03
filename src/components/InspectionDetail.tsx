@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSupabaseStore } from "@/hooks/useSupabaseStore";
-import { ArrowLeft, Download, Mail, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut, ExternalLink, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Eye, User, Calendar, CheckCircle2, AlertTriangle, XCircle, LogOut, ExternalLink, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -429,50 +429,6 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
     }
   };
 
-  // Fonction pour envoyer par email : télécharge le PDF puis ouvre le client mail
-  const handleSendEmail = () => {
-    try {
-      const htmlContent = generatePDFContent();
-      const inspectionDate = format(new Date(inspection.date), 'yyyy-MM-dd');
-      const typeLabel = inspection.type === 'entry' ? 'État d\'entrée' : 'État de sortie';
-      const fileName = `etat-des-lieux-${inspection.client_name.replace(/\s+/g, '-')}-${inspectionDate}.html`;
-
-      // 1. Télécharger le fichier PDF/HTML automatiquement
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      // 2. Ouvrir le client mail avec message pré-rempli
-      const subject = `${typeLabel} - ${inspection.client_name}`;
-      const formattedDate = format(new Date(inspection.date), 'dd MMMM yyyy à HH:mm', { locale: fr });
-      let body = `Bonjour,\n\nVeuillez trouver ci-joint l'état des lieux suivant :\n\n`;
-      body += `Client : ${inspection.client_name}\n`;
-      body += `Type : ${typeLabel}\n`;
-      body += `Date : ${formattedDate}\n`;
-      if (inspection.building_code) {
-        body += `Bâtiment : ${inspection.building_code}\n`;
-      }
-      body += `\nCordialement,\nBEL AIR CAMP`;
-
-      const mailtoLink = `mailto:${inspection.client_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      
-      setTimeout(() => {
-        window.location.href = mailtoLink;
-      }, 500);
-
-      toast.success('Le document a été téléchargé. Ajoutez-le en pièce jointe dans le mail qui s\'ouvre.');
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi email:', error);
-      toast.error('Erreur lors de la préparation de l\'email');
-    }
-  };
-
   // Fonction pour créer un état de sortie basé sur l'état d'entrée
   const handleCreateExitInspection = () => {
     if (inspection.type !== 'entry') return;
@@ -774,15 +730,10 @@ export const InspectionDetail = ({ inspectionId, onNavigate, onBack, onSwitchApp
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button variant="outline" className="h-12" onClick={handleDownloadPDF}>
                 <Download className="w-4 h-4 mr-2" />
                 Télécharger PDF
-              </Button>
-              
-              <Button variant="outline" className="h-12" onClick={handleSendEmail}>
-                <Mail className="w-4 h-4 mr-2" />
-                Envoyer par email
               </Button>
               
               <Button variant="outline" className="h-12" onClick={handlePreviewPDF}>
