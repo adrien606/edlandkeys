@@ -167,6 +167,13 @@ const InspectionApp = ({ onBackToApps, onSwitchApp }: { onBackToApps: () => void
     return 'dashboard';
   })();
   const [currentRoute, setCurrentRoute] = useState(initialRoute);
+  const currentInspection = useSupabaseStore(state => state.currentInspection);
+
+  useEffect(() => {
+    if (currentInspection && currentRoute === 'dashboard') {
+      setCurrentRoute(currentInspection.signature ? 'inspection-signature' : 'inspection-form');
+    }
+  }, [currentInspection, currentRoute]);
 
   const handleNavigate = (route: string) => {
     setCurrentRoute(route);

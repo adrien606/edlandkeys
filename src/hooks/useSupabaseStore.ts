@@ -177,6 +177,51 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
         // Initial sync if online
         if (store.isOnline) {
           await store.syncFromSupabase();
+
+          let draftId: string | null = null;
+          try {
+            draftId = sessionStorage.getItem('currentInspectionId');
+          } catch {}
+
+          if (draftId) {
+            const { data: draft, error } = await supabase
+              .from('inspections')
+              .select('*')
+              .eq('id', draftId)
+              .eq('completed', false)
+              .maybeSingle();
+
+            if (error) {
+              console.error('Failed to restore inspection draft:', error);
+            } else if (draft) {
+              set({
+                currentInspection: {
+                  id: draft.id,
+                  client_id: draft.client_id,
+                  client_name: draft.client_name,
+                  client_email: draft.client_email,
+                  building_id: draft.building_id || undefined,
+                  building_code: draft.building_code || undefined,
+                  type: draft.type as 'entry' | 'exit',
+                  entry_inspection_id: draft.entry_inspection_id || undefined,
+                  date: draft.date || draft.created_at || new Date().toISOString(),
+                  items: draft.items as unknown as Inspection['items'],
+                  signature: draft.signature || '',
+                  site_manager_name: draft.site_manager_name || undefined,
+                  site_manager_signature: draft.site_manager_signature || undefined,
+                  completed: false,
+                  pdf_generated: draft.pdf_generated || false,
+                  email_sent: draft.email_sent || false,
+                  created_at: draft.created_at || undefined,
+                  updated_at: draft.updated_at || undefined
+                }
+              });
+            } else {
+              try {
+                sessionStorage.removeItem('currentInspectionId');
+              } catch {}
+            }
+          }
         }
         
         set({ isInitialized: true, isLoading: false });
