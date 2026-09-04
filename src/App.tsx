@@ -163,10 +163,19 @@ const InspectionApp = ({ onBackToApps, onSwitchApp }: { onBackToApps: () => void
         sessionStorage.removeItem('pendingInspectionRoute');
         return pending;
       }
-    } catch {}
+    } catch (error) {
+      console.warn('Inspection route could not be restored:', error);
+    }
     return 'dashboard';
   })();
   const [currentRoute, setCurrentRoute] = useState(initialRoute);
+  const currentInspection = useSupabaseStore(state => state.currentInspection);
+
+  useEffect(() => {
+    if (currentInspection && currentRoute === 'dashboard') {
+      setCurrentRoute(currentInspection.signature ? 'inspection-signature' : 'inspection-form');
+    }
+  }, [currentInspection, currentRoute]);
 
   const handleNavigate = (route: string) => {
     setCurrentRoute(route);
