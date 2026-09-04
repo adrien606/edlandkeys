@@ -181,7 +181,9 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
           let draftId: string | null = null;
           try {
             draftId = sessionStorage.getItem('currentInspectionId');
-          } catch {}
+          } catch (error) {
+            console.warn('Inspection draft identifier could not be read:', error);
+          }
 
           if (draftId) {
             const { data: draft, error } = await supabase
@@ -219,7 +221,9 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             } else {
               try {
                 sessionStorage.removeItem('currentInspectionId');
-              } catch {}
+              } catch (error) {
+                console.warn('Inspection draft identifier could not be cleared:', error);
+              }
             }
           }
         }
@@ -815,7 +819,7 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
 
       getFilteredClients: () => {
         const { clients, searchTerm, currentBuildingId } = get();
-        let filteredClients = currentBuildingId 
+        const filteredClients = currentBuildingId 
           ? clients.filter((client) => 
               client.equipements.some((eq) => eq.batimentId === currentBuildingId)
             )
@@ -906,7 +910,9 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
 
         try {
           sessionStorage.setItem('currentInspectionId', newInspection.id);
-        } catch {}
+        } catch (error) {
+          console.warn('Inspection draft identifier could not be saved:', error);
+        }
 
         set(state => ({
           currentInspection: newInspection,
@@ -1086,7 +1092,9 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
 
         try {
           sessionStorage.removeItem('currentInspectionId');
-        } catch {}
+        } catch (storageError) {
+          console.warn('Inspection draft identifier could not be cleared:', storageError);
+        }
 
         set(state => ({
           inspections: [completedInspection, ...state.inspections.filter(i => i.id !== completedInspection.id)],

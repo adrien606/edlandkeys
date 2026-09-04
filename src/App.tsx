@@ -163,7 +163,9 @@ const InspectionApp = ({ onBackToApps, onSwitchApp }: { onBackToApps: () => void
         sessionStorage.removeItem('pendingInspectionRoute');
         return pending;
       }
-    } catch {}
+    } catch (error) {
+      console.warn('Inspection route could not be restored:', error);
+    }
     return 'dashboard';
   })();
   const [currentRoute, setCurrentRoute] = useState(initialRoute);
