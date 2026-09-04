@@ -46,20 +46,37 @@ export const InspectionForm = ({ onNavigate, onBack, onSwitchApp }: InspectionFo
     : null;
   const entryItem = entryInspection?.items[currentArea.key as keyof typeof entryInspection.items];
 
-  const handlePhotoCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      addPhotoToItem(currentArea.key as keyof typeof currentInspection.items, result);
+    try {
+      const image = await createImageBitmap(file);
+      const maxDimension = 1600;
+      const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Compression impossible');
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      image.close();
+      const compressedPhoto = canvas.toDataURL('image/jpeg', 0.72);
+      addPhotoToItem(currentArea.key as keyof typeof currentInspection.items, compressedPhoto);
       toast({
         title: "Photo ajoutée",
-        description: "La photo a été ajoutée avec succès"
+        description: "La photo a été compressée et sauvegardée automatiquement"
       });
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Photo compression failed:', error);
+      toast({
+        title: "Photo non ajoutée",
+        description: "Cette photo n'a pas pu être traitée. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    } finally {
+      event.target.value = '';
+    }
   };
 
   const handleNextArea = () => {

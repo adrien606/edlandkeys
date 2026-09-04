@@ -52,6 +52,25 @@ interface Inspection {
   updated_at?: string;
 }
 
+let inspectionSaveTimer: ReturnType<typeof setTimeout> | undefined;
+
+const toInspectionRow = (inspection: Inspection) => ({
+  id: inspection.id,
+  client_id: inspection.client_id,
+  client_name: inspection.client_name,
+  client_email: inspection.client_email,
+  building_id: inspection.building_id,
+  building_code: inspection.building_code,
+  type: inspection.type,
+  entry_inspection_id: inspection.entry_inspection_id,
+  date: inspection.date,
+  items: inspection.items,
+  signature: inspection.signature,
+  site_manager_name: inspection.site_manager_name,
+  site_manager_signature: inspection.site_manager_signature,
+  completed: inspection.completed
+});
+
 interface SupabaseStore {
   clients: Client[];
   buildings: Building[];
@@ -107,7 +126,7 @@ interface SupabaseStore {
   };
 
   // Inspection Actions
-  createInspection: (clientId: string, clientName: string, clientEmail: string, type: 'entry' | 'exit', buildingId?: string, entryInspectionId?: string) => void;
+  createInspection: (clientId: string, clientName: string, clientEmail: string, type: 'entry' | 'exit', buildingId?: string, entryInspectionId?: string) => Promise<void>;
   updateInspectionItem: (areaKey: string, updates: Partial<InspectionItem>) => void;
   addPhotoToItem: (areaKey: string, photo: string) => void;
   removePhotoFromItem: (areaKey: string, photoIndex: number) => void;
@@ -794,7 +813,11 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
       },
 
       // Inspection Actions
-      createInspection: (clientId, clientName, clientEmail, type, buildingId, entryInspectionId) => {
+      createInspection: async (clientId, clientName, clientEmail, type, buildingId, entryInspectionId) => {
+        if (!get().isOnline) {
+          throw new Error("Une connexion internet est requise pour commencer un état des lieux.");
+        }
+
         const building = get().buildings.find(b => b.id === buildingId);
         
         const createEmptyInspectionItem = (name: string): InspectionItem => ({
@@ -827,7 +850,23 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
           completed: false
         };
         
-        set({ currentInspection: newInspection });
+        const { error } = await supabase
+          .from('inspections')
+          .insert(toInspectionRow(newInspection));
+
+        if (error) {
+          console.error('Failed to create inspection draft:', error);
+          throw new Error(error.message || "Le brouillon n'a pas pu être créé.");
+        }
+
+        try {
+          sessionStorage.setItem('currentInspectionId', newInspection.id);
+        } catch {}
+
+        set(state => ({
+          currentInspection: newInspection,
+          inspections: [newInspection, ...state.inspections.filter(i => i.id !== newInspection.id)]
+        }));
       },
 
       updateInspectionItem: (areaKey, updates) => {
@@ -847,6 +886,13 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             }
           };
         });
+        if (inspectionSaveTimer) clearTimeout(inspectionSaveTimer);
+        inspectionSaveTimer = setTimeout(async () => {
+          const draft = get().currentInspection;
+          if (!draft || !get().isOnline) return;
+          const { error } = await supabase.from('inspections').update(toInspectionRow(draft)).eq('id', draft.id);
+          if (error) console.error('Failed to autosave inspection draft:', error);
+        }, 500);
       },
 
       addPhotoToItem: (areaKey, photo) => {
@@ -868,6 +914,13 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             }
           };
         });
+        if (inspectionSaveTimer) clearTimeout(inspectionSaveTimer);
+        inspectionSaveTimer = setTimeout(async () => {
+          const draft = get().currentInspection;
+          if (!draft || !get().isOnline) return;
+          const { error } = await supabase.from('inspections').update(toInspectionRow(draft)).eq('id', draft.id);
+          if (error) console.error('Failed to autosave inspection draft:', error);
+        }, 500);
       },
 
       removePhotoFromItem: (areaKey, photoIndex) => {
@@ -890,6 +943,13 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             }
           };
         });
+        if (inspectionSaveTimer) clearTimeout(inspectionSaveTimer);
+        inspectionSaveTimer = setTimeout(async () => {
+          const draft = get().currentInspection;
+          if (!draft || !get().isOnline) return;
+          const { error } = await supabase.from('inspections').update(toInspectionRow(draft)).eq('id', draft.id);
+          if (error) console.error('Failed to autosave inspection draft:', error);
+        }, 500);
       },
 
       setSignature: (signature) => {
@@ -899,6 +959,13 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             signature
           } : null
         }));
+        if (inspectionSaveTimer) clearTimeout(inspectionSaveTimer);
+        inspectionSaveTimer = setTimeout(async () => {
+          const draft = get().currentInspection;
+          if (!draft || !get().isOnline) return;
+          const { error } = await supabase.from('inspections').update(toInspectionRow(draft)).eq('id', draft.id);
+          if (error) console.error('Failed to autosave inspection draft:', error);
+        }, 500);
       },
 
       setSiteManagerInfo: (name, signature) => {
@@ -909,6 +976,13 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
             site_manager_signature: signature
           } : null
         }));
+        if (inspectionSaveTimer) clearTimeout(inspectionSaveTimer);
+        inspectionSaveTimer = setTimeout(async () => {
+          const draft = get().currentInspection;
+          if (!draft || !get().isOnline) return;
+          const { error } = await supabase.from('inspections').update(toInspectionRow(draft)).eq('id', draft.id);
+          if (error) console.error('Failed to autosave inspection draft:', error);
+        }, 500);
       },
 
       setCurrentInspection: (inspection) => {
@@ -939,36 +1013,35 @@ export const useSupabaseStore = create<SupabaseStore>()((set, get) => ({
         const { currentInspection } = get();
         if (!currentInspection) return;
 
+        if (!get().isOnline) {
+          throw new Error("Connexion internet absente. L'état des lieux reste en cours et pourra être finalisé après reconnexion.");
+        }
+
+        if (inspectionSaveTimer) {
+          clearTimeout(inspectionSaveTimer);
+          inspectionSaveTimer = undefined;
+        }
+
         const completedInspection = {
           ...currentInspection,
           completed: true
         };
 
-        if (get().isOnline) {
-          const { error } = await supabase
-            .from('inspections')
-            .insert({
-              id: completedInspection.id,
-              client_id: completedInspection.client_id,
-              client_name: completedInspection.client_name,
-              client_email: completedInspection.client_email,
-              building_id: completedInspection.building_id,
-              building_code: completedInspection.building_code,
-              type: completedInspection.type,
-              entry_inspection_id: completedInspection.entry_inspection_id,
-              date: completedInspection.date,
-              items: completedInspection.items,
-              signature: completedInspection.signature,
-              site_manager_name: completedInspection.site_manager_name,
-              site_manager_signature: completedInspection.site_manager_signature,
-              completed: completedInspection.completed
-            });
+        const { data, error } = await supabase
+          .from('inspections')
+          .update(toInspectionRow(completedInspection))
+          .eq('id', completedInspection.id)
+          .select('id')
+          .single();
 
-          if (error) {
-            console.error('Failed to save inspection to Supabase:', error);
-            throw new Error(error.message || "Échec de l'enregistrement de l'état des lieux");
-          }
+        if (error || !data) {
+          console.error('Failed to save inspection to Supabase:', error);
+          throw new Error(error?.message || "Échec de l'enregistrement de l'état des lieux");
         }
+
+        try {
+          sessionStorage.removeItem('currentInspectionId');
+        } catch {}
 
         set(state => ({
           inspections: [completedInspection, ...state.inspections.filter(i => i.id !== completedInspection.id)],

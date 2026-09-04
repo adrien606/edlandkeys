@@ -7,6 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useSupabaseStore } from "@/hooks/useSupabaseStore";
 import { ArrowLeft, Home, LogOut, Building, Settings, Check, ChevronsUpDown } from "lucide-react";
+import { toast } from "sonner";
 
 interface NewInspectionProps {
   onNavigate: (route: string) => void;
@@ -20,23 +21,32 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
   const [selectedBuildingId, setSelectedBuildingId] = useState<string>("");
   const [inspectionType, setInspectionType] = useState<'entry' | 'exit'>('entry');
   const [openClientPopover, setOpenClientPopover] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
   const selectedBuilding = buildings.find(b => b.id === selectedBuildingId);
 
-  const handleStartInspection = () => {
+  const handleStartInspection = async () => {
     if (!selectedClient || !selectedBuildingId) return;
-    
-    createInspection(
-      selectedClient.id,
-      `${selectedClient.prenom} ${selectedClient.nom}`,
-      selectedClient.email,
-      inspectionType,
-      selectedBuildingId,
-      undefined // Pas d'inspection d'entrée pour les nouvelles inspections
-    );
-    
-    onNavigate('inspection-form');
+
+    setIsStarting(true);
+    try {
+      await createInspection(
+        selectedClient.id,
+        `${selectedClient.prenom} ${selectedClient.nom}`,
+        selectedClient.email,
+        inspectionType,
+        selectedBuildingId,
+        undefined
+      );
+      onNavigate('inspection-form');
+    } catch (error) {
+      toast.error("Impossible de commencer l'état des lieux", {
+        description: error instanceof Error ? error.message : "Veuillez réessayer."
+      });
+    } finally {
+      setIsStarting(false);
+    }
   };
 
   return (
@@ -212,11 +222,11 @@ export const NewInspection = ({ onNavigate, onBack, onSwitchApp }: NewInspection
 
         <Button 
           onClick={handleStartInspection}
-          disabled={!selectedClientId || !selectedBuildingId}
+          disabled={!selectedClientId || !selectedBuildingId || isStarting}
           className="w-full h-12 text-lg"
           size="lg"
         >
-          Commencer l'État des Lieux
+          {isStarting ? "Création du brouillon..." : "Commencer l'État des Lieux"}
         </Button>
 
         {clients.length === 0 && (
